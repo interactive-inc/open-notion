@@ -1,0 +1,395 @@
+[
+  {
+    "type": "heading",
+    "raw": "# 見出し1\n\n",
+    "depth": 1,
+    "text": "見出し1",
+    "tokens": [
+      {
+        "type": "text",
+        "raw": "見出し1",
+        "text": "見出し1",
+        "escaped": false
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "raw": "あのイーハトーヴォのすきとおった風、夏でも底に冷たさをもつ青いそら、うつくしい森で飾られたモリーオ市、郊外のぎらぎらひかる草の波。",
+    "text": "あのイーハトーヴォのすきとおった風、夏でも底に冷たさをもつ青いそら、うつくしい森で飾られたモリーオ市、郊外のぎらぎらひかる草の波。",
+    "tokens": [
+      {
+        "type": "text",
+        "raw": "あのイーハトーヴォのすきとおった風、夏でも底に冷たさをもつ青いそら、うつくしい森で飾られたモリーオ市、郊外のぎらぎらひかる草の波。",
+        "text": "あのイーハトーヴォのすきとおった風、夏でも底に冷たさをもつ青いそら、うつくしい森で飾られたモリーオ市、郊外のぎらぎらひかる草の波。",
+        "escaped": false
+      }
+    ]
+  },
+  {
+    "type": "space",
+    "raw": "\n\n"
+  },
+  {
+    "type": "paragraph",
+    "raw": "あのイーハトーヴォのすきとおった風、夏でも底に冷たさをもつ青いそら、うつくしい森で飾られたモリーオ市、郊外のぎらぎらひかる草の波。",
+    "text": "あのイーハトーヴォのすきとおった風、夏でも底に冷たさをもつ青いそら、うつくしい森で飾られたモリーオ市、郊外のぎらぎらひかる草の波。",
+    "tokens": [
+      {
+        "type": "text",
+        "raw": "あのイーハトーヴォのすきとおった風、夏でも底に冷たさをもつ青いそら、うつくしい森で飾られたモリーオ市、郊外のぎらぎらひかる草の波。",
+        "text": "あのイーハトーヴォのすきとおった風、夏でも底に冷たさをもつ青いそら、うつくしい森で飾られたモリーオ市、郊外のぎらぎらひかる草の波。",
+        "escaped": false
+      }
+    ]
+  },
+  {
+    "type": "space",
+    "raw": "\n\n"
+  },
+  {
+    "type": "code",
+    "raw": "```\nconst a = 2\n```",
+    "lang": "",
+    "text": "const a = 2"
+  },
+  {
+    "type": "space",
+    "raw": "\n\n"
+  },
+  {
+    "type": "heading",
+    "raw": "## 見出し2\n\n",
+    "depth": 2,
+    "text": "見出し2",
+    "tokens": [
+      {
+        "type": "text",
+        "raw": "見出し2",
+        "text": "見出し2",
+        "escaped": false
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "raw": "あの`イーハトーヴォ`のすきとおった風、夏でも底に冷たさをもつ青いそら、うつくしい森で飾られた`モリーオ`市、郊外のぎらぎらひかる草の波。",
+    "text": "あの`イーハトーヴォ`のすきとおった風、夏でも底に冷たさをもつ青いそら、うつくしい森で飾られた`モリーオ`市、郊外のぎらぎらひかる草の波。",
+    "tokens": [
+      {
+        "type": "text",
+        "raw": "あの",
+        "text": "あの",
+        "escaped": false
+      },
+      {
+        "type": "codespan",
+        "raw": "`イーハトーヴォ`",
+        "text": "イーハトーヴォ"
+      },
+      {
+        "type": "text",
+        "raw": "のすきとおった風、夏でも底に冷たさをもつ青いそら、うつくしい森で飾られた",
+        "text": "のすきとおった風、夏でも底に冷たさをもつ青いそら、うつくしい森で飾られた",
+        "escaped": false
+      },
+      {
+        "type": "codespan",
+        "raw": "`モリーオ`",
+        "text": "モリーオ"
+      },
+      {
+        "type": "text",
+        "raw": "市、郊外のぎらぎらひかる草の波。",
+        "text": "市、郊外のぎらぎらひかる草の波。",
+        "escaped": false
+      }
+    ]
+  },
+  {
+    "type": "space",
+    "raw": "\n\n"
+  },
+  {
+    "type": "heading",
+    "raw": "### 見出し3\n\n",
+    "depth": 3,
+    "text": "見出し3",
+    "tokens": [
+      {
+        "type": "text",
+        "raw": "見出し3",
+        "text": "見出し3",
+        "escaped": false
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "raw": "あのイーハトーヴォのすきとおった風、",
+    "text": "あのイーハトーヴォのすきとおった風、",
+    "tokens": [
+      {
+        "type": "text",
+        "raw": "あのイーハトーヴォのすきとおった風、",
+        "text": "あのイーハトーヴォのすきとおった風、",
+        "escaped": false
+      }
+    ]
+  },
+  {
+    "type": "space",
+    "raw": "\n\n"
+  },
+  {
+    "type": "paragraph",
+    "raw": "夏でも底に冷たさをもつ青いそら、うつくしい森で飾られたモリーオ市、郊外のぎらぎらひかる草の波。",
+    "text": "夏でも底に冷たさをもつ青いそら、うつくしい森で飾られたモリーオ市、郊外のぎらぎらひかる草の波。",
+    "tokens": [
+      {
+        "type": "text",
+        "raw": "夏でも底に冷たさをもつ青いそら、うつくしい森で飾られたモリーオ市、郊外のぎらぎらひかる草の波。",
+        "text": "夏でも底に冷たさをもつ青いそら、うつくしい森で飾られたモリーオ市、郊外のぎらぎらひかる草の波。",
+        "escaped": false
+      }
+    ]
+  },
+  {
+    "type": "space",
+    "raw": "\n\n"
+  },
+  {
+    "type": "list",
+    "raw": "- リスト1\n- リスト2\n  - リスト3\n      - リスト4\n  - リスト5\n",
+    "ordered": false,
+    "start": "",
+    "loose": false,
+    "items": [
+      {
+        "type": "list_item",
+        "raw": "- リスト1\n",
+        "task": false,
+        "loose": false,
+        "text": "リスト1",
+        "tokens": [
+          {
+            "type": "text",
+            "raw": "リスト1",
+            "text": "リスト1",
+            "tokens": [
+              {
+                "type": "text",
+                "raw": "リスト1",
+                "text": "リスト1",
+                "escaped": false
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "list_item",
+        "raw": "- リスト2\n  - リスト3\n      - リスト4\n  - リスト5",
+        "task": false,
+        "loose": false,
+        "text": "リスト2\n- リスト3\n    - リスト4\n- リスト5",
+        "tokens": [
+          {
+            "type": "text",
+            "raw": "リスト2\n",
+            "text": "リスト2",
+            "tokens": [
+              {
+                "type": "text",
+                "raw": "リスト2",
+                "text": "リスト2",
+                "escaped": false
+              }
+            ]
+          },
+          {
+            "type": "list",
+            "raw": "- リスト3\n    - リスト4\n- リスト5",
+            "ordered": false,
+            "start": "",
+            "loose": false,
+            "items": [
+              {
+                "type": "list_item",
+                "raw": "- リスト3\n    - リスト4\n",
+                "task": false,
+                "loose": false,
+                "text": "リスト3\n  - リスト4",
+                "tokens": [
+                  {
+                    "type": "text",
+                    "raw": "リスト3\n",
+                    "text": "リスト3",
+                    "tokens": [
+                      {
+                        "type": "text",
+                        "raw": "リスト3",
+                        "text": "リスト3",
+                        "escaped": false
+                      }
+                    ]
+                  },
+                  {
+                    "type": "list",
+                    "raw": "  - リスト4",
+                    "ordered": false,
+                    "start": "",
+                    "loose": false,
+                    "items": [
+                      {
+                        "type": "list_item",
+                        "raw": "  - リスト4",
+                        "task": false,
+                        "loose": false,
+                        "text": "リスト4",
+                        "tokens": [
+                          {
+                            "type": "text",
+                            "raw": "リスト4",
+                            "text": "リスト4",
+                            "tokens": [
+                              {
+                                "type": "text",
+                                "raw": "リスト4",
+                                "text": "リスト4",
+                                "escaped": false
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "list_item",
+                "raw": "- リスト5",
+                "task": false,
+                "loose": false,
+                "text": "リスト5",
+                "tokens": [
+                  {
+                    "type": "text",
+                    "raw": "リスト5",
+                    "text": "リスト5",
+                    "tokens": [
+                      {
+                        "type": "text",
+                        "raw": "リスト5",
+                        "text": "リスト5",
+                        "escaped": false
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "list",
+    "raw": "1. リスト1\n1. リスト2\n  1. リスト3\n    1. リスト4\n  1. リスト5",
+    "ordered": true,
+    "start": 1,
+    "loose": false,
+    "items": [
+      {
+        "type": "list_item",
+        "raw": "1. リスト1\n",
+        "task": false,
+        "loose": false,
+        "text": "リスト1",
+        "tokens": [
+          {
+            "type": "text",
+            "raw": "リスト1",
+            "text": "リスト1",
+            "tokens": [
+              {
+                "type": "text",
+                "raw": "リスト1",
+                "text": "リスト1",
+                "escaped": false
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "list_item",
+        "raw": "1. リスト2\n",
+        "task": false,
+        "loose": false,
+        "text": "リスト2",
+        "tokens": [
+          {
+            "type": "text",
+            "raw": "リスト2",
+            "text": "リスト2",
+            "tokens": [
+              {
+                "type": "text",
+                "raw": "リスト2",
+                "text": "リスト2",
+                "escaped": false
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "list_item",
+        "raw": "  1. リスト3\n    1. リスト4\n",
+        "task": false,
+        "loose": false,
+        "text": "リスト3\n    1. リスト4",
+        "tokens": [
+          {
+            "type": "text",
+            "raw": "リスト3\n\n    1. リスト4",
+            "text": "リスト3\n1. リスト4",
+            "tokens": [
+              {
+                "type": "text",
+                "raw": "リスト3\n1. リスト4",
+                "text": "リスト3\n1. リスト4",
+                "escaped": false
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "list_item",
+        "raw": "  1. リスト5",
+        "task": false,
+        "loose": false,
+        "text": "リスト5",
+        "tokens": [
+          {
+            "type": "text",
+            "raw": "リスト5",
+            "text": "リスト5",
+            "tokens": [
+              {
+                "type": "text",
+                "raw": "リスト5",
+                "text": "リスト5",
+                "escaped": false
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
