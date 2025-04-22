@@ -1,11 +1,19 @@
 {
-  "name": "notion-to-markdown",
+  "name": "notion-tools",
   "module": "index.ts",
   "type": "module",
-  "devDependencies": {
-    "@types/bun": "latest"
+  "scripts": {
+    "format": "biome check . --fix --unsafe",
+    "init": "bun run .ai/build.ts",
+    "check": "tsc --noEmit"
   },
-  "peerDependencies": {
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/bun": "latest",
     "typescript": "^5"
+  },
+  "dependencies": {
+    "@notionhq/client": "^2.3.0",
+    "marked": "^15.0.8"
   }
 }

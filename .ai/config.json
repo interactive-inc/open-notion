@@ -1,0 +1,31 @@
+{
+  "root": ".ai",
+  "instructions": {
+    "overview": ".ai/00.overview.md",
+    "workflow": ".ai/01.workflow.c.md",
+    "output": ".ai/10.output.md",
+    "commitMessage": ".ai/11.commit-message.md",
+    "pullRequestDescription": ".ai/12.pull-request-description.md",
+    "review": ".ai/13.review.md",
+    "test": ".ai/14.test.md",
+    "code": ".ai/15.code.md",
+    "architecture": ".ai/20.architecture.md",
+    "development": ".ai/21.development.md",
+    "restriction": ".ai/22.restriction.md"
+  },
+  "input": {
+    "rules": ".ai/rules"
+  },
+  "output": {
+    "copilotInstructions": ".github/copilot-instructions.md",
+    "copilotInstructionsCommitMessageGeneration": ".github/copilot-instructions.commit-message-generation.md",
+    "copilotInstructionsPullRequestDescriptionGeneration": ".github/copilot-instructions.pull-request-description-generation.md",
+    "copilotInstructionsReviewSelection": ".github/copilot-instructions.review-selection.md",
+    "copilotInstructionsTestGeneration": ".github/copilot-instructions.test-generation.md",
+    "windsurfrules": ".windsurfrules",
+    "clinerules": ".clinerules",
+    "claude": "CLAUDE.md",
+    "cursorRules": ".cursor/rules",
+    "devin": "devin.md"
+  }
+}
