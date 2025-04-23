@@ -1,6 +1,6 @@
-import { test, expect } from "bun:test"
-import { fromNotionBulletedListItemBlock } from "./from-notion-bulleted-list-item-block"
+import { expect, test } from "bun:test"
 import type { NotionBulletedListItemBlock } from "../types/notion-bulleted-list-item-block"
+import { fromNotionBulletedListItemBlock } from "./from-notion-bulleted-list-item-block"
 
 test("fromNotionBulletedListItemBlock", () => {
   const block = {

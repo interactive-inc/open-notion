@@ -1,6 +1,6 @@
-import { test, expect } from "bun:test"
-import { fromNotionParagraphBlock } from "./from-notion-paragraph-block"
+import { expect, test } from "bun:test"
 import type { ParagraphBlockObjectResponse } from "@notionhq/client/build/src/api-endpoints"
+import { fromNotionParagraphBlock } from "./from-notion-paragraph-block"
 
 const block = {
   object: "block",

@@ -1,6 +1,6 @@
-import { test, expect } from "bun:test"
-import { fromNotionCodeBlock } from "./from-notion-code-block"
+import { expect, test } from "bun:test"
 import type { CodeBlockObjectResponse } from "@notionhq/client/build/src/api-endpoints"
+import { fromNotionCodeBlock } from "./from-notion-code-block"
 
 test("fromNotionCodeBlock", () => {
   const block = {

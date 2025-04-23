@@ -1,6 +1,6 @@
-import { test, expect } from "bun:test"
-import { fromNotionNumberedListItemBlock } from "./from-notion-numbered-list-item-block"
+import { expect, test } from "bun:test"
 import type { NotionNumberedListItemBlock } from "../types/notion-numbered-list-item-block"
+import { fromNotionNumberedListItemBlock } from "./from-notion-numbered-list-item-block"
 
 test("fromNotionNumberedListItemBlock", () => {
   const block = {

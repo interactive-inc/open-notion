@@ -1,6 +1,6 @@
-import { test, expect } from "bun:test"
-import { fromNotionHeading2Block } from "./from-notion-heading2-block"
+import { expect, test } from "bun:test"
 import type { Heading2BlockObjectResponse } from "@notionhq/client/build/src/api-endpoints"
+import { fromNotionHeading2Block } from "./from-notion-heading2-block"
 
 test("fromNotionHeading2Block", () => {
   const block = {

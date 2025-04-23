@@ -1,6 +1,6 @@
 import { Client } from "@notionhq/client"
-import { enhance } from "../lib/enhance"
 import { fromNotionBlocks } from "../lib"
+import { enhance } from "../lib/enhance"
 
 const notion = new Client({
   auth: process.env.NOTION_TOKEN,

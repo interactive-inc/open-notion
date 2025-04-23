@@ -1,4 +1,4 @@
-import { defineTable, defineSchema } from "../lib"
+import { defineSchema, defineTable } from "../lib"
 
 if (process.env.NOTION_TOKEN === undefined) {
   throw new Error("NOTION_TOKEN is not defined")
