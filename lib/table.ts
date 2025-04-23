@@ -1,4 +1,4 @@
-import { Client } from "@notionhq/client"
+import type { Client } from "@notionhq/client"
 
 /* Notionのページオブジェクトの型定義 */
 export type NotionPage = {
@@ -87,7 +87,7 @@ type SelectPropertyConfig = BasePropertyConfig & {
 /* 複数選択プロパティ */
 type MultiSelectPropertyConfig = BasePropertyConfig & {
   type: "multi_select"
-  options: string[]
+  options: string[] | null // nullの場合は任意の値を許容
 }
 
 /* ステータスプロパティ */
@@ -194,7 +194,11 @@ type PropertyTypeMapping<T extends PropertyConfig> =
         : T extends SelectPropertyConfig
           ? T["options"][number]
           : T extends MultiSelectPropertyConfig
-            ? T["options"][number][]
+            ? T["options"] extends null
+              ? string[]
+              : T["options"] extends string[]
+                ? T["options"][number][]
+                : string[]
             : T extends StatusPropertyConfig
               ? T["options"][number]
               : T extends DatePropertyConfig
@@ -250,6 +254,13 @@ type RequiredKeys<T extends Schema> = {
 /* 必須フィールドの型 */
 type RequiredFields<T extends Schema> = {
   [K in RequiredKeys<T>]: SchemaType<T>[K]
+}
+
+/* テーブル作成オプション */
+export type TableOptions<T extends Schema> = {
+  notion: Client
+  tableId: string
+  schema: T
 }
 
 /* クエリオプション型を拡張 */
@@ -912,10 +923,10 @@ export class Table<T extends Schema> {
   private tableId: string
   private schema: T
 
-  constructor(notionApiKey: string, tableId: string, schema: T) {
-    this.notion = new Client({ auth: notionApiKey })
-    this.tableId = tableId
-    this.schema = schema
+  constructor(options: TableOptions<T>) {
+    this.notion = options.notion
+    this.tableId = options.tableId
+    this.schema = options.schema
   }
 
   /* 複数レコード取得（ページネーション・ソート機能付き） */
@@ -1181,9 +1192,10 @@ export class Table<T extends Schema> {
       const updated = await this.findById(existingRecord._id)
       return updated as TableRecord<SchemaType<T>>
     }
+
     /* 新規作成（whereデータとinsertデータをマージ） */
-    const createData = { ...where, ...insert }
-    const newId = await this.create(createData as never)
+    const createData = { ...where, ...insert } as Partial<SchemaType<T>>
+    const newId = await this.create(createData)
 
     /* 作成したデータを取得して返す */
     const created = await this.findById(newId)
@@ -1227,9 +1239,7 @@ export class Table<T extends Schema> {
 
 /* テーブル作成関数 */
 export function defineTable<T extends Schema>(
-  notionApiKey: string,
-  tableId: string,
-  schema: T,
+  options: TableOptions<T>,
 ): Table<T> {
-  return new Table(notionApiKey, tableId, schema)
+  return new Table(options)
 }

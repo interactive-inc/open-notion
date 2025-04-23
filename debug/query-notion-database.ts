@@ -1,3 +1,4 @@
+import { Client } from "@notionhq/client"
 import { defineSchema, defineTable } from "../lib"
 
 if (process.env.NOTION_TOKEN === undefined) {
@@ -10,11 +11,13 @@ const schema = defineSchema({
   bool: { type: "checkbox" },
 })
 
-const table = defineTable(
-  process.env.NOTION_TOKEN,
-  "1dd842f961818010a8d8d9eb0ae16444",
-  schema,
-)
+const client = new Client({ auth: process.env.NOTION_TOKEN })
+
+const table = defineTable({
+  notion: client,
+  tableId: "1dd842f961818010a8d8d9eb0ae16444",
+  schema: schema,
+})
 
 {
   await table.upsert({
