@@ -7,5 +7,6 @@ export type CustomRichTextItem = {
     bold?: boolean
     italic?: boolean
     code?: boolean
+    strikethrough?: boolean
   }
 }
