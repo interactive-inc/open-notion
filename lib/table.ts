@@ -1,4 +1,6 @@
-import { Client } from "@notionhq/client"
+import type { Client } from "@notionhq/client"
+import { toNotionBlocks } from "./to-notion-block/to-notion-blocks"
+import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints"
 
 /* Notionのページオブジェクトの型定義 */
 export type NotionPage = {
@@ -34,7 +36,7 @@ export type NotionPropertyType =
 /* Notionユーザー型 */
 export type NotionUser = {
   id: string
-  name: string
+  name?: string
   avatar_url?: string
   email?: string
 }
@@ -44,6 +46,12 @@ export type NotionFile = {
   name: string
   url: string
   type: "file" | "external"
+}
+
+/* 日付範囲型 */
+export type DateRange = {
+  start: string
+  end: string | null
 }
 
 /* プロパティの共通設定情報 */
@@ -87,7 +95,7 @@ type SelectPropertyConfig = BasePropertyConfig & {
 /* 複数選択プロパティ */
 type MultiSelectPropertyConfig = BasePropertyConfig & {
   type: "multi_select"
-  options: string[]
+  options: string[] | null // nullの場合は任意の値を許容
 }
 
 /* ステータスプロパティ */
@@ -99,7 +107,6 @@ type StatusPropertyConfig = BasePropertyConfig & {
 /* 日付プロパティ */
 type DatePropertyConfig = BasePropertyConfig & {
   type: "date"
-  include_time?: boolean
 }
 
 /* 人物プロパティ */
@@ -194,11 +201,15 @@ type PropertyTypeMapping<T extends PropertyConfig> =
         : T extends SelectPropertyConfig
           ? T["options"][number]
           : T extends MultiSelectPropertyConfig
-            ? T["options"][number][]
+            ? T["options"] extends null
+              ? string[]
+              : T["options"] extends string[]
+                ? T["options"][number][]
+                : string[]
             : T extends StatusPropertyConfig
               ? T["options"][number]
               : T extends DatePropertyConfig
-                ? Date
+                ? DateRange
                 : T extends PeoplePropertyConfig
                   ? NotionUser[]
                   : T extends FilesPropertyConfig
@@ -232,7 +243,10 @@ export type SchemaType<T extends Schema> = {
 
 /* レコード型定義 */
 export type TableRecord<T> = T & {
-  _id: string
+  id: string
+  createdAt: string
+  updatedAt: string
+  isDeleted: boolean
 }
 
 /* ソートオプションの型 */
@@ -250,6 +264,13 @@ type RequiredKeys<T extends Schema> = {
 /* 必須フィールドの型 */
 type RequiredFields<T extends Schema> = {
   [K in RequiredKeys<T>]: SchemaType<T>[K]
+}
+
+/* テーブル作成オプション */
+export type TableOptions<T extends Schema> = {
+  notion: Client
+  tableId: string
+  schema: T
 }
 
 /* クエリオプション型を拡張 */
@@ -370,27 +391,26 @@ function convertStatusProperty(property: unknown): string | null {
 }
 
 /* 日付プロパティの処理 */
-function convertDateProperty(
-  property: unknown,
-  includeTime = false,
-): Date | null {
+function convertDateProperty(property: unknown): DateRange | null {
   if (!property || typeof property !== "object") {
     return null
   }
 
-  const typedProperty = property as { date?: { start: string } }
+  const typedProperty = property as {
+    date?: {
+      start: string
+      end: string | null
+    }
+  }
 
   if (!typedProperty.date?.start) {
     return null
   }
 
-  const date = new Date(typedProperty.date.start)
-
-  if (!includeTime) {
-    date.setHours(0, 0, 0, 0)
+  return {
+    start: typedProperty.date.start,
+    end: typedProperty.date.end,
   }
-
-  return date
 }
 
 /* 人物プロパティの処理 */
@@ -623,10 +643,7 @@ function convertFromNotion<T extends Schema>(
     }
 
     if (config.type === "date") {
-      result[key] = convertDateProperty(
-        property,
-        !!(config as DatePropertyConfig).include_time,
-      )
+      result[key] = convertDateProperty(property)
     }
 
     if (config.type === "people") {
@@ -730,20 +747,30 @@ function convertStatusToNotion(value: unknown): Record<string, unknown> {
 }
 
 /* 日付プロパティの変換 */
-function convertDateToNotion(
-  value: unknown,
-  includeTime = false,
-): Record<string, unknown> {
-  if (!(value instanceof Date)) {
-    return { date: null }
+function convertDateToNotion(value: unknown): Record<string, unknown> {
+  // DateRangeオブジェクトの場合
+  if (value && typeof value === "object" && "start" in value) {
+    const dateRange = value as DateRange
+    return {
+      date: {
+        start: dateRange.start,
+        end: dateRange.end,
+      },
+    }
   }
 
-  const isoString = (value as Date).toISOString()
-  const dateStr = includeTime ? isoString : isoString.split("T")[0]
-
-  return {
-    date: { start: dateStr },
+  // 従来の互換性のためDate型もサポート
+  if (value instanceof Date) {
+    return {
+      date: {
+        start: value.toISOString(),
+        end: null,
+      },
+    }
   }
+
+  // どちらでもない場合
+  return { date: null }
 }
 
 /* 人物プロパティの変換 */
@@ -863,10 +890,7 @@ function convertToNotion<T extends Schema>(
     }
 
     if (config.type === "date") {
-      properties[key] = convertDateToNotion(
-        value,
-        !!(config as DatePropertyConfig).include_time,
-      )
+      properties[key] = convertDateToNotion(value)
     }
 
     if (config.type === "people") {
@@ -912,10 +936,10 @@ export class Table<T extends Schema> {
   private tableId: string
   private schema: T
 
-  constructor(notionApiKey: string, tableId: string, schema: T) {
-    this.notion = new Client({ auth: notionApiKey })
-    this.tableId = tableId
-    this.schema = schema
+  constructor(options: TableOptions<T>) {
+    this.notion = options.notion
+    this.tableId = options.tableId
+    this.schema = options.schema
   }
 
   /* 複数レコード取得（ページネーション・ソート機能付き） */
@@ -1005,13 +1029,26 @@ export class Table<T extends Schema> {
       }
 
       /* 日付タイプ */
-      if (config.type === "date" && value instanceof Date) {
-        notionFilter.and.push({
-          property: key,
-          date: {
-            on: value.toISOString().split("T")[0],
-          },
-        })
+      if (config.type === "date") {
+        // DateRange型の場合
+        if (value && typeof value === "object" && "start" in value) {
+          const dateRange = value as DateRange
+          notionFilter.and.push({
+            property: key,
+            date: {
+              on: dateRange.start.split("T")[0], // 日付部分のみ使用
+            },
+          })
+        }
+        // 従来互換用のDate型の場合
+        else if (value instanceof Date) {
+          notionFilter.and.push({
+            property: key,
+            date: {
+              on: value.toISOString().split("T")[0],
+            },
+          })
+        }
       }
 
       /* チェックボックスタイプ */
@@ -1067,7 +1104,10 @@ export class Table<T extends Schema> {
         const typedPage = page as unknown as NotionPage
         const itemData = convertFromNotion(this.schema, typedPage.properties)
         return {
-          _id: typedPage.id,
+          id: typedPage.id,
+          createdAt: typedPage.created_time,
+          updatedAt: typedPage.last_edited_time,
+          isDeleted: typedPage.archived,
           ...itemData,
         } as TableRecord<SchemaType<T>>
       })
@@ -1109,7 +1149,10 @@ export class Table<T extends Schema> {
       const data = convertFromNotion(this.schema, typedPage.properties)
 
       return {
-        _id: typedPage.id,
+        id: typedPage.id,
+        createdAt: typedPage.created_time,
+        updatedAt: typedPage.last_edited_time,
+        isDeleted: typedPage.archived,
         ...data,
       } as TableRecord<SchemaType<T>>
     } catch (error) {
@@ -1118,7 +1161,9 @@ export class Table<T extends Schema> {
   }
 
   /* レコード作成 */
-  async create(data: Partial<SchemaType<T>>): Promise<string> {
+  async create(
+    data: Partial<SchemaType<T>> & { body?: string },
+  ): Promise<PageObjectResponse> {
     /* 必須フィールドのチェック */
     for (const [key, config] of Object.entries(this.schema)) {
       if (config.required && (data[key] === undefined || data[key] === null)) {
@@ -1131,19 +1176,40 @@ export class Table<T extends Schema> {
     const response = await this.notion.pages.create({
       parent: { database_id: this.tableId },
       properties: properties as never,
+      children: data.body ? toNotionBlocks(data.body) : undefined,
     })
 
-    return response.id
+    return response as PageObjectResponse
   }
 
   /* レコード更新 */
-  async update(id: string, data: Partial<SchemaType<T>>): Promise<void> {
+  async update(
+    id: string,
+    data: Partial<SchemaType<T>> & { body?: string | null },
+  ): Promise<void> {
     const properties = convertToNotion(this.schema, data)
 
     await this.notion.pages.update({
       page_id: id,
       properties: properties as never,
     })
+
+    if (data.body) {
+      const blocksResult = await this.notion.blocks.children.list({
+        block_id: id,
+      })
+
+      for (const block of blocksResult.results) {
+        await this.notion.blocks.delete({
+          block_id: block.id,
+        })
+      }
+
+      await this.notion.blocks.children.append({
+        block_id: id,
+        children: toNotionBlocks(data.body),
+      })
+    }
   }
 
   /* 条件に一致する複数レコードを更新 */
@@ -1159,7 +1225,7 @@ export class Table<T extends Schema> {
     let updated = 0
     /* 取得したレコードを1件ずつ更新 */
     for (const record of result.records) {
-      await this.update(record._id, update)
+      await this.update(record.id, update)
       updated++
     }
 
@@ -1175,15 +1241,16 @@ export class Table<T extends Schema> {
 
     /* 既存レコードがあれば更新、なければ作成 */
     if (existingRecord) {
-      await this.update(existingRecord._id, update)
+      await this.update(existingRecord.id, update)
 
       /* 更新後のデータを取得して返す */
-      const updated = await this.findById(existingRecord._id)
+      const updated = await this.findById(existingRecord.id)
       return updated as TableRecord<SchemaType<T>>
     }
+
     /* 新規作成（whereデータとinsertデータをマージ） */
-    const createData = { ...where, ...insert }
-    const newId = await this.create(createData as never)
+    const createData = { ...where, ...insert } as Partial<SchemaType<T>>
+    const newId = await this.create(createData)
 
     /* 作成したデータを取得して返す */
     const created = await this.findById(newId)
@@ -1201,7 +1268,7 @@ export class Table<T extends Schema> {
     let deleted = 0
     /* 取得したレコードを1件ずつ削除 */
     for (const record of result.records) {
-      await this.delete(record._id)
+      await this.delete(record.id)
       deleted++
     }
 
@@ -1227,9 +1294,7 @@ export class Table<T extends Schema> {
 
 /* テーブル作成関数 */
 export function defineTable<T extends Schema>(
-  notionApiKey: string,
-  tableId: string,
-  schema: T,
+  options: TableOptions<T>,
 ): Table<T> {
-  return new Table(notionApiKey, tableId, schema)
+  return new Table(options)
 }
