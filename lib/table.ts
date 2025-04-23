@@ -1,6 +1,6 @@
 import type { Client } from "@notionhq/client"
-import { toNotionBlocks } from "./to-notion-block/to-notion-blocks"
 import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints"
+import { toNotionBlocks } from "./to-notion-block/to-notion-blocks"
 
 /* Notionのページオブジェクトの型定義 */
 export type NotionPage = {
