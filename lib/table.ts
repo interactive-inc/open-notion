@@ -166,6 +166,12 @@ type LastEditedByPropertyConfig = BasePropertyConfig & {
   type: "last_edited_by"
 }
 
+/* フォーミュラプロパティ */
+type FormulaPropertyConfig = BasePropertyConfig & {
+  type: "formula"
+  formulaType: "string" | "number" | "boolean" | "date"
+}
+
 /* すべてのプロパティ設定を合わせた型 */
 export type PropertyConfig =
   | TitlePropertyConfig
@@ -186,6 +192,7 @@ export type PropertyConfig =
   | CreatedByPropertyConfig
   | LastEditedTimePropertyConfig
   | LastEditedByPropertyConfig
+  | FormulaPropertyConfig
 
 /* データベーススキーマの定義 */
 export type Schema = Record<string, PropertyConfig>
@@ -232,7 +239,17 @@ type PropertyTypeMapping<T extends PropertyConfig> =
                                     ? Date
                                     : T extends LastEditedByPropertyConfig
                                       ? NotionUser
-                                      : never
+                                      : T extends FormulaPropertyConfig
+                                        ? T["formulaType"] extends "string"
+                                          ? string
+                                          : T["formulaType"] extends "number"
+                                            ? number
+                                            : T["formulaType"] extends "boolean"
+                                              ? boolean
+                                              : T["formulaType"] extends "date"
+                                                ? DateRange
+                                                : never
+                                        : never
 
 /* スキーマから型を生成 */
 export type SchemaType<T extends Schema> = {
@@ -302,9 +319,7 @@ export type QueryResult<T> = {
 }
 
 /* フィルター条件の型 */
-export type WhereCondition<T extends Schema> = Partial<{
-  [K in keyof SchemaType<T>]: unknown
-}>
+export type WhereCondition<T extends Schema> = Partial<SchemaType<T>>
 
 /* 型を絞り込むユーティリティ関数 */
 function isNotNullOrUndefined<T>(value: T | null | undefined): value is T {
@@ -602,6 +617,49 @@ function convertLastEditedByProperty(property: unknown): NotionUser | null {
   }
 }
 
+/* フォーミュラプロパティの処理 */
+function convertFormulaProperty(
+  property: unknown,
+  formulaType: "string" | "number" | "boolean" | "date",
+): unknown {
+  if (!property || typeof property !== "object") {
+    return null
+  }
+  const typedProperty = property as {
+    formula?: {
+      type: string
+      string?: string
+      number?: number
+      boolean?: boolean
+      date?: { start: string; end: string | null }
+    }
+  }
+  if (!typedProperty.formula) {
+    return null
+  }
+  if (formulaType === "string") {
+    return typedProperty.formula.string || ""
+  }
+  if (formulaType === "number") {
+    return typeof typedProperty.formula.number === "number"
+      ? typedProperty.formula.number
+      : null
+  }
+  if (formulaType === "boolean") {
+    return !!typedProperty.formula.boolean
+  }
+  if (formulaType === "date") {
+    if (!typedProperty.formula.date?.start) {
+      return null
+    }
+    return {
+      start: typedProperty.formula.date.start,
+      end: typedProperty.formula.date.end,
+    }
+  }
+  return null
+}
+
 /* Notionの値をTypeScriptの値に変換 */
 function convertFromNotion<T extends Schema>(
   schema: T,
@@ -688,6 +746,10 @@ function convertFromNotion<T extends Schema>(
 
     if (config.type === "last_edited_by") {
       result[key] = convertLastEditedByProperty(property)
+    }
+
+    if (config.type === "formula") {
+      result[key] = convertFormulaProperty(property, config.formulaType)
     }
   }
 
@@ -1070,6 +1132,40 @@ export class Table<T extends Schema> {
           },
         })
       }
+
+      /* フォーミュラタイプ */
+      if (config.type === "formula") {
+        if (config.formulaType === "string" && typeof value === "string") {
+          notionFilter.and.push({
+            property: key,
+            formula: { string: { equals: value } },
+          })
+        }
+        if (config.formulaType === "number" && typeof value === "number") {
+          notionFilter.and.push({
+            property: key,
+            formula: { number: { equals: value } },
+          })
+        }
+        if (config.formulaType === "boolean" && typeof value === "boolean") {
+          notionFilter.and.push({
+            property: key,
+            formula: { boolean: { equals: value } },
+          })
+        }
+        if (
+          config.formulaType === "date" &&
+          value &&
+          typeof value === "object" &&
+          "start" in value
+        ) {
+          const dateRange = value as DateRange
+          notionFilter.and.push({
+            property: key,
+            formula: { date: { on: dateRange.start.split("T")[0] } },
+          })
+        }
+      }
     }
 
     /* ソートオプションをNotionのソート形式に変換 */
@@ -1250,10 +1346,8 @@ export class Table<T extends Schema> {
 
     /* 新規作成（whereデータとinsertデータをマージ） */
     const createData = { ...where, ...insert } as Partial<SchemaType<T>>
-    const newId = await this.create(createData)
-
-    /* 作成したデータを取得して返す */
-    const created = await this.findById(newId)
+    const newPage = await this.create(createData)
+    const created = await this.findById(newPage.id)
     return created as TableRecord<SchemaType<T>>
   }
 
