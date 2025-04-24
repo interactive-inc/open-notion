@@ -292,6 +292,18 @@ function parseInlineToken(token: Tokens.Generic): CustomRichTextItem {
     }
   }
 
+  if (token.type === "del") {
+    return {
+      type: "text",
+      text: {
+        content: token.text,
+      },
+      annotations: {
+        strikethrough: true,
+      },
+    }
+  }
+
   return {
     type: "text",
     text: {
