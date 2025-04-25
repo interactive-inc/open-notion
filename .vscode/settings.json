@@ -1,5 +1,8 @@
 {
-  "cSpell.words": ["notionhq", "valibot"],
+  "cSpell.words": [
+    "notionhq",
+    "valibot"
+  ],
   "files.exclude": {
     "**/node_modules": true
   },

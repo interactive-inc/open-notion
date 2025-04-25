@@ -1,20 +1,20 @@
 {
-  "root": ".ai",
+  "root": ".instructions",
   "instructions": {
-    "overview": ".ai/00.overview.md",
-    "workflow": ".ai/01.workflow.c.md",
-    "output": ".ai/10.output.md",
-    "commitMessage": ".ai/11.commit-message.md",
-    "pullRequestDescription": ".ai/12.pull-request-description.md",
-    "review": ".ai/13.review.md",
-    "test": ".ai/14.test.md",
-    "code": ".ai/15.code.md",
-    "architecture": ".ai/20.architecture.md",
-    "development": ".ai/21.development.md",
-    "restriction": ".ai/22.restriction.md"
+    "overview": ".instructions/00.overview.md",
+    "workflow": null,
+    "output": ".instructions/10.output.md",
+    "commitMessage": ".instructions/11.commit-message.md",
+    "pullRequestDescription": ".instructions/12.pull-request-description.md",
+    "review": ".instructions/13.review.md",
+    "test": ".instructions/14.test.md",
+    "code": ".instructions/15.code.md",
+    "architecture": ".instructions/20.architecture.md",
+    "development": ".instructions/21.development.md",
+    "restriction": ".instructions/22.restriction.md"
   },
   "input": {
-    "rules": ".ai/rules"
+    "rules": null
   },
   "output": {
     "copilotInstructions": ".github/copilot-instructions.md",

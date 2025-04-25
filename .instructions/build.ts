@@ -198,7 +198,9 @@ async function updateCopilotInstructions() {
     markdown += "\n\n"
   }
 
-  markdown += await createRulesInstructions({ rulesPath: config.input.rules })
+  if (config.input.rules !== null) {
+    markdown += await createRulesInstructions({ rulesPath: config.input.rules })
+  }
 
   markdown = `${markdown.trim()}\n`
 
@@ -260,10 +262,12 @@ async function updateCursorRules() {
 
   await writeTextFile(markdown, config.output.cursorRules, "instructions.mdc")
 
-  const rules = readTextFiles(config.input.rules)
+  if (config.input.rules !== null) {
+    const rules = readTextFiles(config.input.rules)
 
-  for await (const [path, text] of rules) {
-    await writeTextFile(text, config.output.cursorRules, path)
+    for await (const [path, text] of rules) {
+      await writeTextFile(text, config.output.cursorRules, path)
+    }
   }
 }
 
@@ -321,7 +325,9 @@ async function updateEditorRule() {
 
   markdown = `${markdown.trim()}\n\n`
 
-  markdown += await createRulesInstructions({ rulesPath: config.input.rules })
+  if (config.input.rules !== null) {
+    markdown += await createRulesInstructions({ rulesPath: config.input.rules })
+  }
 
   if (config.output.clinerules) {
     await writeTextFile(markdown, config.output.clinerules)

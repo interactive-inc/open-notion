@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "format": "biome check . --fix --unsafe",
-    "init": "bun run .ai/build.ts",
+    "init": "bun run .instructions/build.ts",
     "check": "tsc --noEmit"
   },
   "devDependencies": {
