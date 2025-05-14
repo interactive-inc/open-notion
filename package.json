@@ -1,10 +1,10 @@
 {
-  "name": "notion-tools",
+  "name": "open-notion",
   "module": "index.ts",
   "type": "module",
   "scripts": {
     "format": "biome check . --fix --unsafe",
-    "init": "bun run .instructions/build.ts",
+    "init": "bun run init.ts",
     "check": "tsc --noEmit"
   },
   "devDependencies": {

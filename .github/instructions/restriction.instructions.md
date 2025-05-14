@@ -1,4 +1,8 @@
-# 22.restriction.md
+---
+applyTo: '**'
+---
+
+# Restrictions
 
 以下のファイルは書き換えてはいけません。
 

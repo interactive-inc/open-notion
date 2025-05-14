@@ -1,4 +1,8 @@
-# 15.code.md
+---
+applyTo: '**/*.ts'
+---
+
+# File rules - TypeScript
 
 - Use descriptive naming conventions
 - No type assertion using "as"
@@ -12,6 +16,8 @@
 - Use const whenever possible, avoid let and var
 - Do NOT use delete operator
 - Do NOT use enum
+- Use variable name "props" for function arguments
+- Avoid any type
 
 ## Functions
 
@@ -30,11 +36,6 @@
 
 - Add comments only when function behavior is not easily predictable
 - Do NOT use param or return annotations
-
-## TypeScript
-
-- Use variable name "props" for function arguments
-- Avoid any type
 
 ## React
 
