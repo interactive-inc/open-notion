@@ -8,7 +8,7 @@ applyTo: '**/*.ts'
 - No type assertion using "as"
 - Use "type" instead of "interface"
 - Use for-of loops instead of forEach
-- Use destructuring for function arguments
+- Do NOT use destructuring
 - Avoid if-else statements
 - Use early returns instead of nested if statements
 - Do NOT abbreviate variable names
