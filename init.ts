@@ -1,14 +1,6 @@
-import { readdirSync } from "node:fs"
+// @ts-nocheck
 
-const config = {
-  output: {
-    windsurf: false,
-    cline: true,
-    claude: true,
-    devin: false,
-    augment: false,
-  },
-}
+import { readdirSync } from "node:fs"
 
 let markdown = ""
 
@@ -29,25 +21,9 @@ for (const path of instructionFiles) {
 
 markdown = `${markdown.trim()}\n\n`
 
-if (config.output.cline) {
-  await writeTextFile(markdown, ".clinerules")
-}
+// await writeTextFile(markdown, ".clinerules")
 
-if (config.output.claude) {
-  await writeTextFile(markdown, "CLAUDE.md")
-}
-
-if (config.output.windsurf) {
-  await writeTextFile(markdown, ".windsurfrules")
-}
-
-if (config.output.augment) {
-  await writeTextFile(markdown, ".augment-guidelines")
-}
-
-if (config.output.devin) {
-  await writeTextFile(markdown, "devin.md")
-}
+await writeTextFile(markdown, "CLAUDE.md")
 
 async function readTextFile(...filePath: string[]): Promise<string> {
   const contentPath = `${process.cwd()}/${filePath.join("/")}`

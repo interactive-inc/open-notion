@@ -322,7 +322,7 @@ export type QueryResult<T> = {
 export type WhereCondition<T extends Schema> = Partial<SchemaType<T>>
 
 /* 型を絞り込むユーティリティ関数 */
-function isNotNullOrUndefined<T>(value: T | null | undefined): value is T {
+function _isNotNullOrUndefined<T>(value: T | null | undefined): value is T {
   return value !== null && value !== undefined
 }
 
@@ -1251,7 +1251,7 @@ export class Table<T extends Schema> {
         isDeleted: typedPage.archived,
         ...data,
       } as TableRecord<SchemaType<T>>
-    } catch (error) {
+    } catch (_error) {
       return null
     }
   }

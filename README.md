@@ -1,4 +1,4 @@
-# notion-to-markdown
+# @interactive-inc/notion-client
 
 To install dependencies:
 

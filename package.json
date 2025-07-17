@@ -1,19 +1,32 @@
 {
-  "name": "open-notion",
-  "module": "index.ts",
+  "name": "@interactive-inc/notion-client",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "format": "biome check . --fix --unsafe",
-    "init": "bun run init.ts",
-    "check": "tsc --noEmit"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
-    "@types/bun": "latest",
-    "typescript": "^5"
+    "check": "tsgo --noEmit",
+    "build": "tsup",
+    "deploy": "bun run build && npm publish"
   },
   "dependencies": {
     "@notionhq/client": "^2.3.0",
     "marked": "^15.0.8"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.1.1",
+    "@types/bun": "latest",
+    "@typescript/native-preview": "^7.0.0-dev.20250716.1",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "module": "build/index.js",
+  "exports": {
+    ".": "./build/index.js",
+    "./models": "./build/models.js"
   }
 }

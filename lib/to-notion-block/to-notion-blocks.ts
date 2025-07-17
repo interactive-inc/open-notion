@@ -2,7 +2,7 @@ import type {
   BlockObjectRequest,
   BlockObjectRequestWithoutChildren,
 } from "@notionhq/client/build/src/api-endpoints"
-import { type Tokens, lexer } from "marked"
+import { lexer, type Tokens } from "marked"
 import { BlockType } from "../types/block-type"
 import type { CustomRichTextItem } from "../types/custom-rich-text-item"
 

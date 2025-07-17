@@ -1,0 +1,13 @@
+.npmignore
+debug
+lib
+samples
+.editorconfig
+biome.json
+bun.lock
+node_modules
+CLAUDE.md
+init.ts
+README.md
+tsconfig.json
+tsup.config.ts

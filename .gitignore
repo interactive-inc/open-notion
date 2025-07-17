@@ -1,9 +1,12 @@
+# Build
+build
+
 # Rules
-/.windsurfrules
-/.clinerules
-/.cursor/rules/*
-!/.cursor/rules/.gitkeep
-CLAUDE.md
+# /.windsurfrules
+# /.clinerules
+# /.cursor/rules/*
+# !/.cursor/rules/.gitkeep
+# CLAUDE.md
 
 # dependencies (bun install)
 node_modules
