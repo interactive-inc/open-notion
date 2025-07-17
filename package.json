@@ -1,12 +1,13 @@
 {
   "name": "@interactive-inc/notion-client",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "scripts": {
     "format": "biome check . --fix --unsafe",
     "check": "tsgo --noEmit",
     "build": "tsup",
-    "deploy": "bun run build && npm publish"
+    "deploy": "bun run build && npm publish",
+    "claude": "claude --dangerously-skip-permissions"
   },
   "dependencies": {
     "@notionhq/client": "^2.3.0",
