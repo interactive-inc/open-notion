@@ -1,22 +1,20 @@
 import { Client } from "@notionhq/client"
-import { defineSchema, defineTable } from "../lib"
+import { NotionTable } from "../lib/table/notion-table"
 
 if (process.env.NOTION_TOKEN === undefined) {
   throw new Error("NOTION_TOKEN is not defined")
 }
 
-const schema = defineSchema({
-  title: { type: "title", required: true },
-  number: { type: "number" },
-  bool: { type: "checkbox" },
-})
-
 const client = new Client({ auth: process.env.NOTION_TOKEN })
 
-const table = defineTable({
-  notion: client,
+const table = new NotionTable({
+  client: client,
   tableId: "1dd842f961818010a8d8d9eb0ae16444",
-  schema: schema,
+  schema: {
+    title: { type: "title", required: true },
+    number: { type: "number" },
+    bool: { type: "checkbox" },
+  },
 })
 
 {

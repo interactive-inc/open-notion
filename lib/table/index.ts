@@ -1,13 +1,14 @@
-export { fromNotionBlock } from "./from-notion-block/from-notion-block"
-export { fromNotionBlocks } from "./from-notion-block/from-notion-blocks"
-// Re-export types for convenience
+export { NotionTable } from "./notion-table"
 export type {
   BatchResult,
   DateRange,
   FindOptions,
+  NotionConverterInterface as ConverterInterface,
   NotionFile,
+  NotionMemoeryCacheInterface as CacheInterface,
   NotionPage,
   NotionPropertyType,
+  NotionQueryBuilderInterface as QueryBuilderInterface,
   NotionUser,
   PropertyConfig,
   QueryResult,
@@ -19,6 +20,6 @@ export type {
   TableRecord,
   UpdateManyOptions,
   UpsertOptions,
+  ValidatorInterface,
   WhereCondition,
-} from "./table"
-export { toNotionBlocks } from "./to-notion-block/to-notion-blocks"
+} from "./types"

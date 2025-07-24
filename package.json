@@ -1,6 +1,6 @@
 {
   "name": "@interactive-inc/notion-client",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "scripts": {
     "format": "biome check . --fix --unsafe",
@@ -27,7 +27,6 @@
   "types": "build/index.d.ts",
   "module": "build/index.js",
   "exports": {
-    ".": "./build/index.js",
-    "./models": "./build/models.js"
+    ".": "./build/index.js"
   }
 }
