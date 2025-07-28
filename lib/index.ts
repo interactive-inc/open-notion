@@ -1,24 +1,12 @@
+export { enhance } from "./enhance"
 export { fromNotionBlock } from "./from-notion-block/from-notion-block"
 export { fromNotionBlocks } from "./from-notion-block/from-notion-blocks"
-// Re-export types for convenience
-export type {
-  BatchResult,
-  DateRange,
-  FindOptions,
-  NotionFile,
-  NotionPage,
-  NotionPropertyType,
-  NotionUser,
-  PropertyConfig,
-  QueryResult,
-  Schema,
-  SchemaType,
-  SortOption,
-  TableHooks,
-  TableOptions,
-  TableRecord,
-  UpdateManyOptions,
-  UpsertOptions,
-  WhereCondition,
-} from "./table"
+export { NotionMarkdown } from "./table/notion-markdown"
+export { NotionMemoryCache } from "./table/notion-memory-cache"
+export { NotionPropertyConverter } from "./table/notion-property-converter"
+export { NotionQueryBuilder } from "./table/notion-query-builder"
+export { NotionSchemaValidator } from "./table/notion-schema-validator"
+export { NotionTable } from "./table/notion-table"
+export type * from "./table/types"
 export { toNotionBlocks } from "./to-notion-block/to-notion-blocks"
+export type { fromNotionRichTextItem } from "./utils/from-notion-rich-text-item"

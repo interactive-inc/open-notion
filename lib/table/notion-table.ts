@@ -2,7 +2,7 @@ import type { Client } from "@notionhq/client"
 import { toNotionBlocks } from "../to-notion-block/to-notion-blocks"
 import { NotionMarkdown } from "./notion-markdown"
 import { NotionMemoryCache } from "./notion-memory-cache"
-import { NotionConverter } from "./notion-property-converter"
+import { NotionPropertyConverter } from "./notion-property-converter"
 import { NotionQueryBuilder } from "./notion-query-builder"
 import { NotionSchemaValidator } from "./notion-schema-validator"
 import type {
@@ -27,7 +27,7 @@ export class NotionTable<T extends Schema> {
   private readonly cache: NotionMemoryCache
   private readonly validator: NotionSchemaValidator
   private readonly queryBuilder: NotionQueryBuilder
-  private readonly converter: NotionConverter
+  private readonly converter: NotionPropertyConverter
   private readonly enhancer: NotionMarkdown
   public hooks: TableHooks<T> = {}
 
@@ -38,7 +38,7 @@ export class NotionTable<T extends Schema> {
     cache?: NotionMemoryCache
     validator?: NotionSchemaValidator
     queryBuilder?: NotionQueryBuilder
-    converter?: NotionConverter
+    converter?: NotionPropertyConverter
     enhancer?: NotionMarkdown
   }) {
     this.client = options.client
@@ -47,7 +47,7 @@ export class NotionTable<T extends Schema> {
     this.cache = options.cache || new NotionMemoryCache()
     this.validator = options.validator || new NotionSchemaValidator()
     this.queryBuilder = options.queryBuilder || new NotionQueryBuilder()
-    this.converter = options.converter || new NotionConverter()
+    this.converter = options.converter || new NotionPropertyConverter()
     this.enhancer = options.enhancer || new NotionMarkdown()
   }
 

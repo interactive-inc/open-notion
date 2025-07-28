@@ -6,7 +6,7 @@ import type {
   SchemaType,
 } from "./types"
 
-export class NotionConverter {
+export class NotionPropertyConverter {
   fromNotion<T extends Schema>(
     schema: T,
     properties: Record<string, unknown>,
