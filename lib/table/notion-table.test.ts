@@ -209,7 +209,7 @@ test("バリデーションとフックのテスト", async () => {
 
   await expect(
     table.create({ email: "test@example.com", age: 150 }),
-  ).rejects.toThrow('フィールド "age" は 120 以下である必要があります')
+  ).rejects.toThrow('Field "age" must be at most 120')
 
   // フック
   let hookCalled = false

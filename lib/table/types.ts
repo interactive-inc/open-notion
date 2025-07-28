@@ -1,6 +1,6 @@
 import type { Client } from "@notionhq/client"
 
-/* Notionのページオブジェクトの型定義 */
+/* Notion page object type */
 export type NotionPage = {
   id: string
   url: string
@@ -10,7 +10,7 @@ export type NotionPage = {
   properties: Record<string, unknown>
 }
 
-/* Notionの基本データ型 */
+/* Notion base data types */
 export type NotionPropertyType =
   | "title"
   | "rich_text"
@@ -32,7 +32,7 @@ export type NotionPropertyType =
   | "last_edited_by"
   | "formula"
 
-/* Notionユーザー型 */
+/* Notion user type */
 export type NotionUser = {
   id: string
   name?: string
@@ -40,26 +40,26 @@ export type NotionUser = {
   email?: string
 }
 
-/* Notionファイル型 */
+/* Notion file type */
 export type NotionFile = {
   name: string
   url: string
   type: "file" | "external"
 }
 
-/* 日付範囲型 */
+/* Date range type */
 export type DateRange = {
   start: string
   end: string | null
 }
 
-/* プロパティの共通設定情報 */
+/* Common property config */
 type BasePropertyConfig = {
   required?: boolean
   validate?: (value: unknown) => boolean | string
 }
 
-/* 数値フォーマット型 */
+/* Number format type */
 type NumberFormat =
   | "number"
   | "number_with_commas"
@@ -73,17 +73,14 @@ type NumberFormat =
   | "won"
   | "yuan"
 
-/* タイトルプロパティ */
 export type TitlePropertyConfig = BasePropertyConfig & {
   type: "title"
 }
 
-/* リッチテキストプロパティ */
 export type RichTextPropertyConfig = BasePropertyConfig & {
   type: "rich_text"
 }
 
-/* 数値プロパティ */
 export type NumberPropertyConfig = BasePropertyConfig & {
   type: "number"
   format?: NumberFormat
@@ -91,93 +88,77 @@ export type NumberPropertyConfig = BasePropertyConfig & {
   max?: number
 }
 
-/* 選択肢プロパティ */
 export type SelectPropertyConfig = BasePropertyConfig & {
   type: "select"
   options: readonly string[] | string[]
 }
 
-/* 複数選択プロパティ */
 export type MultiSelectPropertyConfig = BasePropertyConfig & {
   type: "multi_select"
   options: string[] | null
 }
 
-/* ステータスプロパティ */
 export type StatusPropertyConfig = BasePropertyConfig & {
   type: "status"
   options: readonly string[] | string[]
 }
 
-/* 日付プロパティ */
 export type DatePropertyConfig = BasePropertyConfig & {
   type: "date"
 }
 
-/* 人物プロパティ */
 export type PeoplePropertyConfig = BasePropertyConfig & {
   type: "people"
 }
 
-/* ファイルプロパティ */
 export type FilesPropertyConfig = BasePropertyConfig & {
   type: "files"
 }
 
-/* チェックボックスプロパティ */
 export type CheckboxPropertyConfig = BasePropertyConfig & {
   type: "checkbox"
 }
 
-/* URLプロパティ */
 export type UrlPropertyConfig = BasePropertyConfig & {
   type: "url"
 }
 
-/* メールプロパティ */
 export type EmailPropertyConfig = BasePropertyConfig & {
   type: "email"
 }
 
-/* 電話番号プロパティ */
 export type PhoneNumberPropertyConfig = BasePropertyConfig & {
   type: "phone_number"
 }
 
-/* リレーションプロパティ */
 export type RelationPropertyConfig = BasePropertyConfig & {
   type: "relation"
   database_id: string
   single_property?: boolean
 }
 
-/* 作成日時プロパティ */
 export type CreatedTimePropertyConfig = BasePropertyConfig & {
   type: "created_time"
 }
 
-/* 作成者プロパティ */
 export type CreatedByPropertyConfig = BasePropertyConfig & {
   type: "created_by"
 }
 
-/* 最終編集日時プロパティ */
 export type LastEditedTimePropertyConfig = BasePropertyConfig & {
   type: "last_edited_time"
 }
 
-/* 最終編集者プロパティ */
 export type LastEditedByPropertyConfig = BasePropertyConfig & {
   type: "last_edited_by"
 }
 
-/* フォーミュラプロパティ */
 export type FormulaPropertyConfig = BasePropertyConfig & {
   type: "formula"
   formulaType: "string" | "number" | "boolean" | "date"
 }
 
-/* すべてのプロパティ設定を合わせた型 */
+/* All property config types */
 export type PropertyConfig =
   | TitlePropertyConfig
   | RichTextPropertyConfig
@@ -199,10 +180,10 @@ export type PropertyConfig =
   | LastEditedByPropertyConfig
   | FormulaPropertyConfig
 
-/* データベーススキーマの定義 */
+/* Database schema definition */
 export type Schema = Record<string, PropertyConfig>
 
-/* スキーマから型を生成するための型マッピング */
+/* Type mapping for schema */
 export type PropertyTypeMapping<T extends PropertyConfig> = T extends
   | TitlePropertyConfig
   | RichTextPropertyConfig
@@ -256,14 +237,14 @@ export type PropertyTypeMapping<T extends PropertyConfig> = T extends
                                   : never
                           : never
 
-/* スキーマから型を生成 */
+/* Generate type from schema */
 export type SchemaType<T extends Schema> = {
   [K in keyof T]: T[K] extends { required: true }
     ? PropertyTypeMapping<T[K]>
     : PropertyTypeMapping<T[K]> | null | undefined
 }
 
-/* レコード型定義 */
+/* Record type definition */
 export type TableRecord<T> = T & {
   id: string
   createdAt: string
@@ -271,31 +252,31 @@ export type TableRecord<T> = T & {
   isDeleted: boolean
 }
 
-/* ソートオプションの型 */
+/* Sort option type */
 export type SortOption<T extends Schema> = {
   field: keyof SchemaType<T>
   direction: "asc" | "desc"
 }
 
-/* 必須フィールドのキーを取得する型 */
+/* Get required field keys */
 export type RequiredKeys<T extends Schema> = {
   [K in keyof T]: T[K] extends { required: true } ? K : never
 }[keyof T] &
   keyof SchemaType<T>
 
-/* 必須フィールドの型 */
+/* Required fields type */
 export type RequiredFields<T extends Schema> = {
   [K in RequiredKeys<T>]: SchemaType<T>[K]
 }
 
-/* テーブル作成オプション */
+/* Table creation options */
 export type TableOptions<T extends Schema> = {
   notion: Client
   tableId: string
   schema: T
 }
 
-/* 高度なクエリ条件 */
+/* Advanced query operators */
 export type QueryOperator<T> = {
   $eq?: T
   $ne?: T
@@ -316,35 +297,32 @@ export type WhereCondition<T extends Schema> = {
   $and?: WhereCondition<T>[]
 }
 
-/* クエリオプション型を拡張 */
 export type FindOptions<T extends Schema> = {
   where?: WhereCondition<T>
   count?: number
   sorts?: SortOption<T> | SortOption<T>[]
 }
 
-/* updateMany用のオプション型 */
 export type UpdateManyOptions<T extends Schema> = {
   where?: WhereCondition<T>
   update: Partial<SchemaType<T>>
   count?: number
 }
 
-/* upsert用のオプション型 */
 export type UpsertOptions<T extends Schema> = {
   where: WhereCondition<T>
   insert: Partial<SchemaType<T>> & RequiredFields<T>
   update: Partial<SchemaType<T>>
 }
 
-/* クエリ結果型 */
+/* Query result type */
 export type QueryResult<T> = {
   records: TableRecord<T>[]
   cursor: string | null
   hasMore: boolean
 }
 
-/* バッチ操作結果型 */
+/* Batch operation result */
 export type BatchResult<T> = {
   succeeded: T[]
   failed: Array<{
@@ -353,7 +331,7 @@ export type BatchResult<T> = {
   }>
 }
 
-/* フック定義 */
+/* Hook definitions */
 export type TableHooks<T extends Schema> = {
   beforeCreate?: (
     data: Partial<SchemaType<T>>,
@@ -371,14 +349,14 @@ export type TableHooks<T extends Schema> = {
   afterDelete?: (id: string) => Promise<void>
 }
 
-/* キャッシュエントリ */
+/* Cache entry */
 export type CacheEntry<T> = {
   data: T
   timestamp: number
   ttl: number
 }
 
-/* キャッシュインターフェース */
+/* Cache interface */
 export type NotionMemoeryCacheInterface = {
   get<T>(key: string): T | undefined
   set<T>(key: string, value: T, ttl?: number): void
@@ -386,18 +364,18 @@ export type NotionMemoeryCacheInterface = {
   clear(): void
 }
 
-/* バリデーターインターフェース */
+/* Validator interface */
 export type ValidatorInterface = {
   validate(schema: Schema, data: unknown): Record<string, unknown>
 }
 
-/* クエリビルダーインターフェース */
+/* Query builder interface */
 export type NotionQueryBuilderInterface = {
   buildFilter(where: WhereCondition<any>): any
   buildSorts(sorts: SortOption<any> | SortOption<any>[]): any[]
 }
 
-/* コンバーターインターフェース */
+/* Converter interface */
 export type NotionConverterInterface = {
   convertFromNotion(property: any, config: PropertyConfig): any
   convertToNotion(value: any, config: PropertyConfig): any

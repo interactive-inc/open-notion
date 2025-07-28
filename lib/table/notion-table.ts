@@ -51,7 +51,6 @@ export class NotionTable<T extends Schema> {
     this.enhancer = options.enhancer || new NotionMarkdown()
   }
 
-  /* 複数レコード取得（ページネーション・ソート機能付き） */
   async findMany(
     options: FindOptions<T> = {},
   ): Promise<QueryResult<SchemaType<T>>> {
@@ -81,7 +80,6 @@ export class NotionTable<T extends Schema> {
     }
   }
 
-  /* 指定した条件に一致する最初のレコードを取得 */
   async findOne(
     options: FindOptions<T> = {},
   ): Promise<TableRecord<SchemaType<T>> | null> {
@@ -92,7 +90,6 @@ export class NotionTable<T extends Schema> {
     return result.records[0] || null
   }
 
-  /* IDで1件取得（キャッシュ対応） */
   async findById(
     id: string,
     options?: { cache?: boolean },
@@ -120,7 +117,6 @@ export class NotionTable<T extends Schema> {
     }
   }
 
-  /* レコード作成 */
   async create(
     data: Partial<SchemaType<T>> & { body?: string },
   ): Promise<TableRecord<SchemaType<T>>> {
@@ -156,7 +152,7 @@ export class NotionTable<T extends Schema> {
 
     const record = await this.findById(response.id)
     if (!record) {
-      throw new Error("作成したレコードの取得に失敗しました")
+      throw new Error("Failed to retrieve created record")
     }
 
     if (this.hooks.afterCreate) {
@@ -166,7 +162,6 @@ export class NotionTable<T extends Schema> {
     return record
   }
 
-  /* 複数レコード作成（バッチ処理） */
   async createMany(
     records: Array<Partial<SchemaType<T>> & { body?: string }>,
   ): Promise<BatchResult<TableRecord<SchemaType<T>>>> {
@@ -201,13 +196,11 @@ export class NotionTable<T extends Schema> {
     return { succeeded, failed }
   }
 
-  /* レコード更新 */
   async update(
     id: string,
     data: Partial<SchemaType<T>> & { body?: string | null },
   ): Promise<void> {
-    const dataForValidation = this.prepareDataForValidation(data)
-    this.validator?.validate(this.schema, dataForValidation)
+    this.validator?.validate(this.schema, data, { skipRequired: true })
 
     const processedData = this.hooks.beforeUpdate
       ? await this.hooks.beforeUpdate(id, data)
@@ -238,7 +231,6 @@ export class NotionTable<T extends Schema> {
     }
   }
 
-  /* 条件に一致する複数レコードを更新 */
   async updateMany(options: UpdateManyOptions<T>): Promise<number> {
     const { where = {}, update, count = 1024 } = options
 
@@ -253,7 +245,6 @@ export class NotionTable<T extends Schema> {
     return updated
   }
 
-  /* upsert処理（既存レコードがあれば更新、なければ作成） */
   async upsert(options: UpsertOptions<T>): Promise<TableRecord<SchemaType<T>>> {
     const { where, insert = {}, update } = options
 
@@ -269,7 +260,6 @@ export class NotionTable<T extends Schema> {
     return await this.create(createData)
   }
 
-  /* 条件に一致する複数レコードを削除（アーカイブ） */
   async deleteMany(where: WhereCondition<T> = {}): Promise<number> {
     const result = await this.findMany({ where, count: 1024 })
 
@@ -282,7 +272,6 @@ export class NotionTable<T extends Schema> {
     return deleted
   }
 
-  /* レコード削除（アーカイブ） */
   async delete(id: string): Promise<void> {
     if (this.hooks.beforeDelete) {
       await this.hooks.beforeDelete(id)
@@ -300,7 +289,6 @@ export class NotionTable<T extends Schema> {
     }
   }
 
-  /* レコード復元 */
   async restore(id: string): Promise<void> {
     await this.client.pages.update({
       page_id: id,
@@ -310,12 +298,10 @@ export class NotionTable<T extends Schema> {
     this.cache?.delete(`page:${id}`)
   }
 
-  /* キャッシュクリア */
   clearCache(): void {
     this.cache?.clear()
   }
 
-  /* プライベートメソッド */
   private buildNotionSort(
     sorts: SortOption<T> | SortOption<T>[] | undefined,
   ): Array<Record<string, unknown>> {
@@ -385,18 +371,6 @@ export class NotionTable<T extends Schema> {
       isDeleted: page.archived,
       ...data,
     } as TableRecord<SchemaType<T>>
-  }
-
-  private prepareDataForValidation(
-    data: Partial<SchemaType<T>>,
-  ): Partial<SchemaType<T>> {
-    const dataWithoutRequired = { ...data }
-    for (const [key, config] of Object.entries(this.schema)) {
-      if (config.required && dataWithoutRequired[key] === undefined) {
-        delete dataWithoutRequired[key]
-      }
-    }
-    return dataWithoutRequired
   }
 
   private async updatePageContent(id: string, content: string): Promise<void> {

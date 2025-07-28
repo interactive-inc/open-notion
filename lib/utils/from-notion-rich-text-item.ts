@@ -1,9 +1,7 @@
 import type { RichTextItemResponse } from "@notionhq/client/build/src/api-endpoints"
 
 /**
- * Notionのリッチテキストをマークダウンテキストに変換する
- * @param richTexts リッチテキスト配列
- * @returns マークダウンテキスト
+ * Convert Notion rich text to markdown text
  */
 export function fromNotionRichTextItem(
   richTexts: RichTextItemResponse[],

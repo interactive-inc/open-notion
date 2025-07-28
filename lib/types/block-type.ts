@@ -1,5 +1,5 @@
 /**
- * Notionブロックの種類を表現する定数
+ * Notion block type constants
  */
 export const BlockType = {
   Paragraph: "paragraph",
@@ -16,6 +16,6 @@ export const BlockType = {
 } as const
 
 /**
- * Notionブロックの種類の型
+ * Notion block type union
  */
 export type BlockTypeValue = (typeof BlockType)[keyof typeof BlockType]

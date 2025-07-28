@@ -9,7 +9,7 @@ type Client = (
 ) => Promise<ListBlockChildrenResponse>
 
 /**
- * 指定したブロックの子ブロックを再帰的に取得する
+ * Recursively fetch child blocks for a given block
  */
 export function enhance(client: Client) {
   const fn = async (

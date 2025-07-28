@@ -12,12 +12,12 @@ test("必須フィールドのバリデーション", () => {
   // 必須フィールドが存在しない場合
   expect(() => {
     validator.validate(schema, { description: "説明" })
-  }).toThrow('必須フィールド "title" が指定されていません')
+  }).toThrow('Required field "title" is missing')
 
   // 必須フィールドがnullの場合
   expect(() => {
     validator.validate(schema, { title: null })
-  }).toThrow('必須フィールド "title" が指定されていません')
+  }).toThrow('Required field "title" is missing')
 
   // 正常な場合
   expect(() => {
@@ -35,7 +35,7 @@ test("文字列型のバリデーション", () => {
   // 文字列以外の値
   expect(() => {
     validator.validate(schema, { title: 123 })
-  }).toThrow('フィールド "title" は文字列である必要があります')
+  }).toThrow('Field "title" must be a string')
 
   // 正常な場合
   expect(() => {
@@ -53,17 +53,17 @@ test("数値型のバリデーション", () => {
   // 数値以外の値
   expect(() => {
     validator.validate(schema, { priority: "高" })
-  }).toThrow('フィールド "priority" は数値である必要があります')
+  }).toThrow('Field "priority" must be a number')
 
   // 最小値未満
   expect(() => {
     validator.validate(schema, { priority: 0 })
-  }).toThrow('フィールド "priority" は 1 以上である必要があります')
+  }).toThrow('Field "priority" must be at least 1')
 
   // 最大値超過
   expect(() => {
     validator.validate(schema, { priority: 11 })
-  }).toThrow('フィールド "priority" は 10 以下である必要があります')
+  }).toThrow('Field "priority" must be at most 10')
 
   // 正常な場合
   expect(() => {
@@ -82,7 +82,7 @@ test("選択肢型のバリデーション", () => {
   expect(() => {
     validator.validate(schema, { status: "完了" })
   }).toThrow(
-    'フィールド "status" の値 "完了" は許可されていません。許可される値: todo, in_progress, done',
+    'Field "status" value "完了" is not allowed. Allowed values: todo, in_progress, done',
   )
 
   // 正常な場合
@@ -104,13 +104,13 @@ test("複数選択型のバリデーション", () => {
   // 配列以外の値
   expect(() => {
     validator.validate(schema, { tags: "javascript" })
-  }).toThrow('フィールド "tags" は配列である必要があります')
+  }).toThrow('Field "tags" must be an array')
 
   // 許可されていない値を含む配列
   expect(() => {
     validator.validate(schema, { tags: ["javascript", "python"] })
   }).toThrow(
-    'フィールド "tags" の値 "python" は許可されていません。許可される値: javascript, typescript, react',
+    'Field "tags" value "python" is not allowed. Allowed values: javascript, typescript, react',
   )
 
   // 任意の値を許可する場合
@@ -145,14 +145,12 @@ test("日付型のバリデーション", () => {
   // 無効な形式
   expect(() => {
     validator.validate(schema, { deadline: "2024-01-01" })
-  }).toThrow(
-    'フィールド "deadline" はDateオブジェクトまたはDateRange型である必要があります',
-  )
+  }).toThrow('Field "deadline" must be a Date object or DateRange type')
 
   // 開始日が文字列でない
   expect(() => {
     validator.validate(schema, { deadline: { start: 123, end: null } })
-  }).toThrow('フィールド "deadline" の開始日は文字列である必要があります')
+  }).toThrow('Field "deadline" start date must be a string')
 })
 
 test("メールアドレスのバリデーション", () => {
@@ -164,7 +162,7 @@ test("メールアドレスのバリデーション", () => {
   // 無効なメールアドレス
   expect(() => {
     validator.validate(schema, { email: "invalid-email" })
-  }).toThrow('フィールド "email" は有効なメールアドレスである必要があります')
+  }).toThrow('Field "email" must be a valid email address')
 
   // 有効なメールアドレス
   expect(() => {
@@ -181,7 +179,7 @@ test("URLのバリデーション", () => {
   // 無効なURL
   expect(() => {
     validator.validate(schema, { website: "not-a-url" })
-  }).toThrow('フィールド "website" は有効なURLである必要があります')
+  }).toThrow('Field "website" must be a valid URL')
 
   // 有効なURL
   expect(() => {
@@ -208,15 +206,15 @@ test("カスタムバリデーション", () => {
   // カスタムバリデーションのエラーメッセージ
   expect(() => {
     validator.validate(schema, { password: "short" })
-  }).toThrow('フィールド "password": パスワードは8文字以上である必要があります')
+  }).toThrow('Field "password": パスワードは8文字以上である必要があります')
 
   expect(() => {
     validator.validate(schema, { password: "lowercase123" })
-  }).toThrow('フィールド "password": パスワードは大文字を含む必要があります')
+  }).toThrow('Field "password": パスワードは大文字を含む必要があります')
 
   expect(() => {
     validator.validate(schema, { password: "NoNumbers" })
-  }).toThrow('フィールド "password": パスワードは数字を含む必要があります')
+  }).toThrow('Field "password": パスワードは数字を含む必要があります')
 
   // 正常な場合
   expect(() => {
@@ -243,16 +241,12 @@ test("リレーション型のバリデーション", () => {
   // 無効な型
   expect(() => {
     validator.validate(schema, { related: 123 })
-  }).toThrow(
-    'フィールド "related" は文字列または文字列配列である必要があります',
-  )
+  }).toThrow('Field "related" must be a string or string array')
 
   // 配列内に文字列以外
   expect(() => {
     validator.validate(schema, { related: ["page-id", 123] })
-  }).toThrow(
-    'フィールド "related" のリレーションIDは文字列である必要があります',
-  )
+  }).toThrow('Field "related" relation IDs must be strings')
 })
 
 test("オブジェクト以外のデータ", () => {
@@ -263,13 +257,13 @@ test("オブジェクト以外のデータ", () => {
 
   expect(() => {
     validator.validate(schema, null)
-  }).toThrow("データはオブジェクトである必要があります")
+  }).toThrow("Data must be an object")
 
   expect(() => {
     validator.validate(schema, "文字列")
-  }).toThrow("データはオブジェクトである必要があります")
+  }).toThrow("Data must be an object")
 
   expect(() => {
     validator.validate(schema, 123)
-  }).toThrow("データはオブジェクトである必要があります")
+  }).toThrow("Data must be an object")
 })
