@@ -371,12 +371,23 @@ export type ValidatorInterface = {
 
 /* Query builder interface */
 export type NotionQueryBuilderInterface = {
-  buildFilter(where: WhereCondition<any>): any
-  buildSorts(sorts: SortOption<any> | SortOption<any>[]): any[]
+  buildFilter<T extends Schema>(
+    schema: T,
+    where: WhereCondition<T>
+  ): Record<string, unknown> | undefined
+  buildSort<T extends Schema>(
+    sorts: SortOption<T>[]
+  ): Array<Record<string, unknown>>
 }
 
 /* Converter interface */
 export type NotionConverterInterface = {
-  convertFromNotion(property: any, config: PropertyConfig): any
-  convertToNotion(value: any, config: PropertyConfig): any
+  fromNotion<T extends Schema>(
+    schema: T,
+    properties: Record<string, unknown>
+  ): SchemaType<T>
+  toNotion<T extends Schema>(
+    schema: T,
+    data: Partial<SchemaType<T>>
+  ): Record<string, unknown>
 }
