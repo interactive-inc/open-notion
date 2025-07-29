@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { readdirSync } from "node:fs"
 
 let markdown = ""
@@ -21,7 +19,7 @@ for (const path of instructionFiles) {
 
 markdown = `${markdown.trim()}\n\n`
 
-// await writeTextFile(markdown, ".clinerules")
+await writeTextFile(markdown, ".clinerules")
 
 await writeTextFile(markdown, "CLAUDE.md")
 
