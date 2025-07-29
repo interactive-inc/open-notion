@@ -8,7 +8,7 @@ hero:
   actions:
     - theme: brand
       text: Get Started
-      link: /guides/query
+      link: /guides
     - theme: alt
       text: GitHub
       link: https://github.com/interactive-inc/open-notion
