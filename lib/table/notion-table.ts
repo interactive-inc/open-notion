@@ -1,10 +1,10 @@
 import type { Client } from "@notionhq/client"
-import { toNotionBlocks } from "../to-notion-block/to-notion-blocks"
-import { NotionMarkdown } from "./notion-markdown"
-import { NotionMemoryCache } from "./notion-memory-cache"
-import { NotionPropertyConverter } from "./notion-property-converter"
-import { NotionQueryBuilder } from "./notion-query-builder"
-import { NotionSchemaValidator } from "./notion-schema-validator"
+import { NotionMarkdown } from "@/table/notion-markdown"
+import { NotionMemoryCache } from "@/table/notion-memory-cache"
+import { NotionPropertyConverter } from "@/table/notion-property-converter"
+import { NotionQueryBuilder } from "@/table/notion-query-builder"
+import { NotionSchemaValidator } from "@/table/notion-schema-validator"
+import { toNotionBlocks } from "@/to-notion-block/to-notion-blocks"
 import type {
   BatchResult,
   FindOptions,
@@ -18,7 +18,7 @@ import type {
   UpdateManyOptions,
   UpsertOptions,
   WhereCondition,
-} from "./types"
+} from "@/types"
 
 export class NotionTable<T extends Schema> {
   private readonly client: Client

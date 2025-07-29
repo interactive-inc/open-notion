@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test"
+import type { Schema } from "@/types"
 import { NotionPropertyConverter } from "./notion-property-converter"
-import type { Schema } from "./types"
 
 const converter = new NotionPropertyConverter()
 

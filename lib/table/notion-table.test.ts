@@ -1,8 +1,8 @@
 import { expect, test } from "bun:test"
 import type { Client } from "@notionhq/client"
+import type { Schema } from "@/types"
 import { NotionMarkdown } from "./notion-markdown"
 import { NotionTable } from "./notion-table"
-import type { Schema } from "./types"
 
 // 簡易的な統合テスト（実際のNotionクライアントの動作に近いモック）
 test("基本的な統合テスト", async () => {

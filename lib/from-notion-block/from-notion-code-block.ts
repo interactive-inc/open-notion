@@ -1,5 +1,5 @@
 import type { CodeBlockObjectResponse } from "@notionhq/client/build/src/api-endpoints"
-import { fromNotionRichTextItem } from "../utils/from-notion-rich-text-item"
+import { fromNotionRichTextItem } from "@/utils/from-notion-rich-text-item"
 
 export function fromNotionCodeBlock(block: CodeBlockObjectResponse): string {
   const language = block.code.language || ""

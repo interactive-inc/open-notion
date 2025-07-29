@@ -1,5 +1,5 @@
-import type { NotionBlock } from "../types/notion-block"
-import { fromNotionBlock } from "./from-notion-block"
+import { fromNotionBlock } from "@/from-notion-block/from-notion-block"
+import type { NotionBlock } from "@/types"
 
 /**
  * Notionブロックの配列をマークダウンテキストに変換する

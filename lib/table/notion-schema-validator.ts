@@ -1,4 +1,4 @@
-import type { NumberPropertyConfig, PropertyConfig, Schema } from "./types"
+import type { NumberPropertyConfig, PropertyConfig, Schema } from "@/types"
 
 export class NotionSchemaValidator {
   validate<T extends Schema>(

@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test"
+import type { Schema } from "@/types"
 import { NotionQueryBuilder } from "./notion-query-builder"
-import type { Schema } from "./types"
 
 const queryBuilder = new NotionQueryBuilder()
 

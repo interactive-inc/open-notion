@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test"
 import type { Heading1BlockObjectResponse } from "@notionhq/client/build/src/api-endpoints"
-import { fromNotionHeading1Block } from "./from-notion-heading1-block"
+import { fromNotionHeadingOneBlock } from "./from-notion-heading-one-block"
 
 test("fromNotionHeading1Block", () => {
   const block = {
@@ -49,7 +49,7 @@ test("fromNotionHeading1Block", () => {
     },
   } as const satisfies Heading1BlockObjectResponse
 
-  const result = fromNotionHeading1Block(block)
+  const result = fromNotionHeadingOneBlock(block)
 
   expect(result).toBe("# 見出し1")
 })

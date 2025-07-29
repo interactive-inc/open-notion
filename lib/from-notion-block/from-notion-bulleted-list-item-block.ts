@@ -1,6 +1,6 @@
-import type { NotionBulletedListItemBlock } from "../types/notion-bulleted-list-item-block"
-import { fromNotionRichTextItem } from "../utils/from-notion-rich-text-item"
-import { fromNotionBlock } from "./from-notion-block"
+import { fromNotionBlock } from "@/from-notion-block/from-notion-block"
+import type { NotionBulletedListItemBlock } from "@/types"
+import { fromNotionRichTextItem } from "@/utils/from-notion-rich-text-item"
 
 export function fromNotionBulletedListItemBlock(
   block: NotionBulletedListItemBlock,

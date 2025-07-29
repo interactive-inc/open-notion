@@ -373,10 +373,10 @@ export type ValidatorInterface = {
 export type NotionQueryBuilderInterface = {
   buildFilter<T extends Schema>(
     schema: T,
-    where: WhereCondition<T>
+    where: WhereCondition<T>,
   ): Record<string, unknown> | undefined
   buildSort<T extends Schema>(
-    sorts: SortOption<T>[]
+    sorts: SortOption<T>[],
   ): Array<Record<string, unknown>>
 }
 
@@ -384,10 +384,78 @@ export type NotionQueryBuilderInterface = {
 export type NotionConverterInterface = {
   fromNotion<T extends Schema>(
     schema: T,
-    properties: Record<string, unknown>
+    properties: Record<string, unknown>,
   ): SchemaType<T>
   toNotion<T extends Schema>(
     schema: T,
-    data: Partial<SchemaType<T>>
+    data: Partial<SchemaType<T>>,
   ): Record<string, unknown>
 }
+
+/* Block types */
+import type {
+  BlockObjectResponse,
+  BulletedListItemBlockObjectResponse,
+  NumberedListItemBlockObjectResponse,
+} from "@notionhq/client/build/src/api-endpoints"
+
+/**
+ * Notion block type constants
+ */
+export const BlockType = {
+  Paragraph: "paragraph",
+  Heading1: "heading_1",
+  Heading2: "heading_2",
+  Heading3: "heading_3",
+  BulletedListItem: "bulleted_list_item",
+  NumberedListItem: "numbered_list_item",
+  Code: "code",
+  Quote: "quote",
+  Divider: "divider",
+  Image: "image",
+  Title: "title",
+} as const
+
+/**
+ * Notion block type union
+ */
+export type BlockTypeValue = (typeof BlockType)[keyof typeof BlockType]
+
+/**
+ * Custom rich text item type
+ */
+export type CustomRichTextItem = {
+  text: {
+    content: string
+  }
+  type: "text"
+  annotations?: {
+    bold?: boolean
+    italic?: boolean
+    code?: boolean
+    strikethrough?: boolean
+  }
+}
+
+/**
+ * Notion block type definition
+ */
+export type NotionBlock = BlockObjectResponse & {
+  children: NotionBlock[]
+}
+
+/**
+ * Notion bulleted list item block type
+ */
+export type NotionBulletedListItemBlock =
+  BulletedListItemBlockObjectResponse & {
+    children: NotionBlock[]
+  }
+
+/**
+ * Notion numbered list item block type
+ */
+export type NotionNumberedListItemBlock =
+  NumberedListItemBlockObjectResponse & {
+    children: NotionBlock[]
+  }

@@ -1,7 +1,7 @@
 import type { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoints"
 import type { Tokens } from "marked"
-import { parseBulletedListItemToken } from "./parse-bulleted-list-item-token"
-import { parseNumberedListItemToken } from "./parse-numbered-list-item-token"
+import { parseBulletedListItemToken } from "@/to-notion-block/parse-bulleted-list-item-token"
+import { parseNumberedListItemToken } from "@/to-notion-block/parse-numbered-list-item-token"
 
 /**
  * Convert list token to Notion blocks

@@ -1,9 +1,9 @@
 import type { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoints"
 import { lexer, type Tokens } from "marked"
-import { parseCodeToken } from "./parse-code-token"
-import { parseHeadingToken } from "./parse-heading-token"
-import { parseListToken } from "./parse-list-token"
-import { parseParagraphToken } from "./parse-paragraph-token"
+import { parseCodeToken } from "@/to-notion-block/parse-code-token"
+import { parseHeadingToken } from "@/to-notion-block/parse-heading-token"
+import { parseListToken } from "@/to-notion-block/parse-list-token"
+import { parseParagraphToken } from "@/to-notion-block/parse-paragraph-token"
 
 /**
  * Convert markdown string to Notion blocks

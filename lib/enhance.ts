@@ -2,7 +2,7 @@ import type {
   ListBlockChildrenParameters,
   ListBlockChildrenResponse,
 } from "@notionhq/client/build/src/api-endpoints"
-import type { NotionBlock } from "./types/notion-block"
+import type { NotionBlock } from "@/types"
 
 type Client = (
   args: ListBlockChildrenParameters,

@@ -1,7 +1,7 @@
 import type { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoints"
 import type { Tokens } from "marked"
-import { BlockType } from "../types/block-type"
-import { parseInlineToken } from "./parse-inline-token"
+import { parseInlineToken } from "@/to-notion-block/parse-inline-token"
+import { BlockType } from "@/types"
 
 /**
  * Convert code token to Notion block

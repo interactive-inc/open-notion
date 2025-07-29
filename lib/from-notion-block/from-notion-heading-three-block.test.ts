@@ -1,16 +1,16 @@
 import { expect, test } from "bun:test"
-import type { Heading2BlockObjectResponse } from "@notionhq/client/build/src/api-endpoints"
-import { fromNotionHeading2Block } from "./from-notion-heading2-block"
+import type { Heading3BlockObjectResponse } from "@notionhq/client/build/src/api-endpoints"
+import { fromNotionHeadingThreeBlock } from "./from-notion-heading-three-block"
 
-test("fromNotionHeading2Block", () => {
+test("fromNotionHeading3Block", () => {
   const block = {
     object: "block",
-    id: "1d8842f9-6181-8011-a082-cc6b57b3b5a2",
+    id: "1d8842f9-6181-8084-a428-db6ac61c21d4",
     parent: {
       type: "page_id",
       page_id: "1d8842f9-6181-8042-8c77-d5c2f6cb333b",
     },
-    created_time: "2025-04-17T15:59:00.000Z",
+    created_time: "2025-04-17T16:09:00.000Z",
     last_edited_time: "2025-04-17T16:09:00.000Z",
     created_by: {
       object: "user",
@@ -23,13 +23,13 @@ test("fromNotionHeading2Block", () => {
     has_children: false,
     archived: false,
     in_trash: false,
-    type: "heading_2",
-    heading_2: {
+    type: "heading_3",
+    heading_3: {
       rich_text: [
         {
           type: "text",
           text: {
-            content: "見出し2",
+            content: "見出し3",
             link: null,
           },
           annotations: {
@@ -40,16 +40,16 @@ test("fromNotionHeading2Block", () => {
             code: false,
             color: "default",
           },
-          plain_text: "見出し2",
+          plain_text: "見出し3",
           href: null,
         },
       ],
       is_toggleable: false,
       color: "default",
     },
-  } as const satisfies Heading2BlockObjectResponse
+  } as const satisfies Heading3BlockObjectResponse
 
-  const result = fromNotionHeading2Block(block)
+  const result = fromNotionHeadingThreeBlock(block)
 
-  expect(result).toBe("## 見出し2")
+  expect(result).toBe("### 見出し3")
 })

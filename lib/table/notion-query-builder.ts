@@ -5,7 +5,7 @@ import type {
   Schema,
   SortOption,
   WhereCondition,
-} from "./types"
+} from "@/types"
 
 export class NotionQueryBuilder {
   buildFilter<T extends Schema>(

@@ -1,5 +1,5 @@
 import type { Tokens } from "marked"
-import type { CustomRichTextItem } from "../types/custom-rich-text-item"
+import type { CustomRichTextItem } from "@/types"
 
 /**
  * Convert inline token to Notion rich text item

@@ -1,11 +1,11 @@
-import type { NotionBlock } from "../types/notion-block"
-import { fromNotionBulletedListItemBlock } from "./from-notion-bulleted-list-item-block"
-import { fromNotionCodeBlock } from "./from-notion-code-block"
-import { fromNotionHeading1Block } from "./from-notion-heading1-block"
-import { fromNotionHeading2Block } from "./from-notion-heading2-block"
-import { fromNotionHeading3Block } from "./from-notion-heading3-block"
-import { fromNotionNumberedListItemBlock } from "./from-notion-numbered-list-item-block"
-import { fromNotionParagraphBlock } from "./from-notion-paragraph-block"
+import { fromNotionBulletedListItemBlock } from "@/from-notion-block/from-notion-bulleted-list-item-block"
+import { fromNotionCodeBlock } from "@/from-notion-block/from-notion-code-block"
+import { fromNotionHeadingOneBlock } from "@/from-notion-block/from-notion-heading-one-block"
+import { fromNotionHeadingThreeBlock } from "@/from-notion-block/from-notion-heading-three-block"
+import { fromNotionHeadingTwoBlock } from "@/from-notion-block/from-notion-heading-two-block"
+import { fromNotionNumberedListItemBlock } from "@/from-notion-block/from-notion-numbered-list-item-block"
+import { fromNotionParagraphBlock } from "@/from-notion-block/from-notion-paragraph-block"
+import type { NotionBlock } from "@/types"
 
 /**
  * 単一のNotionブロックをマークダウンテキストに変換する
@@ -16,15 +16,15 @@ export function fromNotionBlock(block: NotionBlock): string {
   }
 
   if (block.type === "heading_1") {
-    return fromNotionHeading1Block(block)
+    return fromNotionHeadingOneBlock(block)
   }
 
   if (block.type === "heading_2") {
-    return fromNotionHeading2Block(block)
+    return fromNotionHeadingTwoBlock(block)
   }
 
   if (block.type === "heading_3") {
-    return fromNotionHeading3Block(block)
+    return fromNotionHeadingThreeBlock(block)
   }
 
   if (block.type === "bulleted_list_item") {

@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test"
+import type { Schema } from "@/types"
 import { NotionSchemaValidator } from "./notion-schema-validator"
-import type { Schema } from "./types"
 
 test("必須フィールドのバリデーション", () => {
   const validator = new NotionSchemaValidator()

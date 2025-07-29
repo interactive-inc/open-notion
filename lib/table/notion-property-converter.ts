@@ -4,7 +4,7 @@ import type {
   NotionUser,
   Schema,
   SchemaType,
-} from "./types"
+} from "@/types"
 
 export class NotionPropertyConverter {
   fromNotion<T extends Schema>(

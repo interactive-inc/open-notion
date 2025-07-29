@@ -1,7 +1,7 @@
 import type { BlockObjectRequestWithoutChildren } from "@notionhq/client/build/src/api-endpoints"
 import type { Tokens } from "marked"
-import { BlockType } from "../types/block-type"
-import { parseInlineToken } from "./parse-inline-token"
+import { parseInlineToken } from "@/to-notion-block/parse-inline-token"
+import { BlockType } from "@/types"
 
 /**
  * Convert last numbered list item to Notion block

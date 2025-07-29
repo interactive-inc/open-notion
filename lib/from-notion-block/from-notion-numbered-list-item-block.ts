@@ -1,6 +1,6 @@
-import type { NotionNumberedListItemBlock } from "../types/notion-numbered-list-item-block"
-import { fromNotionRichTextItem } from "../utils/from-notion-rich-text-item"
-import { fromNotionBlock } from "./from-notion-block"
+import { fromNotionBlock } from "@/from-notion-block/from-notion-block"
+import type { NotionNumberedListItemBlock } from "@/types"
+import { fromNotionRichTextItem } from "@/utils/from-notion-rich-text-item"
 
 export function fromNotionNumberedListItemBlock(
   block: NotionNumberedListItemBlock,

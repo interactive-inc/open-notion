@@ -1,9 +1,9 @@
 import type { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoints"
 import type { Tokens } from "marked"
-import { BlockType } from "../types/block-type"
-import { parseInlineToken } from "./parse-inline-token"
-import { parseLastBulletedListItem } from "./parse-last-bulleted-list-item-token"
-import { parseLastNumberedListItem } from "./parse-last-numbered-list-item-token"
+import { parseInlineToken } from "@/to-notion-block/parse-inline-token"
+import { parseLastBulletedListItem } from "@/to-notion-block/parse-last-bulleted-list-item-token"
+import { parseLastNumberedListItem } from "@/to-notion-block/parse-last-numbered-list-item-token"
+import { BlockType } from "@/types"
 
 /**
  * Convert nested numbered list item token to Notion block
