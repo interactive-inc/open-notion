@@ -13,7 +13,7 @@ hero:
       text: GitHub
       link: https://github.com/interactive-inc/open-notion
     - theme: alt
-      text: Contact Us
+      text: Contact
       link: https://www.inta.co.jp/contact/
 
 features:
