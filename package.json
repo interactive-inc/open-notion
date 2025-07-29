@@ -1,6 +1,6 @@
 {
   "name": "@interactive-inc/notion-client",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "type": "module",
   "scripts": {
     "format": "biome check . --fix --unsafe",
@@ -10,13 +10,13 @@
     "claude": "claude --dangerously-skip-permissions"
   },
   "dependencies": {
-    "@notionhq/client": "^2.3.0",
-    "marked": "^15.0.8"
+    "@notionhq/client": "^4.0.1",
+    "marked": "^16.1.1"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.1.2",
     "@types/bun": "latest",
-    "@typescript/native-preview": "^7.0.0-dev.20250716.1",
+    "@typescript/native-preview": "^7.0.0-dev.20250728.1",
     "tsup": "^8.5.0",
     "typescript": "^5.8.3"
   },
