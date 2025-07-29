@@ -7,11 +7,15 @@
     "check": "tsgo --noEmit",
     "build": "tsup",
     "deploy": "bun run build && npm publish",
-    "claude": "claude --dangerously-skip-permissions"
+    "claude": "claude --dangerously-skip-permissions",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "dependencies": {
     "@notionhq/client": "^4.0.1",
-    "marked": "^16.1.1"
+    "marked": "^16.1.1",
+    "vitepress": "^1.6.3"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.1.2",

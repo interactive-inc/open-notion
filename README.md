@@ -22,7 +22,7 @@ For example, retrieving a simple text value requires navigating through multiple
 }
 ```
 
-Open Notion simplifies this to just `{ name: "Hello World" }`, making Notion as easy to use as any traditional database.
+notion-client simplifies this to just `{ name: "Hello World" }`, making Notion as easy to use as any traditional database.
 
 ## Features
 
