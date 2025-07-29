@@ -1,6 +1,8 @@
 import { defineConfig } from "vitepress"
 
 export default defineConfig({
+  /** https://vitepress.dev/guide/deploy#setting-a-public-base-path */
+  base: "/open-notion/",
   title: "notion-client",
   description: "Type-safe Notion database client for TypeScript",
   appearance: "force-dark",
