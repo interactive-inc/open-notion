@@ -11,7 +11,7 @@ export function parseCodeToken(token: Tokens.Code): BlockObjectRequest {
     type: BlockType.Code,
     code: {
       rich_text: [parseInlineToken(token)],
-      language: "plain text" as const,
+      language: token.lang || "plain text",
     },
   } as const
 }

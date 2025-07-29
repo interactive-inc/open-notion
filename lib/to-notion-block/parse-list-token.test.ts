@@ -1,0 +1,302 @@
+import { expect, test } from "bun:test"
+import type { Tokens } from "marked"
+import { parseListToken } from "./parse-list-token"
+
+test("箇条書きリストを変換", () => {
+  const token: Tokens.List = {
+    type: "list",
+    raw: "- Item 1\n- Item 2\n- Item 3",
+    ordered: false,
+    start: "",
+    loose: false,
+    items: [
+      {
+        type: "list_item",
+        raw: "- Item 1",
+        task: false,
+        checked: undefined,
+        loose: false,
+        text: "Item 1",
+        tokens: [
+          {
+            type: "text",
+            raw: "Item 1",
+            text: "Item 1",
+          } as Tokens.Text,
+        ],
+      },
+      {
+        type: "list_item",
+        raw: "- Item 2",
+        task: false,
+        checked: undefined,
+        loose: false,
+        text: "Item 2",
+        tokens: [
+          {
+            type: "text",
+            raw: "Item 2",
+            text: "Item 2",
+          } as Tokens.Text,
+        ],
+      },
+      {
+        type: "list_item",
+        raw: "- Item 3",
+        task: false,
+        checked: undefined,
+        loose: false,
+        text: "Item 3",
+        tokens: [
+          {
+            type: "text",
+            raw: "Item 3",
+            text: "Item 3",
+          } as Tokens.Text,
+        ],
+      },
+    ],
+  }
+
+  const result = parseListToken(token)
+
+  expect(result).toEqual([
+    {
+      type: "bulleted_list_item",
+      bulleted_list_item: {
+        rich_text: [
+          {
+            type: "text",
+            text: { content: "Item 1" },
+            annotations: {},
+          },
+        ],
+        children: undefined,
+      },
+    },
+    {
+      type: "bulleted_list_item",
+      bulleted_list_item: {
+        rich_text: [
+          {
+            type: "text",
+            text: { content: "Item 2" },
+            annotations: {},
+          },
+        ],
+        children: undefined,
+      },
+    },
+    {
+      type: "bulleted_list_item",
+      bulleted_list_item: {
+        rich_text: [
+          {
+            type: "text",
+            text: { content: "Item 3" },
+            annotations: {},
+          },
+        ],
+        children: undefined,
+      },
+    },
+  ])
+})
+
+test("番号付きリストを変換", () => {
+  const token: Tokens.List = {
+    type: "list",
+    raw: "1. First\n2. Second\n3. Third",
+    ordered: true,
+    start: "1",
+    loose: false,
+    items: [
+      {
+        type: "list_item",
+        raw: "1. First",
+        task: false,
+        checked: undefined,
+        loose: false,
+        text: "First",
+        tokens: [
+          {
+            type: "text",
+            raw: "First",
+            text: "First",
+          } as Tokens.Text,
+        ],
+      },
+      {
+        type: "list_item",
+        raw: "2. Second",
+        task: false,
+        checked: undefined,
+        loose: false,
+        text: "Second",
+        tokens: [
+          {
+            type: "text",
+            raw: "Second",
+            text: "Second",
+          } as Tokens.Text,
+        ],
+      },
+      {
+        type: "list_item",
+        raw: "3. Third",
+        task: false,
+        checked: undefined,
+        loose: false,
+        text: "Third",
+        tokens: [
+          {
+            type: "text",
+            raw: "Third",
+            text: "Third",
+          } as Tokens.Text,
+        ],
+      },
+    ],
+  }
+
+  const result = parseListToken(token)
+
+  expect(result).toEqual([
+    {
+      type: "numbered_list_item",
+      numbered_list_item: {
+        rich_text: [
+          {
+            type: "text",
+            text: { content: "First" },
+            annotations: {},
+          },
+        ],
+        children: undefined,
+      },
+    },
+    {
+      type: "numbered_list_item",
+      numbered_list_item: {
+        rich_text: [
+          {
+            type: "text",
+            text: { content: "Second" },
+            annotations: {},
+          },
+        ],
+        children: undefined,
+      },
+    },
+    {
+      type: "numbered_list_item",
+      numbered_list_item: {
+        rich_text: [
+          {
+            type: "text",
+            text: { content: "Third" },
+            annotations: {},
+          },
+        ],
+        children: undefined,
+      },
+    },
+  ])
+})
+
+test("空のリストを変換", () => {
+  const token: Tokens.List = {
+    type: "list",
+    raw: "",
+    ordered: false,
+    start: "",
+    loose: false,
+    items: [],
+  }
+
+  const result = parseListToken(token)
+
+  expect(result).toEqual([])
+})
+
+test("ネストを含むリストを変換", () => {
+  const nestedItem: Tokens.ListItem = {
+    type: "list_item",
+    raw: "  - Nested",
+    task: false,
+    checked: undefined,
+    loose: false,
+    text: "Nested",
+    tokens: [
+      {
+        type: "text",
+        raw: "Nested",
+        text: "Nested",
+      } as Tokens.Text,
+    ],
+  }
+
+  const token: Tokens.List = {
+    type: "list",
+    raw: "- Parent\n  - Nested",
+    ordered: false,
+    start: "",
+    loose: false,
+    items: [
+      {
+        type: "list_item",
+        raw: "- Parent\n  - Nested",
+        task: false,
+        checked: undefined,
+        loose: false,
+        text: "Parent",
+        tokens: [
+          {
+            type: "text",
+            raw: "Parent",
+            text: "Parent",
+          } as Tokens.Text,
+          {
+            type: "list",
+            raw: "  - Nested",
+            ordered: false,
+            start: "",
+            loose: false,
+            items: [nestedItem],
+          } as Tokens.List,
+        ],
+      },
+    ],
+  }
+
+  const result = parseListToken(token)
+
+  expect(result).toEqual([
+    {
+      type: "bulleted_list_item",
+      bulleted_list_item: {
+        rich_text: [
+          {
+            type: "text",
+            text: { content: "Parent" },
+            annotations: {},
+          },
+        ],
+        children: [
+          {
+            type: "bulleted_list_item",
+            bulleted_list_item: {
+              rich_text: [
+                {
+                  type: "text",
+                  text: { content: "Nested" },
+                  annotations: {},
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ])
+})

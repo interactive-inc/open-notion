@@ -18,7 +18,7 @@ export function parseHeadingToken(
     } as const
   }
 
-  if (markedToken.depth === 3) {
+  if (markedToken.depth >= 3) {
     return {
       type: BlockType.Heading3,
       heading_3: {
