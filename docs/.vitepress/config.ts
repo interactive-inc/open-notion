@@ -75,9 +75,5 @@ export default defineConfig({
       message: "MIT License.",
       copyright: "© 2025-present Interactive Inc.",
     },
-    editLink: {
-      pattern:
-        "https://github.com/interactive-inc/open-notion/edit/main/docs/:path",
-    },
   },
 })

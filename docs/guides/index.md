@@ -184,35 +184,30 @@ const projectTable = new NotionTable({
   schema
 })
 
-// Use it
-async function main() {
-  // Create task
-  const task = await projectTable.create({
-    title: 'Fix login bug',
-    description: 'Users cannot login with email',
-    status: 'todo',
-    priority: 5,
-    tags: ['bug']
-  })
+// Create task
+const task = await projectTable.create({
+  title: 'Fix login bug',
+  description: 'Users cannot login with email',
+  status: 'todo',
+  priority: 5,
+  tags: ['bug']
+})
 
-  // Query tasks
-  const urgentBugs = await projectTable.findMany({
-    where: {
-      status: { $ne: 'done' },
-      priority: { $gte: 4 },
-      tags: { $contains: 'bug' }
-    },
-    sorts: [{ property: 'priority', direction: 'descending' }]
-  })
+// Query tasks
+const urgentBugs = await projectTable.findMany({
+  where: {
+    status: { $ne: 'done' },
+    priority: { $gte: 4 },
+    tags: { $contains: 'bug' }
+  },
+  sorts: [{ property: 'priority', direction: 'descending' }]
+})
 
-  // Update task
-  await projectTable.update(task.id, {
-    status: 'in_progress',
-    assignee: ['user-id']
-  })
-}
-
-main().catch(console.error)
+// Update task
+await projectTable.update(task.id, {
+  status: 'in_progress',
+  assignee: ['user-id']
+})
 ```
 
 ## Next Steps

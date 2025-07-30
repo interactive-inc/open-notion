@@ -1,31 +1,20 @@
 {
-  "files.exclude": {
-    "**/node_modules": true
+  "[typescript][typescriptreact][json][css]": {
+    "editor.codeActionsOnSave": {
+      "quickfix.biome": "explicit"
+    },
+    "editor.defaultFormatter": "biomejs.biome",
+    "editor.formatOnSave": true
   },
   "files.associations": {
     "*.json": "json"
   },
-  "files.watcherExclude": {
-    "**/routeTree.gen.ts": true
+  "files.exclude": {
+    "**/node_modules": true
   },
-  "files.readonlyInclude": {
-    "**/routeTree.gen.ts": true
-  },
-  "github.copilot.chat.codesearch.enabled": true,
-  "github.copilot.chat.languageContext.typescript.enabled": true,
   "search.exclude": {
-    "bun.lock": true,
-    "**/routeTree.gen.ts": true
+    "bun.lock": true
   },
-  "typescript.tsdk": "node_modules/typescript/lib",
   "typescript.preferences.importModuleSpecifier": "non-relative",
-  "typescript.enablePromptUseWorkspaceTsdk": true,
-  "typescript.preferences.autoImportFileExcludePatterns": [],
-  "[typescript][typescriptreact][json][css]": {
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "biomejs.biome",
-    "editor.codeActionsOnSave": {
-      "quickfix.biome": "explicit"
-    }
-  } 
+  "typescript.tsdk": "node_modules/typescript/lib"
 }
