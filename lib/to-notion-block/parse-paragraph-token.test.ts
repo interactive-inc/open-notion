@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test"
 import type { Tokens } from "marked"
+import type { RichTextItemResponse } from "@/types"
 import { parseParagraphToken } from "./parse-paragraph-token"
 
 test("シンプルなテキストの段落を変換", () => {
@@ -25,8 +26,9 @@ test("シンプルなテキストの段落を変換", () => {
         {
           type: "text",
           text: { content: "This is a simple paragraph." },
+          plain_text: "This is a simple paragraph.",
           annotations: {},
-        },
+        } as RichTextItemResponse,
       ],
     },
   })
@@ -72,20 +74,23 @@ test("太字を含む段落を変換", () => {
         {
           type: "text",
           text: { content: "This is " },
+          plain_text: "This is ",
           annotations: {},
-        },
+        } as RichTextItemResponse,
         {
           type: "text",
           text: { content: "bold" },
+          plain_text: "bold",
           annotations: {
             bold: true,
           },
-        },
+        } as RichTextItemResponse,
         {
           type: "text",
           text: { content: " text." },
+          plain_text: " text.",
           annotations: {},
-        },
+        } as RichTextItemResponse,
       ],
     },
   })
@@ -170,51 +175,59 @@ test("複数の装飾を含む段落を変換", () => {
         {
           type: "text",
           text: { content: "Bold" },
+          plain_text: "Bold",
           annotations: {
             bold: true,
           },
-        },
+        } as RichTextItemResponse,
         {
           type: "text",
           text: { content: ", " },
+          plain_text: ", ",
           annotations: {},
-        },
+        } as RichTextItemResponse,
         {
           type: "text",
           text: { content: "italic" },
+          plain_text: "italic",
           annotations: {
             italic: true,
           },
-        },
+        } as RichTextItemResponse,
         {
           type: "text",
           text: { content: ", " },
+          plain_text: ", ",
           annotations: {},
-        },
+        } as RichTextItemResponse,
         {
           type: "text",
           text: { content: "code" },
+          plain_text: "code",
           annotations: {
             code: true,
           },
-        },
+        } as RichTextItemResponse,
         {
           type: "text",
           text: { content: " and " },
+          plain_text: " and ",
           annotations: {},
-        },
+        } as RichTextItemResponse,
         {
           type: "text",
           text: { content: "strikethrough" },
+          plain_text: "strikethrough",
           annotations: {
             strikethrough: true,
           },
-        },
+        } as RichTextItemResponse,
         {
           type: "text",
           text: { content: "." },
+          plain_text: ".",
           annotations: {},
-        },
+        } as RichTextItemResponse,
       ],
     },
   })

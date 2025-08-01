@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test"
 import type { Tokens } from "marked"
+import type { RichTextItemResponse } from "@/types"
 import { parseHeadingToken } from "./parse-heading-token"
 
 test("見出しレベル1をNotion heading_1 に変換", () => {
@@ -26,8 +27,9 @@ test("見出しレベル1をNotion heading_1 に変換", () => {
         {
           type: "text",
           text: { content: "Title" },
+          plain_text: "Title",
           annotations: {},
-        },
+        } as RichTextItemResponse,
       ],
     },
   })
@@ -57,8 +59,9 @@ test("見出しレベル2をNotion heading_2 に変換", () => {
         {
           type: "text",
           text: { content: "Subtitle" },
+          plain_text: "Subtitle",
           annotations: {},
-        },
+        } as RichTextItemResponse,
       ],
     },
   })
@@ -88,8 +91,9 @@ test("見出しレベル3をNotion heading_3 に変換", () => {
         {
           type: "text",
           text: { content: "Section" },
+          plain_text: "Section",
           annotations: {},
-        },
+        } as RichTextItemResponse,
       ],
     },
   })
@@ -119,8 +123,9 @@ test("見出しレベル4以上をheading_3に変換", () => {
         {
           type: "text",
           text: { content: "Deep Section" },
+          plain_text: "Deep Section",
           annotations: {},
-        },
+        } as RichTextItemResponse,
       ],
     },
   })
@@ -157,10 +162,11 @@ test("太字を含む見出しを変換", () => {
         {
           type: "text",
           text: { content: "Bold Title" },
+          plain_text: "Bold Title",
           annotations: {
             bold: true,
           },
-        },
+        } as RichTextItemResponse,
       ],
     },
   })
@@ -214,22 +220,25 @@ test("複数のインライン要素を含む見出しを変換", () => {
         {
           type: "text",
           text: { content: "Bold" },
+          plain_text: "Bold",
           annotations: {
             bold: true,
           },
-        },
+        } as RichTextItemResponse,
         {
           type: "text",
           text: { content: " and " },
+          plain_text: " and ",
           annotations: {},
-        },
+        } as RichTextItemResponse,
         {
           type: "text",
           text: { content: "italic" },
+          plain_text: "italic",
           annotations: {
             italic: true,
           },
-        },
+        } as RichTextItemResponse,
       ],
     },
   })

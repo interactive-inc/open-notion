@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test"
 import type { Tokens } from "marked"
+import type { RichTextItemResponse } from "@/types"
 import { parseBulletedListItemToken } from "./parse-bulleted-list-item-token"
 
 test("シンプルな箇条書きアイテムを変換", () => {
@@ -28,8 +29,9 @@ test("シンプルな箇条書きアイテムを変換", () => {
         {
           type: "text",
           text: { content: "Item 1" },
+          plain_text: "Item 1",
           annotations: {},
-        },
+        } as RichTextItemResponse,
       ],
       children: undefined,
     },
@@ -86,8 +88,9 @@ test("ネストされた箇条書きを含むアイテムを変換", () => {
         {
           type: "text",
           text: { content: "Parent item" },
+          plain_text: "Parent item",
           annotations: {},
-        },
+        } as RichTextItemResponse,
       ],
       children: [
         {
@@ -97,8 +100,9 @@ test("ネストされた箇条書きを含むアイテムを変換", () => {
               {
                 type: "text",
                 text: { content: "Nested item" },
+                plain_text: "Nested item",
                 annotations: {},
-              },
+              } as RichTextItemResponse,
             ],
           },
         },
@@ -152,8 +156,9 @@ test("太字を含む箇条書きアイテムを変換", () => {
         {
           type: "text",
           text: { content: "Bold item" },
+          plain_text: "Bold item",
           annotations: {},
-        },
+        } as RichTextItemResponse,
       ],
       children: undefined,
     },
@@ -210,7 +215,7 @@ test("番号付きリストが混在するネストを変換", () => {
         type: "list",
         raw: "  1. Numbered nested",
         ordered: true,
-        start: "1",
+        start: 1,
         loose: false,
         items: [nestedItem],
       } as Tokens.List,
@@ -226,8 +231,9 @@ test("番号付きリストが混在するネストを変換", () => {
         {
           type: "text",
           text: { content: "Bullet parent" },
+          plain_text: "Bullet parent",
           annotations: {},
-        },
+        } as RichTextItemResponse,
       ],
       children: [
         {
@@ -237,8 +243,9 @@ test("番号付きリストが混在するネストを変換", () => {
               {
                 type: "text",
                 text: { content: "Numbered nested" },
+                plain_text: "Numbered nested",
                 annotations: {},
-              },
+              } as RichTextItemResponse,
             ],
           },
         },

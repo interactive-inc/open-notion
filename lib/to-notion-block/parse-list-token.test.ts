@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test"
 import type { Tokens } from "marked"
+import type { RichTextItemResponse } from "@/types"
 import { parseListToken } from "./parse-list-token"
 
 test("箇条書きリストを変換", () => {
@@ -68,8 +69,9 @@ test("箇条書きリストを変換", () => {
           {
             type: "text",
             text: { content: "Item 1" },
+            plain_text: "Item 1",
             annotations: {},
-          },
+          } as RichTextItemResponse,
         ],
         children: undefined,
       },
@@ -81,8 +83,9 @@ test("箇条書きリストを変換", () => {
           {
             type: "text",
             text: { content: "Item 2" },
+            plain_text: "Item 2",
             annotations: {},
-          },
+          } as RichTextItemResponse,
         ],
         children: undefined,
       },
@@ -94,8 +97,9 @@ test("箇条書きリストを変換", () => {
           {
             type: "text",
             text: { content: "Item 3" },
+            plain_text: "Item 3",
             annotations: {},
-          },
+          } as RichTextItemResponse,
         ],
         children: undefined,
       },
@@ -108,7 +112,7 @@ test("番号付きリストを変換", () => {
     type: "list",
     raw: "1. First\n2. Second\n3. Third",
     ordered: true,
-    start: "1",
+    start: 1,
     loose: false,
     items: [
       {
@@ -169,8 +173,9 @@ test("番号付きリストを変換", () => {
           {
             type: "text",
             text: { content: "First" },
+            plain_text: "First",
             annotations: {},
-          },
+          } as RichTextItemResponse,
         ],
         children: undefined,
       },
@@ -182,8 +187,9 @@ test("番号付きリストを変換", () => {
           {
             type: "text",
             text: { content: "Second" },
+            plain_text: "Second",
             annotations: {},
-          },
+          } as RichTextItemResponse,
         ],
         children: undefined,
       },
@@ -195,8 +201,9 @@ test("番号付きリストを変換", () => {
           {
             type: "text",
             text: { content: "Third" },
+            plain_text: "Third",
             annotations: {},
-          },
+          } as RichTextItemResponse,
         ],
         children: undefined,
       },
@@ -279,8 +286,9 @@ test("ネストを含むリストを変換", () => {
           {
             type: "text",
             text: { content: "Parent" },
+            plain_text: "Parent",
             annotations: {},
-          },
+          } as RichTextItemResponse,
         ],
         children: [
           {
@@ -290,8 +298,9 @@ test("ネストを含むリストを変換", () => {
                 {
                   type: "text",
                   text: { content: "Nested" },
+                  plain_text: "Nested",
                   annotations: {},
-                },
+                } as RichTextItemResponse,
               ],
             },
           },

@@ -192,7 +192,7 @@ test("カスタムバリデーション", () => {
   const schema: Schema = {
     password: {
       type: "rich_text",
-      validate: (value) => {
+      validate: (value: unknown) => {
         if (typeof value !== "string") return false
         if (value.length < 8) return "パスワードは8文字以上である必要があります"
         if (!/[A-Z]/.test(value))

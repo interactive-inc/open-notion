@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test"
 import type { Tokens } from "marked"
+import type { RichTextItemResponse } from "@/types"
 import { parseCodeToken } from "./parse-code-token"
 
 test("シンプルなコードブロックを変換", () => {
@@ -20,8 +21,9 @@ test("シンプルなコードブロックを変換", () => {
         {
           type: "text",
           text: { content: "console.log('hello');" },
+          plain_text: "console.log('hello');",
           annotations: {},
-        },
+        } as RichTextItemResponse,
       ],
     },
   })
@@ -45,8 +47,9 @@ test("言語指定付きコードブロックを変換", () => {
         {
           type: "text",
           text: { content: "const x = 10;" },
+          plain_text: "const x = 10;",
           annotations: {},
-        },
+        } as RichTextItemResponse,
       ],
     },
   })
@@ -72,8 +75,9 @@ test("複数行のコードブロックを変換", () => {
           text: {
             content: "def hello():\n    print('Hello, World!')\n\nhello()",
           },
+          plain_text: "def hello():\n    print('Hello, World!')\n\nhello()",
           annotations: {},
-        },
+        } as RichTextItemResponse,
       ],
     },
   })
@@ -97,8 +101,9 @@ test("空のコードブロックを変換", () => {
         {
           type: "text",
           text: { content: "" },
+          plain_text: "",
           annotations: {},
-        },
+        } as RichTextItemResponse,
       ],
     },
   })
@@ -122,8 +127,9 @@ test("特殊文字を含むコードブロックを変換", () => {
         {
           type: "text",
           text: { content: '<div class="test">&nbsp;</div>' },
+          plain_text: '<div class="test">&nbsp;</div>',
           annotations: {},
-        },
+        } as RichTextItemResponse,
       ],
     },
   })

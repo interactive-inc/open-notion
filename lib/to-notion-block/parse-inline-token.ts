@@ -1,16 +1,17 @@
 import type { Tokens } from "marked"
-import type { CustomRichTextItem } from "@/types"
+import type { RichTextItemResponse } from "@/types"
 
 /**
  * Convert inline token to Notion rich text item
  */
-export function parseInlineToken(token: Tokens.Generic): CustomRichTextItem {
+export function parseInlineToken(token: Tokens.Generic): RichTextItemResponse {
   if (token.type === "strong") {
     return {
       type: "text",
       text: {
         content: token.text,
       },
+      plain_text: token.text,
       annotations: {
         bold: true,
       },
@@ -23,6 +24,7 @@ export function parseInlineToken(token: Tokens.Generic): CustomRichTextItem {
       text: {
         content: token.text,
       },
+      plain_text: token.text,
       annotations: {
         italic: true,
       },
@@ -35,6 +37,7 @@ export function parseInlineToken(token: Tokens.Generic): CustomRichTextItem {
       text: {
         content: token.text,
       },
+      plain_text: token.text,
       annotations: {
         code: true,
       },
@@ -47,6 +50,7 @@ export function parseInlineToken(token: Tokens.Generic): CustomRichTextItem {
       text: {
         content: token.text,
       },
+      plain_text: token.text,
       annotations: {
         strikethrough: true,
       },
@@ -58,6 +62,7 @@ export function parseInlineToken(token: Tokens.Generic): CustomRichTextItem {
     text: {
       content: token.text,
     },
+    plain_text: token.text,
     annotations: {},
   }
 }

@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test"
 import type { Tokens } from "marked"
+import type { RichTextItemResponse } from "@/types"
 import { parseNestedNumberedListItemToken } from "./parse-nested-numbered-list-item-token"
 
 test("最後のネストされた番号付きアイテムを変換", () => {
@@ -28,8 +29,9 @@ test("最後のネストされた番号付きアイテムを変換", () => {
         {
           type: "text",
           text: { content: "Nested numbered" },
+          plain_text: "Nested numbered",
           annotations: {},
-        },
+        } as RichTextItemResponse,
       ],
     },
   })
@@ -69,7 +71,7 @@ test("さらにネストされた番号付きリストを含むアイテムを�
         type: "list",
         raw: "      1. Deep nested numbered",
         ordered: true,
-        start: "1",
+        start: 1,
         loose: false,
         items: [deepNestedItem],
       } as Tokens.List,
@@ -85,8 +87,9 @@ test("さらにネストされた番号付きリストを含むアイテムを�
         {
           type: "text",
           text: { content: "Nested with child" },
+          plain_text: "Nested with child",
           annotations: {},
-        },
+        } as RichTextItemResponse,
       ],
       children: [
         {
@@ -96,8 +99,9 @@ test("さらにネストされた番号付きリストを含むアイテムを�
               {
                 type: "text",
                 text: { content: "Deep nested numbered" },
+                plain_text: "Deep nested numbered",
                 annotations: {},
-              },
+              } as RichTextItemResponse,
             ],
           },
         },
@@ -156,8 +160,9 @@ test("ネストされた箇条書きリストを含むアイテムを変換", ()
         {
           type: "text",
           text: { content: "Numbered with bullet child" },
+          plain_text: "Numbered with bullet child",
           annotations: {},
-        },
+        } as RichTextItemResponse,
       ],
       children: [
         {
@@ -167,8 +172,9 @@ test("ネストされた箇条書きリストを含むアイテムを変換", ()
               {
                 type: "text",
                 text: { content: "Bullet nested" },
+                plain_text: "Bullet nested",
                 annotations: {},
-              },
+              } as RichTextItemResponse,
             ],
           },
         },

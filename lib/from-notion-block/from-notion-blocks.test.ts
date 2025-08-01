@@ -1,12 +1,18 @@
 import { expect, test } from "bun:test"
+import {
+  sampleNotionBlocksResponse,
+  sampleNotionBlocksResponseMarkdown,
+} from "../samples/notion-blocks-response"
 import { fromNotionBlocks } from "./from-notion-blocks"
 
-test("fromNotionBlocks", async () => {
-  const jsonText = await Bun.file("samples/notion-blocks-response.json").text()
+test("fromNotionBlocks", () => {
+  // 型キャストしてNotionBlock[]として扱う（childrenプロパティは空配列で初期化）
+  const blocksWithChildren = sampleNotionBlocksResponse.data.map((block) => ({
+    ...block,
+    children: [],
+  }))
 
-  const text = fromNotionBlocks(JSON.parse(jsonText))
+  const text = fromNotionBlocks(blocksWithChildren)
 
-  const mdText = await Bun.file("samples/markdown.md").text()
-
-  expect(text).toBe(mdText.trim())
+  expect(text).toBe(sampleNotionBlocksResponseMarkdown)
 })

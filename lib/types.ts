@@ -1,4 +1,11 @@
 import type { Client } from "@notionhq/client"
+import type {
+  CreatePageParameters,
+  PageObjectResponse,
+  UpdatePageParameters,
+} from "@notionhq/client/build/src/api-endpoints"
+import type { z } from "zod"
+import type { zPropertyConfig, zSchema } from "./models"
 
 /* Notion page object type */
 export type NotionPage = {
@@ -51,6 +58,91 @@ export type NotionFile = {
 export type DateRange = {
   start: string
   end: string | null
+  timeZone?: string
+}
+
+/* Rich text types */
+/**
+ * Type for rich text item response
+ * Includes plain_text field that exists in Notion API response
+ */
+export type RichTextItemResponse = {
+  type: "text"
+  text: {
+    content: string
+    link?: {
+      url: string
+    } | null
+  }
+  plain_text: string
+  annotations: {
+    bold?: boolean
+    italic?: boolean
+    strikethrough?: boolean
+    underline?: boolean
+    code?: boolean
+    color?:
+      | "default"
+      | "gray"
+      | "brown"
+      | "orange"
+      | "yellow"
+      | "green"
+      | "blue"
+      | "purple"
+      | "pink"
+      | "red"
+      | "gray_background"
+      | "brown_background"
+      | "orange_background"
+      | "yellow_background"
+      | "green_background"
+      | "blue_background"
+      | "purple_background"
+      | "pink_background"
+      | "red_background"
+  }
+}
+
+/**
+ * Type for rich text item request
+ * Used when sending data to Notion API (does not include plain_text)
+ */
+export type RichTextItemRequest = {
+  type: "text"
+  text: {
+    content: string
+    link?: {
+      url: string
+    } | null
+  }
+  annotations?: {
+    bold?: boolean
+    italic?: boolean
+    strikethrough?: boolean
+    underline?: boolean
+    code?: boolean
+    color?:
+      | "default"
+      | "gray"
+      | "brown"
+      | "orange"
+      | "yellow"
+      | "green"
+      | "blue"
+      | "purple"
+      | "pink"
+      | "red"
+      | "gray_background"
+      | "brown_background"
+      | "orange_background"
+      | "yellow_background"
+      | "green_background"
+      | "blue_background"
+      | "purple_background"
+      | "pink_background"
+      | "red_background"
+  }
 }
 
 /* Common property config */
@@ -158,30 +250,11 @@ export type FormulaPropertyConfig = BasePropertyConfig & {
   formulaType: "string" | "number" | "boolean" | "date"
 }
 
-/* All property config types */
-export type PropertyConfig =
-  | TitlePropertyConfig
-  | RichTextPropertyConfig
-  | NumberPropertyConfig
-  | SelectPropertyConfig
-  | MultiSelectPropertyConfig
-  | StatusPropertyConfig
-  | DatePropertyConfig
-  | PeoplePropertyConfig
-  | FilesPropertyConfig
-  | CheckboxPropertyConfig
-  | UrlPropertyConfig
-  | EmailPropertyConfig
-  | PhoneNumberPropertyConfig
-  | RelationPropertyConfig
-  | CreatedTimePropertyConfig
-  | CreatedByPropertyConfig
-  | LastEditedTimePropertyConfig
-  | LastEditedByPropertyConfig
-  | FormulaPropertyConfig
+/* All property config types - inferred from zod */
+export type PropertyConfig = z.infer<typeof zPropertyConfig>
 
-/* Database schema definition */
-export type Schema = Record<string, PropertyConfig>
+/* Database schema definition - inferred from zod */
+export type Schema = z.infer<typeof zSchema>
 
 /* Type mapping for schema */
 export type PropertyTypeMapping<T extends PropertyConfig> = T extends
@@ -250,6 +323,13 @@ export type TableRecord<T> = T & {
   createdAt: string
   updatedAt: string
   isDeleted: boolean
+}
+
+/* Page reference type */
+export type PageReferenceType<T> = {
+  properties(): T
+  raw(): PageObjectResponse
+  body(): Promise<string>
 }
 
 /* Sort option type */
@@ -429,6 +509,7 @@ export type CustomRichTextItem = {
     content: string
   }
   type: "text"
+  plain_text: string
   annotations?: {
     bold?: boolean
     italic?: boolean
@@ -459,3 +540,108 @@ export type NotionNumberedListItemBlock =
   NumberedListItemBlockObjectResponse & {
     children: NotionBlock[]
   }
+
+/* Notion API Request Property Types */
+
+/**
+ * Notion APIのリクエスト用プロパティ型
+ */
+export type NotionPropertyRequest =
+  | NonNullable<CreatePageParameters["properties"]>[string]
+  | NonNullable<UpdatePageParameters["properties"]>[string]
+
+/**
+ * Notion APIのタイトルプロパティ型
+ */
+export type NotionTitlePropertyRequest = Extract<
+  NotionPropertyRequest,
+  { title?: unknown }
+>
+
+/**
+ * Notion APIのリッチテキストプロパティ型
+ */
+export type NotionRichTextPropertyRequest = Extract<
+  NotionPropertyRequest,
+  { rich_text?: unknown }
+>
+
+/**
+ * Notion APIの数値プロパティ型
+ */
+export type NotionNumberPropertyRequest = Extract<
+  NotionPropertyRequest,
+  { number?: unknown }
+>
+
+/**
+ * Notion APIのチェックボックスプロパティ型
+ */
+export type NotionCheckboxPropertyRequest = Extract<
+  NotionPropertyRequest,
+  { checkbox?: unknown }
+>
+
+/**
+ * Notion APIのセレクトプロパティ型
+ */
+export type NotionSelectPropertyRequest = Extract<
+  NotionPropertyRequest,
+  { select?: unknown }
+>
+
+/**
+ * Notion APIのマルチセレクトプロパティ型
+ */
+export type NotionMultiSelectPropertyRequest = Extract<
+  NotionPropertyRequest,
+  { multi_select?: unknown }
+>
+
+/**
+ * Notion APIの日付プロパティ型
+ */
+export type NotionDatePropertyRequest = Extract<
+  NotionPropertyRequest,
+  { date?: unknown }
+>
+
+/**
+ * Notion APIのURLプロパティ型
+ */
+export type NotionUrlPropertyRequest = Extract<
+  NotionPropertyRequest,
+  { url?: unknown }
+>
+
+/**
+ * Notion APIのメールプロパティ型
+ */
+export type NotionEmailPropertyRequest = Extract<
+  NotionPropertyRequest,
+  { email?: unknown }
+>
+
+/**
+ * Notion APIの電話番号プロパティ型
+ */
+export type NotionPhoneNumberPropertyRequest = Extract<
+  NotionPropertyRequest,
+  { phone_number?: unknown }
+>
+
+/**
+ * Notion APIのリレーションプロパティ型
+ */
+export type NotionRelationPropertyRequest = Extract<
+  NotionPropertyRequest,
+  { relation?: unknown }
+>
+
+/**
+ * Notion APIのピープルプロパティ型
+ */
+export type NotionPeoplePropertyRequest = Extract<
+  NotionPropertyRequest,
+  { people?: unknown }
+>

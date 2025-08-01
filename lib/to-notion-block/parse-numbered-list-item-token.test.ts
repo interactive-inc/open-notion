@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test"
 import type { Tokens } from "marked"
+import type { RichTextItemResponse } from "@/types"
 import { parseNumberedListItemToken } from "./parse-numbered-list-item-token"
 
 test("シンプルな番号付きリストアイテムを変換", () => {
@@ -28,8 +29,9 @@ test("シンプルな番号付きリストアイテムを変換", () => {
         {
           type: "text",
           text: { content: "First item" },
+          plain_text: "First item",
           annotations: {},
-        },
+        } as RichTextItemResponse,
       ],
       children: undefined,
     },
@@ -70,7 +72,7 @@ test("ネストされた番号付きリストを含むアイテムを変換", ()
         type: "list",
         raw: "   1. Nested numbered",
         ordered: true,
-        start: "1",
+        start: 1,
         loose: false,
         items: [nestedItem],
       } as Tokens.List,
@@ -86,8 +88,9 @@ test("ネストされた番号付きリストを含むアイテムを変換", ()
         {
           type: "text",
           text: { content: "Parent numbered" },
+          plain_text: "Parent numbered",
           annotations: {},
-        },
+        } as RichTextItemResponse,
       ],
       children: [
         {
@@ -97,8 +100,9 @@ test("ネストされた番号付きリストを含むアイテムを変換", ()
               {
                 type: "text",
                 text: { content: "Nested numbered" },
+                plain_text: "Nested numbered",
                 annotations: {},
-              },
+              } as RichTextItemResponse,
             ],
           },
         },
@@ -157,8 +161,9 @@ test("箇条書きが混在するネストを変換", () => {
         {
           type: "text",
           text: { content: "Numbered parent" },
+          plain_text: "Numbered parent",
           annotations: {},
-        },
+        } as RichTextItemResponse,
       ],
       children: [
         {
@@ -168,8 +173,9 @@ test("箇条書きが混在するネストを変換", () => {
               {
                 type: "text",
                 text: { content: "Bullet nested" },
+                plain_text: "Bullet nested",
                 annotations: {},
-              },
+              } as RichTextItemResponse,
             ],
           },
         },
@@ -235,8 +241,9 @@ test("複数のインライン要素を含むアイテムを変換", () => {
         {
           type: "text",
           text: { content: "Bold and italic" },
+          plain_text: "Bold and italic",
           annotations: {},
-        },
+        } as RichTextItemResponse,
       ],
       children: undefined,
     },

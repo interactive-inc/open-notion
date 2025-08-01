@@ -19,5 +19,5 @@
     "noPropertyAccessFromIndexSignature": false,
     "paths": { "@/*": ["./lib/*"] }
   },
-  "include": ["lib/**/*.ts"]
+  "include": ["lib/**/*.ts", "debug/**/*.ts"]
 }

@@ -17,9 +17,9 @@ test("基本的な統合テスト", async () => {
             last_edited_time: "2024-01-01T00:00:00Z",
             archived: false,
             properties: {
-              title: { title: [{ plain_text: "タスク1" }] },
-              status: { select: { name: "todo" } },
-              priority: { number: 3 },
+              title: { type: "title", title: [{ plain_text: "タスク1" }] },
+              status: { type: "select", select: { name: "todo" } },
+              priority: { type: "number", number: 3 },
             },
           },
         ],
@@ -45,8 +45,8 @@ test("基本的な統合テスト", async () => {
         last_edited_time: "2024-01-01T00:00:00Z",
         archived: false,
         properties: {
-          title: { title: [{ plain_text: "新規タスク" }] },
-          status: { select: { name: "todo" } },
+          title: { type: "title", title: [{ plain_text: "新規タスク" }] },
+          status: { type: "select", select: { name: "todo" } },
         },
       }),
       update: async () => ({}),
@@ -74,10 +74,10 @@ test("基本的な統合テスト", async () => {
 
   // findManyのテスト
   const results = await table.findMany()
-  expect(results.records).toHaveLength(1)
-  expect(results.records[0]?.title).toBe("タスク1")
-  expect(results.records[0]?.status).toBe("todo")
-  expect(results.records[0]?.priority).toBe(3)
+  expect(results).toHaveLength(1)
+  expect(results[0]?.properties().title).toBe("タスク1")
+  expect(results[0]?.properties().status).toBe("todo")
+  expect(results[0]?.properties().priority).toBe(3)
 
   // createのテスト
   const created = await table.create({
@@ -165,8 +165,8 @@ test("バリデーションとフックのテスト", async () => {
         last_edited_time: "2024-01-01T00:00:00Z",
         archived: false,
         properties: {
-          email: { email: "test@example.com" },
-          age: { number: 25 },
+          email: { type: "email", email: "test@example.com" },
+          age: { type: "number", number: 25 },
         },
       }),
       update: async () => ({}),
@@ -184,7 +184,7 @@ test("バリデーションとフックのテスト", async () => {
     email: {
       type: "email",
       required: true,
-      validate: (value) => {
+      validate: (value: unknown) => {
         if (typeof value !== "string") return false
         return value.includes("@") || "有効なメールアドレスを入力してください"
       },
@@ -254,7 +254,7 @@ test("NotionMarkdownとの統合", async () => {
         last_edited_time: "2024-01-01T00:00:00Z",
         archived: false,
         properties: {
-          title: { title: [{ plain_text: "テストページ" }] },
+          title: { type: "title", title: [{ plain_text: "テストページ" }] },
         },
       }),
       update: async () => ({}),
@@ -331,7 +331,7 @@ test("エンハンサーなしのデフォルト動作", async () => {
         last_edited_time: "2024-01-01T00:00:00Z",
         archived: false,
         properties: {
-          title: { title: [{ plain_text: "テストページ" }] },
+          title: { type: "title", title: [{ plain_text: "テストページ" }] },
         },
       }),
       update: async () => ({}),

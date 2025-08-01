@@ -1,8 +1,8 @@
 import { expect, test } from "bun:test"
 import type { Schema } from "@/types"
-import { NotionPropertyConverter } from "./notion-property-converter"
+import { NotionPropertyConverterLegacy } from "./notion-property-converter-legacy"
 
-const converter = new NotionPropertyConverter()
+const converter = new NotionPropertyConverterLegacy()
 
 test("fromNotion: タイトルプロパティの変換", () => {
   const schema: Schema = {

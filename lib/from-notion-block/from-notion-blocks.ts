@@ -7,10 +7,35 @@ import type { NotionBlock } from "@/types"
 export function fromNotionBlocks(blocks: NotionBlock[]): string {
   let result = ""
 
-  for (const block of blocks) {
-    result += fromNotionBlock(block)
-    // 各ブロック間に空行を挿入
-    result += "\n"
+  for (let i = 0; i < blocks.length; i++) {
+    const block = blocks[i]
+    if (!block) continue
+
+    const blockContent = fromNotionBlock(block)
+
+    if (blockContent.trim() !== "") {
+      result += blockContent
+
+      // 次のブロックがある場合の改行処理
+      if (i < blocks.length - 1) {
+        const currentBlockType = block.type
+        const nextBlock = blocks[i + 1]
+        const nextBlockType = nextBlock?.type
+
+        // リストアイテム同士は単一改行
+        if (
+          (currentBlockType === "bulleted_list_item" ||
+            currentBlockType === "numbered_list_item") &&
+          (nextBlockType === "bulleted_list_item" ||
+            nextBlockType === "numbered_list_item")
+        ) {
+          result += "\n"
+        } else {
+          // その他は改行のみ（空行なし）
+          result += "\n"
+        }
+      }
+    }
   }
 
   return result.trim()

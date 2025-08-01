@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test"
 import type { Tokens } from "marked"
+import type { RichTextItemResponse } from "@/types"
 import { parseLastNumberedListItem } from "./parse-last-numbered-list-item-token"
 
 test("最後の番号付きアイテムを変換", () => {
@@ -28,8 +29,9 @@ test("最後の番号付きアイテムを変換", () => {
         {
           type: "text",
           text: { content: "Last numbered item" },
+          plain_text: "Last numbered item",
           annotations: {},
-        },
+        } as RichTextItemResponse,
       ],
     },
   })
@@ -80,8 +82,9 @@ test("イタリックを含む最後の番号付きアイテムを変換", () =>
         {
           type: "text",
           text: { content: "Italic last item" },
+          plain_text: "Italic last item",
           annotations: {},
-        },
+        } as RichTextItemResponse,
       ],
     },
   })
@@ -148,8 +151,9 @@ test("取り消し線を含む最後のアイテムを変換", () => {
         {
           type: "text",
           text: { content: "Strikethrough text" },
+          plain_text: "Strikethrough text",
           annotations: {},
-        },
+        } as RichTextItemResponse,
       ],
     },
   })

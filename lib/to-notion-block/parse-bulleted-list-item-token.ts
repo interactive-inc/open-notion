@@ -35,7 +35,11 @@ export function parseBulletedListItemToken(
     type: BlockType.BulletedListItem,
     bulleted_list_item: {
       rich_text: [parseInlineToken(textToken)],
-      children: children as never,
+      children:
+        children && children.length > 0
+          ? // biome-ignore lint/suspicious/noExplicitAny: NotionブロックのネストされたDOM構造のため型キャストが必要
+            (children as any)
+          : undefined,
     },
   }
 }
