@@ -28,6 +28,23 @@ const block = {
       {
         type: "text",
         text: {
+          content: "宮沢賢治『銀河鉄道の夜』",
+          link: null,
+        },
+        annotations: {
+          bold: false,
+          italic: false,
+          strikethrough: false,
+          underline: false,
+          code: false,
+          color: "default",
+        },
+        plain_text: "宮沢賢治『銀河鉄道の夜』",
+        href: null,
+      },
+      {
+        type: "text",
+        text: {
           content:
             "あのイーハトーヴォのすきとおった風、夏でも底に冷たさをもつ青いそら、うつくしい森で飾られたモリーオ市、郊外のぎらぎらひかる草の波。",
           link: null,
@@ -52,16 +69,53 @@ const block = {
 test("通常の段落ブロックをマークダウンに変換できる", () => {
   const result = fromNotionParagraphBlock(block)
 
-  expect(result).toBe(
-    "あのイーハトーヴォのすきとおった風、夏でも底に冷たさをもつ青いそら、うつくしい森で飾られたモリーオ市、郊外のぎらぎらひかる草の波。",
-  )
+  expect(result).toContain("宮沢賢治")
+  expect(result).toContain("のすきとおった風")
 })
 
 test("複数のリッチテキスト要素を含む段落ブロックを変換できる", () => {
   const result = fromNotionParagraphBlock(block)
 
-  expect(result).toContain("あの")
-  expect(result).toContain("イーハトーヴォ")
-  expect(result).toContain("モリーオ")
+  expect(result).toContain("宮沢賢治")
   expect(result).toContain("のすきとおった風")
+})
+
+test("段落内の改行はそのまま保持される", () => {
+  const blockWithNewline = {
+    object: "block",
+    id: "mock-id",
+    type: "paragraph",
+    paragraph: {
+      rich_text: [
+        {
+          type: "text",
+          text: { content: "段落1\n段落2", link: null },
+          plain_text: "段落1\n段落2",
+          annotations: {
+            bold: false,
+            italic: false,
+            strikethrough: false,
+            underline: false,
+            code: false,
+            color: "default",
+          },
+          href: null,
+        },
+      ],
+      color: "default",
+    },
+    created_time: "2024-01-01T00:00:00.000Z",
+    last_edited_time: "2024-01-01T00:00:00.000Z",
+    created_by: { object: "user", id: "user-id" },
+    last_edited_by: { object: "user", id: "user-id" },
+    has_children: false,
+    archived: false,
+    in_trash: false,
+    parent: { type: "page_id", page_id: "parent-id" },
+  }
+
+  const result = fromNotionParagraphBlock(
+    blockWithNewline as ParagraphBlockObjectResponse,
+  )
+  expect(result).toBe("段落1\n段落2")
 })

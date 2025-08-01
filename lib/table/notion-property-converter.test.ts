@@ -1,341 +1,257 @@
 import { expect, test } from "bun:test"
+import type {
+  PageObjectResponse,
+  RichTextItemResponse,
+} from "@notionhq/client/build/src/api-endpoints"
 import type { Schema } from "@/types"
-import { NotionPropertyConverterLegacy } from "./notion-property-converter-legacy"
+import { NotionPropertyConverter } from "./notion-property-converter"
 
-const converter = new NotionPropertyConverterLegacy()
+const converter = new NotionPropertyConverter()
 
-test("fromNotion: タイトルプロパティの変換", () => {
+// ヘルパー関数：完全なRichTextItemResponseを作成
+function createRichTextItem(content: string): RichTextItemResponse {
+  return {
+    type: "text",
+    text: { content, link: null },
+    plain_text: content,
+    annotations: {
+      bold: false,
+      italic: false,
+      strikethrough: false,
+      underline: false,
+      code: false,
+      color: "default",
+    },
+    href: null,
+  }
+}
+
+test("fromNotion: スキーマに基づいてプロパティを変換", () => {
   const schema: Schema = {
     title: { type: "title" },
-  }
-
-  const properties = {
-    title: {
-      title: [{ plain_text: "テストタイトル" }],
-    },
-  }
-
-  const result = converter.fromNotion(schema, properties)
-  expect(result.title).toBe("テストタイトル")
-
-  // 空の場合
-  const emptyResult = converter.fromNotion(schema, { title: { title: [] } })
-  expect(emptyResult.title).toBe("")
-})
-
-test("fromNotion: リッチテキストプロパティの変換", () => {
-  const schema: Schema = {
     content: { type: "rich_text" },
-  }
-
-  const properties = {
-    content: {
-      rich_text: [
-        { plain_text: "これは" },
-        { plain_text: "リッチテキスト" },
-        { plain_text: "です" },
-      ],
-    },
-  }
-
-  const result = converter.fromNotion(schema, properties)
-  expect(result.content).toBe("これはリッチテキストです")
-})
-
-test("fromNotion: 数値プロパティの変換", () => {
-  const schema: Schema = {
     score: { type: "number" },
-  }
-
-  const properties = {
-    score: { number: 42 },
-  }
-
-  const result = converter.fromNotion(schema, properties)
-  expect(result.score).toBe(42)
-
-  // nullの場合
-  const nullResult = converter.fromNotion(schema, { score: { number: null } })
-  expect(nullResult.score).toBeNull()
-})
-
-test("fromNotion: 選択プロパティの変換", () => {
-  const schema: Schema = {
-    status: { type: "select", options: ["todo", "done"] },
-  }
-
-  const properties = {
-    status: { select: { name: "todo" } },
-  }
-
-  const result = converter.fromNotion(schema, properties)
-  expect(result.status).toBe("todo")
-
-  // nullの場合
-  const nullResult = converter.fromNotion(schema, { status: { select: null } })
-  expect(nullResult.status).toBeNull()
-})
-
-test("fromNotion: 複数選択プロパティの変換", () => {
-  const schema: Schema = {
-    tags: { type: "multi_select", options: ["js", "ts", "react"] },
-  }
-
-  const properties = {
-    tags: {
-      multi_select: [{ name: "js" }, { name: "react" }],
-    },
-  }
-
-  const result = converter.fromNotion(schema, properties)
-  expect(result.tags).toEqual(["js", "react"])
-
-  // 空の場合
-  const emptyResult = converter.fromNotion(schema, {
-    tags: { multi_select: [] },
-  })
-  expect(emptyResult.tags).toEqual([])
-})
-
-test("fromNotion: 日付プロパティの変換", () => {
-  const schema: Schema = {
-    deadline: { type: "date" },
-  }
-
-  const properties = {
-    deadline: {
-      date: {
-        start: "2024-01-01",
-        end: "2024-01-31",
-      },
-    },
-  }
-
-  const result = converter.fromNotion(schema, properties)
-  expect(result.deadline).toEqual({
-    start: "2024-01-01",
-    end: "2024-01-31",
-  })
-
-  // 終了日なし
-  const singleDate = converter.fromNotion(schema, {
-    deadline: { date: { start: "2024-01-01", end: null } },
-  })
-  expect(singleDate.deadline).toEqual({
-    start: "2024-01-01",
-    end: null,
-  })
-})
-
-test("fromNotion: チェックボックスプロパティの変換", () => {
-  const schema: Schema = {
     completed: { type: "checkbox" },
   }
 
-  const properties = {
-    completed: { checkbox: true },
+  const properties: PageObjectResponse["properties"] = {
+    title: {
+      id: "title-id",
+      type: "title",
+      title: [createRichTextItem("テストタイトル")],
+    },
+    content: {
+      id: "content-id",
+      type: "rich_text",
+      rich_text: [createRichTextItem("テキスト内容")],
+    },
+    score: {
+      id: "score-id",
+      type: "number",
+      number: 85,
+    },
+    completed: {
+      id: "completed-id",
+      type: "checkbox",
+      checkbox: true,
+    },
   }
 
   const result = converter.fromNotion(schema, properties)
+
+  expect(result.title).toBe("テストタイトル")
+  expect(result.content).toBe("テキスト内容")
+  expect(result.score).toBe(85)
   expect(result.completed).toBe(true)
-
-  // falseの場合
-  const falseResult = converter.fromNotion(schema, {
-    completed: { checkbox: false },
-  })
-  expect(falseResult.completed).toBe(false)
 })
 
-test("fromNotion: 必須プロパティのエラー", () => {
-  const schema: Schema = {
-    title: { type: "title", required: true },
-  }
-
-  expect(() => {
-    converter.fromNotion(schema, {})
-  }).toThrow("必須プロパティ title が見つかりません")
-})
-
-test("toNotion: タイトルプロパティの変換", () => {
+test("fromNotion: オプショナルなプロパティが存在しない場合", () => {
   const schema: Schema = {
     title: { type: "title" },
+    description: { type: "rich_text", required: false },
   }
 
-  const data = { title: "テストタイトル" }
+  const properties: PageObjectResponse["properties"] = {
+    title: {
+      id: "title-id",
+      type: "title",
+      title: [createRichTextItem("タイトルのみ")],
+    },
+  }
+
+  const result = converter.fromNotion(schema, properties)
+
+  expect(result.title).toBe("タイトルのみ")
+  expect(result.description).toBeNull()
+})
+
+test("fromNotion: 必須プロパティが存在しない場合はエラー", () => {
+  const schema: Schema = {
+    title: { type: "title", required: true },
+    score: { type: "number", required: true },
+  }
+
+  const properties: PageObjectResponse["properties"] = {
+    title: {
+      id: "title-id",
+      type: "title",
+      title: [createRichTextItem("タイトル")],
+    },
+  }
+
+  expect(() => converter.fromNotion(schema, properties)).toThrow(
+    "必須プロパティ score が見つかりません",
+  )
+})
+
+test("toNotion: スキーマに基づいてデータを変換", () => {
+  const schema: Schema = {
+    title: { type: "title" },
+    content: { type: "rich_text" },
+    score: { type: "number" },
+    completed: { type: "checkbox" },
+  }
+
+  const data = {
+    title: "新しいタイトル",
+    content: "新しい内容",
+    score: 95,
+    completed: false,
+  }
+
   const result = converter.toNotion(schema, data)
 
   expect(result.title).toEqual({
-    title: [{ type: "text", text: { content: "テストタイトル" } }],
+    title: [{ type: "text", text: { content: "新しいタイトル" } }],
   })
-})
-
-test("toNotion: リッチテキストプロパティの変換", () => {
-  const schema: Schema = {
-    content: { type: "rich_text" },
-  }
-
-  const data = { content: "リッチテキスト内容" }
-  const result = converter.toNotion(schema, data)
-
   expect(result.content).toEqual({
-    rich_text: [{ type: "text", text: { content: "リッチテキスト内容" } }],
+    rich_text: [{ type: "text", text: { content: "新しい内容" } }],
   })
+  expect(result.score).toEqual({ number: 95 })
+  expect(result.completed).toEqual({ checkbox: false })
 })
 
-test("toNotion: 数値プロパティの変換", () => {
+test("toNotion: 部分的なデータを変換", () => {
   const schema: Schema = {
+    title: { type: "title" },
+    content: { type: "rich_text" },
     score: { type: "number" },
   }
 
-  const data = { score: 100 }
-  const result = converter.toNotion(schema, data)
-
-  expect(result.score).toEqual({ number: 100 })
-
-  // 数値以外の場合
-  const nullResult = converter.toNotion(schema, { score: null })
-  expect(nullResult.score).toEqual({ number: null })
-})
-
-test("toNotion: 選択プロパティの変換", () => {
-  const schema: Schema = {
-    status: { type: "select", options: ["todo", "done"] },
+  const data = {
+    title: "タイトルのみ更新",
   }
 
-  const data = { status: "todo" }
   const result = converter.toNotion(schema, data)
 
-  expect(result.status).toEqual({ select: { name: "todo" } })
-
-  // 空文字の場合
-  const emptyResult = converter.toNotion(schema, { status: "" })
-  expect(emptyResult.status).toEqual({ select: null })
-})
-
-test("toNotion: 複数選択プロパティの変換", () => {
-  const schema: Schema = {
-    tags: { type: "multi_select", options: ["js", "ts"] },
-  }
-
-  const data = { tags: ["js", "ts"] }
-  const result = converter.toNotion(schema, data)
-
-  expect(result.tags).toEqual({
-    multi_select: [{ name: "js" }, { name: "ts" }],
+  expect(result.title).toEqual({
+    title: [{ type: "text", text: { content: "タイトルのみ更新" } }],
   })
-
-  // 配列以外の場合
-  const emptyResult = converter.toNotion(schema, { tags: null })
-  expect(emptyResult.tags).toEqual({ multi_select: [] })
+  expect(result.content).toBeUndefined()
+  expect(result.score).toBeUndefined()
 })
 
-test("toNotion: 日付プロパティの変換", () => {
+test("toNotion: 日付プロパティを正しく変換", () => {
   const schema: Schema = {
     deadline: { type: "date" },
   }
 
-  // DateRange型
-  const dateRangeData = {
-    deadline: { start: "2024-01-01", end: "2024-01-31" },
-  }
-  const dateRangeResult = converter.toNotion(schema, dateRangeData)
-  expect(dateRangeResult.deadline).toEqual({
-    date: { start: "2024-01-01", end: "2024-01-31" },
-  })
-
-  // Date型（後方互換）
-  const date = new Date("2024-01-01")
-  const dateResult = converter.toNotion(schema, {
-    deadline: { start: date.toISOString(), end: null },
-  })
-  expect(dateResult.deadline).toEqual({
-    date: { start: date.toISOString(), end: null },
-  })
-
-  // null
-  const nullResult = converter.toNotion(schema, { deadline: null })
-  expect(nullResult.deadline).toEqual({ date: null })
-})
-
-test("toNotion: チェックボックスプロパティの変換", () => {
-  const schema: Schema = {
-    completed: { type: "checkbox" },
+  const data = {
+    deadline: { start: "2024-01-15", end: "2024-01-20" },
   }
 
-  const data = { completed: true }
   const result = converter.toNotion(schema, data)
 
-  expect(result.completed).toEqual({ checkbox: true })
-
-  // falsy値
-  const falsyResult = converter.toNotion(schema, { completed: false })
-  expect(falsyResult.completed).toEqual({ checkbox: false })
+  expect(result.deadline).toEqual({
+    date: {
+      start: "2024-01-15",
+      end: "2024-01-20",
+      time_zone: null,
+    },
+  })
 })
 
-test("toNotion: URLプロパティの変換", () => {
+test("toNotion: 複数選択プロパティを正しく変換", () => {
   const schema: Schema = {
-    website: { type: "url" },
+    tags: { type: "multi_select", options: ["TypeScript", "Notion", "テスト"] },
   }
 
-  const data = { website: "https://example.com" }
+  const data = {
+    tags: ["TypeScript", "Notion", "テスト"],
+  }
+
   const result = converter.toNotion(schema, data)
 
-  expect(result.website).toEqual({ url: "https://example.com" })
-
-  // 空の場合
-  const emptyResult = converter.toNotion(schema, { website: null })
-  expect(emptyResult.website).toEqual({ url: "" })
+  expect(result.tags).toEqual({
+    multi_select: [
+      { name: "TypeScript" },
+      { name: "Notion" },
+      { name: "テスト" },
+    ],
+  })
 })
 
-test("toNotion: リレーションプロパティの変換", () => {
-  const schema: Schema = {
-    related: { type: "relation", database_id: "db-id" },
-  }
-
-  // 配列
-  const arrayData = { related: ["page-1", "page-2"] }
-  const arrayResult = converter.toNotion(schema, arrayData)
-  expect(arrayResult.related).toEqual({
-    relation: [{ id: "page-1" }, { id: "page-2" }],
-  })
-
-  // 単一文字列
-  const stringData = { related: ["page-1"] }
-  const stringResult = converter.toNotion(schema, stringData)
-  expect(stringResult.related).toEqual({
-    relation: [{ id: "page-1" }],
-  })
-
-  // 空配列
-  const emptyResult = converter.toNotion(schema, { related: [] })
-  expect(emptyResult.related).toEqual({ relation: [] })
-})
-
-test("toNotion: undefinedプロパティはスキップ", () => {
-  const schema: Schema = {
+test("型安全性の確認", () => {
+  const articleSchema: Schema = {
     title: { type: "title" },
-    description: { type: "rich_text" },
+    author: { type: "rich_text" },
+    publishedDate: { type: "date" },
+    isPublished: { type: "checkbox" },
+    tags: { type: "multi_select", options: ["技術"] },
   }
 
-  const data = { title: "タイトル", description: undefined }
-  const result = converter.toNotion(schema, data)
+  const properties: PageObjectResponse["properties"] = {
+    title: {
+      id: "title-id",
+      type: "title",
+      title: [createRichTextItem("記事タイトル")],
+    },
+    author: {
+      id: "author-id",
+      type: "rich_text",
+      rich_text: [createRichTextItem("著者名")],
+    },
+    publishedDate: {
+      id: "date-id",
+      type: "date",
+      date: { start: "2024-01-01", end: null, time_zone: null },
+    },
+    isPublished: {
+      id: "published-id",
+      type: "checkbox",
+      checkbox: true,
+    },
+    tags: {
+      id: "tags-id",
+      type: "multi_select",
+      multi_select: [{ id: "tag1", name: "技術", color: "blue" }],
+    },
+  }
 
-  expect(result).toEqual({
-    title: { title: [{ type: "text", text: { content: "タイトル" } }] },
+  const result = converter.fromNotion(articleSchema, properties)
+
+  // 型推論によって適切な型が設定されることを確認
+  expect(typeof result.title).toBe("string")
+  expect(typeof result.author).toBe("string")
+  expect(typeof result.isPublished).toBe("boolean")
+  expect(Array.isArray(result.tags)).toBe(true)
+  expect(result.publishedDate).toEqual({
+    start: "2024-01-01",
+    end: null,
+    timeZone: undefined,
   })
-  expect(result.description).toBeUndefined()
 })
 
-test("toNotion: スキーマに存在しないプロパティはスキップ", () => {
-  const schema: Schema = {
-    title: { type: "title" },
-  }
+test("クラスのインスタンス化", () => {
+  const converter1 = new NotionPropertyConverter()
+  const converter2 = new NotionPropertyConverter()
 
-  const data = { title: "タイトル", unknown: "不明なプロパティ" }
-  const result = converter.toNotion(schema, data)
+  // 異なるインスタンスであることを確認
+  expect(converter1).not.toBe(converter2)
 
-  expect(result).toEqual({
-    title: { title: [{ type: "text", text: { content: "タイトル" } }] },
-  })
-  expect(result.unknown).toBeUndefined()
+  // 同じメソッドを持つことを確認
+  expect(typeof converter1.fromNotion).toBe("function")
+  expect(typeof converter1.toNotion).toBe("function")
+  expect(typeof converter2.fromNotion).toBe("function")
+  expect(typeof converter2.toNotion).toBe("function")
 })

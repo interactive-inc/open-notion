@@ -7,6 +7,11 @@ import { parseParagraphToken } from "@/to-notion-block/parse-paragraph-token"
 
 /**
  * Convert markdown string to Notion blocks
+ *
+ * CRITICAL PARAGRAPH SEPARATION BEHAVIOR:
+ * - We deliberately SKIP 'space' tokens to avoid creating unnecessary empty paragraph blocks
+ * - Paragraph separation is handled by fromNotionBlocks through proper spacing between blocks
+ * - This ensures clean paragraph separation without redundant empty blocks in Notion
  */
 export function toNotionBlocks(markdown: string): BlockObjectRequest[] {
   const tokenList = lexer(markdown)
@@ -36,6 +41,11 @@ export function toNotionBlocks(markdown: string): BlockObjectRequest[] {
       const t = token as Tokens.Paragraph
       blocks.push(parseParagraphToken(t))
     }
+
+    // CRITICAL: DO NOT process 'space' tokens here!
+    // Space tokens (markdown blank lines) should NOT create empty paragraph blocks.
+    // Paragraph spacing is handled in fromNotionBlocks to ensure proper paragraph separation
+    // without creating redundant empty blocks that show as unwanted blank lines in Notion.
   }
 
   return blocks
