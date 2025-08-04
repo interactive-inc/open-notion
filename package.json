@@ -35,7 +35,7 @@
     ".": "./build/index.js"
   },
   "homepage": "https://interactive-inc.github.io/open-notion",
-    "repository": {
+  "repository": {
     "type": "git",
     "url": "https://github.com/interactive-inc/open-notion.git"
   }
