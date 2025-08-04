@@ -1,6 +1,6 @@
 {
   "name": "@interactive-inc/notion-client",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "scripts": {
     "format": "biome check . --fix --unsafe",
@@ -33,5 +33,10 @@
   "module": "build/index.js",
   "exports": {
     ".": "./build/index.js"
+  },
+  "homepage": "https://interactive-inc.github.io/open-notion",
+    "repository": {
+    "type": "git",
+    "url": "https://github.com/interactive-inc/open-notion.git"
   }
 }
