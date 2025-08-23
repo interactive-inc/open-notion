@@ -1,21 +1,111 @@
+---
+description: 'Update the codebase information file.'
+---
+
 # Codebase
 
-以下のファイルを更新してください。
-このファイルではAIがコードベースを理解する為の最低限の情報を管理します。このファイルが人間に読まれることはありません。英語で端的に記述してください。
+Update the codebase information file that manages minimum information for AI to understand the codebase. This file will not be read by humans.
+
+Target file: @.github/instructions/~.instructions.md
+
+## Rules
+
+- Write in English
+- Keep content concise and minimal
+- Ensure information is up-to-date
+- Do NOT change section titles in the format
+- Only include important directories
+- Explore subdirectories as well
+- Ignore: directories starting with dots, configuration files, "docs" directory, items with obvious purposes
+
+## File Format
 
 ```
-CODEBASE.md
+# Overview
+
+[Product overview]
+
+## Directory Structure
+
+- `lib/api` - API
+- `lib/api/routes` - API routing
+
+## Technical Features
+
+- Remix
+- Shopify Hydrogen framework
+
+## Appendix A (Optional)
+
+[Additional information if needed]
+
+## Appendix B (Optional)
+
+[Additional information if needed]
 ```
 
-ディレクトリを探索してディレクトリ構成のメモを更新してください。
+For monorepo, use the following format:
 
-- 重要なディレクトリのみを記載してください。
-- サブディレクトリも探索してください。
-- ディレクトリの説明は英語で記述してください。
-- 用途が明らかなものは無視してください。
+```
+# Overview
 
-以下のディレクトリやファイルは無視してください:
+[Product overview]
 
-- ディレクトリ「docs」
-- ドットから始まるディレクトリ
-- 設定ファイル
+### Directory Structure
+
+[Overview]
+
+- `packages/product-a` - Product A
+- `packages/product-b` - Product B
+
+### Technical Features
+
+[Overview]
+
+- Remix
+- Shopify Hydrogen framework
+
+## Product A
+
+[Product overview]
+
+### Directory Structure
+
+[Overview]
+
+- `lib/api` - API
+- `lib/api/routes` - API routing
+
+### Technical Features
+
+[Overview]
+
+- Remix
+- Shopify Hydrogen framework
+
+## Product B
+
+[Product overview]
+
+### Directory Structure
+
+[Overview]
+
+- `lib/api` - API
+- `lib/api/routes` - API routing
+
+### Technical Features
+
+[Overview]
+
+- Remix
+- Shopify Hydrogen framework
+
+## Appendix A (Optional)
+
+[Additional information if needed]
+
+## Appendix B (Optional)
+
+[Additional information if needed]
+```
