@@ -8,7 +8,7 @@ description: Write TypeScript code
 以下の条件の場合は必ず対応するSubagentsに必ず委託してください。
 
 - `@agent-ts-errors` - ファイル `*.ts` のTypeScriptのエラーを修正する
-- `@ts-code-checker` - TypeScriptのコードを書き換えた場合に品質をチェックする
+- `@agent-ts-code-checker` - TypeScriptのコードを書き換えた場合に品質をチェックする
 
 ## File Organization
 
