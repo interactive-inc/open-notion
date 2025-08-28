@@ -1,10 +1,10 @@
 ---
-description: 'Update the codebase information file.'
+description: 'Update the repository-wide codebase information file.'
 ---
 
-# Codebase
+# Codebase Overview
 
-Update the codebase information file that manages minimum information for AI to understand the codebase. This file will not be read by humans.
+Generate or update the repository-wide codebase information file that provides minimum information for AI to understand the entire project structure. This file will not be read by humans.
 
 Target file: @.github/instructions/~.instructions.md
 
@@ -18,94 +18,98 @@ Target file: @.github/instructions/~.instructions.md
 - Explore subdirectories as well
 - Ignore: directories starting with dots, configuration files, "docs" directory, items with obvious purposes
 
-## File Format
+## Standard Repository Format
 
 ```
 # Overview
 
-[Product overview]
+[What this repository does - one paragraph describing the main purpose]
+
+## Architecture Pattern
+
+[High-level architecture description - monolith/microservices/monorepo/etc.]
 
 ## Directory Structure
 
-- `lib/api` - API
+- `lib/api` - API layer
 - `lib/api/routes` - API routing
+- `components/` - Shared UI components
 
 ## Technical Features
 
-- Remix
-- Shopify Hydrogen framework
+- **Framework**: [Main framework and why]
+- **Database**: [Database technology and purpose]
+- **Authentication**: [Auth approach]
+- **Deployment**: [Deployment strategy]
 
-## Appendix A (Optional)
+## Extension Points
 
-[Additional information if needed]
-
-## Appendix B (Optional)
-
-[Additional information if needed]
+- **New API Routes**: Add to `lib/api/routes/`
+- **New Components**: Add to `components/` following existing patterns
+- **New Features**: [Where and how to add new functionality]
 ```
 
-For monorepo, use the following format:
+## Monorepo Format
+
+For monorepos with multiple products:
 
 ```
 # Overview
 
-[Product overview]
+[Repository overview - what this monorepo contains]
+
+## Architecture Pattern
+
+[Monorepo structure and inter-package relationships]
 
 ### Directory Structure
 
-[Overview]
-
-- `packages/product-a` - Product A
-- `packages/product-b` - Product B
+- `packages/product-a` - Product A description
+- `packages/product-b` - Product B description
+- `shared/` - Shared utilities
 
 ### Technical Features
 
-[Overview]
-
-- Remix
-- Shopify Hydrogen framework
+- **Monorepo Tool**: [Lerna/Rush/Nx and why]
+- **Shared Tech Stack**: [Common technologies across packages]
 
 ## Product A
 
-[Product overview]
+[What Product A does]
 
 ### Directory Structure
 
-[Overview]
-
-- `lib/api` - API
+- `lib/api` - API layer
 - `lib/api/routes` - API routing
 
 ### Technical Features
 
-[Overview]
+- **Framework**: [Specific to this product]
+- **Database**: [If different from main]
 
-- Remix
-- Shopify Hydrogen framework
+### Extension Points
+
+- **New Features**: [How to extend Product A]
 
 ## Product B
 
-[Product overview]
+[What Product B does]
 
 ### Directory Structure
 
-[Overview]
-
-- `lib/api` - API
-- `lib/api/routes` - API routing
+- `lib/core` - Core business logic
+- `lib/ui` - UI components
 
 ### Technical Features
 
-[Overview]
+- **Framework**: [Specific to this product]
 
-- Remix
-- Shopify Hydrogen framework
+### Extension Points
 
-## Appendix A (Optional)
+- **New Features**: [How to extend Product B]
 
-[Additional information if needed]
+## Cross-Package Extension Points
 
-## Appendix B (Optional)
-
-[Additional information if needed]
+- **New Package**: [How to add new packages to monorepo]
+- **Shared Utilities**: [How to add to shared/]
 ```
