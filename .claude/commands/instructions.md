@@ -1,12 +1,12 @@
 ---
-description: 'Update the repository-wide codebase information file.'
+description: 'Update the repository-wide codebase information file (copilot-instructions).'
 ---
 
 # Codebase Overview
 
 Generate or update the repository-wide codebase information file that provides minimum information for AI to understand the entire project structure. This file will not be read by humans.
 
-Target file: @.github/instructions/~.instructions.md
+Target file: @.github/copilot-instructions.md
 
 ## Rules
 

@@ -1,5 +1,5 @@
 ---
-name: ts-errors
+name: ts-errors-checker
 description: Fix TypeScript errors
 model: opus
 color: red
