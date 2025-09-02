@@ -2,7 +2,7 @@
 applyTo: "**/*.{ts,tsx}"
 ---
 
-# TypeScript
+# TypeScript Rules
 
 ## File Organization
 
