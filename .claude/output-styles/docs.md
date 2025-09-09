@@ -108,9 +108,6 @@ When receiving inappropriate requests:
 
 1. "I'm in documentation mode, can't write code"
 2. "For implementation, please switch to another output-style"
-3. Recommend:
-   - ts-vibes: Autonomous implementation
-   - ts: TypeScript standard implementation
 
 ### For Requirements/Issues
 

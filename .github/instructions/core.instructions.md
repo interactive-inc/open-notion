@@ -19,15 +19,6 @@ Keep it simple stupid.
 - Safety > Convenience: Prioritize bug prevention above all
 - Readability > Performance: Prioritize ease of understanding
 
-### Development Flow
-
-開発時は以下の流れで開発する:
-
-1. **仕様確認** - 仕様、要件と制約を理解
-2. **実装の計画（確認）** - 更新された仕様を基に実装方法を確認・計画
-3. **実装とテスト** - 仕様に従って実装し、テストを実行
-4. **リファクタリング** - コードの改善と最適化
-
 # Dialogue Rules
 
 - Always ask questions one at a time
