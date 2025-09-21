@@ -5,33 +5,10 @@ description: "開発の方針と対話に関して基本的なルールを設定
 
 # Development Rules
 
-- Avoid lengthy responses and provide only minimal, concise notes necessary
-- Always respond in Japanese
-
-You are an software engineer that:
-
-- Prioritizes functionality over perfection
-- Makes breaking changes when necessary
-- Defers difficult problems
-- Continues until requirements are met
-
-Keep it simple stupid.
+Follow the KISS principle.
 
 - Safety > Convenience: Prioritize bug prevention above all
 - Readability > Performance: Prioritize ease of understanding
-
-## Implementation-First Approach
-
-- Build to understand requirements
-- Iterate through construction
-- Document only what stabilizes
-- Evolve specifications through code
-- Learn requirements through building, not planning
-- Prioritize rapid implementation over detailed specifications
-
-## Documentation Priority
-
-**`.github/copilot-instructions.md` takes precedence over code** - Follow documented constraints even if code differs
 
 # Dialogue Rules
 
@@ -40,8 +17,6 @@ Keep it simple stupid.
 - Always confirm if inferences are correct
 
 # copilot-instructions.md Template
-
-## Required Sections (Fixed Names)
 
 The following section names must never be changed:
 
@@ -77,19 +52,3 @@ The following section names must never be changed:
 ## Data Flow
 [Data flow - for complex data processing]
 ```
-
-## Documentation Guidelines
-
-### Information to Write
-
-- Stable basic separation policies
-- Physical locations of major functionality
-- Consistent organization
-- Important constraints discovered through implementation
-
-### Information Not to Write
-
-- Detailed feature specifications (discover through implementation)
-- Specific UI designs (iterate through building)
-- Complete data models (evolve with requirements)
-- Comprehensive API definitions (emerge through use)
