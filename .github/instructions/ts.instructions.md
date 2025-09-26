@@ -1,5 +1,5 @@
 ---
-applyTo: "**/*.{ts,tsx}"
+applyTo: "**"
 ---
 
 # TypeScript Rules
