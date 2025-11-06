@@ -1,4 +1,12 @@
-import type { RichTextItemResponse } from "@notionhq/client/build/src/api-endpoints"
+import type {
+  PageObjectResponse,
+  RichTextItemResponse,
+  UpdatePageResponse,
+} from "@notionhq/client/build/src/api-endpoints"
+
+export function toNotionPage(resp: UpdatePageResponse): PageObjectResponse {
+  return resp as unknown as PageObjectResponse
+}
 
 /**
  * Convert Notion rich text to markdown text

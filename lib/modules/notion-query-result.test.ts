@@ -23,13 +23,19 @@ test("ページ参照の配列を取得できる", () => {
     notion: mockClient,
     schema: mockSchema,
     converter: mockConverter,
-    rawData: { id: "page-1", properties: {} } as unknown as PageObjectResponse,
+    notionPage: {
+      id: "page-1",
+      properties: {},
+    } as unknown as PageObjectResponse,
   })
   const pageRef2 = new NotionPageReference({
     notion: mockClient,
     schema: mockSchema,
     converter: mockConverter,
-    rawData: { id: "page-2", properties: {} } as unknown as PageObjectResponse,
+    notionPage: {
+      id: "page-2",
+      properties: {},
+    } as unknown as PageObjectResponse,
   })
 
   const queryResult = new NotionQueryResult({
@@ -38,7 +44,7 @@ test("ページ参照の配列を取得できる", () => {
     hasMore: true,
   })
 
-  const refs = queryResult.pageReferences()
+  const refs = queryResult.references()
   expect(refs).toHaveLength(2)
   expect(refs[0]).toBe(pageRef1)
   expect(refs[1]).toBe(pageRef2)
@@ -101,7 +107,7 @@ test("ページ数を取得できる", () => {
         notion: mockClient,
         schema: mockSchema,
         converter: mockConverter,
-        rawData: {
+        notionPage: {
           id: `page-${i}`,
           properties: {},
         } as unknown as PageObjectResponse,
@@ -124,7 +130,7 @@ test("空の結果の場合", () => {
     hasMore: false,
   })
 
-  expect(queryResult.pageReferences()).toEqual([])
+  expect(queryResult.references()).toEqual([])
   expect(queryResult.length()).toBe(0)
   expect(queryResult.hasMore()).toBe(false)
   expect(queryResult.cursor()).toBeNull()
@@ -163,7 +169,7 @@ test("型安全なプロパティを持つページ参照を扱える", () => {
     notion: mockClient,
     schema: mockSchema,
     converter: mockConverter,
-    rawData: { id: "article-1", properties: {} } as PageObjectResponse,
+    notionPage: { id: "article-1", properties: {} } as PageObjectResponse,
   })
 
   const queryResult = new NotionQueryResult({
@@ -172,7 +178,7 @@ test("型安全なプロパティを持つページ参照を扱える", () => {
     hasMore: false,
   })
 
-  const refs = queryResult.pageReferences()
+  const refs = queryResult.references()
   const props = refs[0]?.properties()
   expect(props?.title).toBe("TypeScriptの基礎")
   expect(props?.author).toBe("山田太郎")

@@ -8,14 +8,7 @@ import type { z } from "zod"
 import type { zPropertyConfig, zSchema } from "./models"
 
 /* Notion page object type */
-export type NotionPage = {
-  id: string
-  url: string
-  created_time: string
-  last_edited_time: string
-  archived: boolean
-  properties: Record<string, unknown>
-}
+export type NotionPage = PageObjectResponse
 
 /* Notion base data types */
 export type NotionPropertyType =
@@ -425,19 +418,6 @@ export type BatchResult<T> = {
     data: unknown
     error: Error
   }>
-}
-
-/* Hook definitions */
-export type TableHooks<T extends Schema> = {
-  beforeCreate?: (data: CreateInput<T>) => Promise<CreateInput<T>>
-  afterCreate?: (record: PageReferenceType<SchemaType<T>>) => Promise<void>
-  beforeUpdate?: (id: string, data: UpdateInput<T>) => Promise<UpdateInput<T>>
-  afterUpdate?: (
-    id: string,
-    record: PageReferenceType<SchemaType<T>>,
-  ) => Promise<void>
-  beforeDelete?: (id: string) => Promise<void>
-  afterDelete?: (id: string) => Promise<void>
 }
 
 /* Cache entry */

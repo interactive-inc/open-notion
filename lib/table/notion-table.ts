@@ -14,12 +14,12 @@ import type {
   FindOptions,
   Schema,
   SortOption,
-  TableHooks,
   UpdateInput,
   UpdateManyOptions,
   UpsertOptions,
   WhereCondition,
 } from "@/types"
+import { toNotionPage } from "@/utils"
 
 type Props<T extends Schema> = {
   client: Client
@@ -28,8 +28,8 @@ type Props<T extends Schema> = {
   cache?: NotionMemoryCache
   validator?: NotionSchemaValidator
   queryBuilder?: NotionQueryBuilder
-  converter?: NotionPropertyConverter
-  enhancer?: NotionMarkdown
+  propertyConverter?: NotionPropertyConverter
+  markdown?: NotionMarkdown
 }
 
 export class NotionTable<T extends Schema> {
@@ -39,19 +39,19 @@ export class NotionTable<T extends Schema> {
   private readonly cache: NotionMemoryCache
   private readonly validator: NotionSchemaValidator
   private readonly queryBuilder: NotionQueryBuilder
-  private readonly converter: NotionPropertyConverter
-  private readonly enhancer: NotionMarkdown
-  public hooks: TableHooks<T> = {}
+  private readonly propertyConverter: NotionPropertyConverter
+  private readonly markdown: NotionMarkdown
 
-  constructor(options: Props<T>) {
-    this.client = options.client
-    this.tableId = options.tableId
-    this.schema = options.schema
-    this.cache = options.cache || new NotionMemoryCache()
-    this.validator = options.validator || new NotionSchemaValidator()
-    this.queryBuilder = options.queryBuilder || new NotionQueryBuilder()
-    this.converter = options.converter || new NotionPropertyConverter()
-    this.enhancer = options.enhancer || new NotionMarkdown()
+  constructor(props: Props<T>) {
+    this.client = props.client
+    this.tableId = props.tableId
+    this.schema = props.schema
+    this.cache = props.cache || new NotionMemoryCache()
+    this.validator = props.validator || new NotionSchemaValidator()
+    this.queryBuilder = props.queryBuilder || new NotionQueryBuilder()
+    this.propertyConverter =
+      props.propertyConverter || new NotionPropertyConverter()
+    this.markdown = props.markdown || new NotionMarkdown()
   }
 
   async findMany(
@@ -70,14 +70,14 @@ export class NotionTable<T extends Schema> {
 
     const notionSort = this.buildNotionSort(options.sorts)
 
-    const allRecords = await this.fetchAllRecords(
+    const pages = await this.fetchPages(
       maxCount,
       pageSize,
       notionFilter,
       notionSort,
     )
 
-    return allRecords.pageReferences()
+    return pages.references()
   }
 
   async findOne(
@@ -94,26 +94,34 @@ export class NotionTable<T extends Schema> {
     id: string,
     options?: { cache?: boolean },
   ): Promise<NotionPageReference<T> | null> {
-    const cacheKey = `page:${id}`
-
     if (options?.cache) {
-      const cached = this.cache?.get<NotionPageReference<T>>(cacheKey)
+      const cached = this.cache.getPage(id)
       if (cached) {
-        return cached
+        return new NotionPageReference({
+          notion: this.client,
+          schema: this.schema,
+          converter: this.propertyConverter,
+          notionPage: cached,
+          cache: this.cache,
+        })
       }
     }
 
     try {
       const response = await this.client.pages.retrieve({ page_id: id })
-      const pageRef = this.convertPageToPageReference(
-        response as unknown as PageObjectResponse,
-      )
+      const notionPage = response as unknown as PageObjectResponse
 
       if (options?.cache) {
-        this.cache?.set(cacheKey, pageRef)
+        this.cache.setPage(id, notionPage)
       }
 
-      return pageRef
+      return new NotionPageReference({
+        notion: this.client,
+        schema: this.schema,
+        converter: this.propertyConverter,
+        notionPage: notionPage,
+        cache: this.cache,
+      })
     } catch {
       return null
     }
@@ -122,25 +130,21 @@ export class NotionTable<T extends Schema> {
   async create(input: CreateInput<T>): Promise<NotionPageReference<T>> {
     this.validator.validate(this.schema, input.properties)
 
-    const processedInput = this.hooks.beforeCreate
-      ? await this.hooks.beforeCreate(input)
-      : input
-
-    if (!this.converter) {
+    if (!this.propertyConverter) {
       throw new Error("Converter is not initialized")
     }
 
-    const properties = this.converter.toNotion(
+    const properties = this.propertyConverter.toNotion(
       this.schema,
-      processedInput.properties,
+      input.properties,
     )
 
     let children: unknown[] | undefined
-    if (processedInput.body) {
-      const blocks = toNotionBlocks(processedInput.body)
+    if (input.body) {
+      const blocks = toNotionBlocks(input.body)
       children = blocks.map((block) => {
         if ("type" in block && typeof block.type === "string") {
-          const enhancedType = this.enhancer.enhanceBlockType(block.type)
+          const enhancedType = this.markdown.enhanceBlockType(block.type)
           return { ...block, type: enhancedType } as typeof block
         }
         return block
@@ -157,10 +161,6 @@ export class NotionTable<T extends Schema> {
 
     if (!record) {
       throw new Error("Failed to retrieve created record")
-    }
-
-    if (this.hooks.afterCreate) {
-      await this.hooks.afterCreate(record)
     }
 
     return record
@@ -219,17 +219,13 @@ export class NotionTable<T extends Schema> {
       skipRequired: true,
     })
 
-    const processedInput = this.hooks.beforeUpdate
-      ? await this.hooks.beforeUpdate(id, input)
-      : input
-
-    if (!this.converter) {
+    if (!this.propertyConverter) {
       throw new Error("Converter is not initialized")
     }
 
-    const properties = this.converter.toNotion(
+    const properties = this.propertyConverter.toNotion(
       this.schema,
-      processedInput.properties,
+      input.properties,
     )
 
     const result = await this.client.pages.update({
@@ -237,21 +233,23 @@ export class NotionTable<T extends Schema> {
       properties: properties,
     })
 
-    if (processedInput.body) {
-      await this.updatePageContent(id, processedInput.body)
+    if (input.body) {
+      await this.updatePageContent(id, input.body)
+      this.cache.deleteBlocks(id)
     }
 
-    this.cache?.delete(`page:${id}`)
+    const notionPage = result as unknown as PageObjectResponse
 
-    const pageRef = this.convertPageToPageReference(
-      result as unknown as PageObjectResponse,
-    )
+    this.cache.setPage(id, notionPage)
+    this.cache.deleteBlocks(id)
 
-    if (this.hooks.afterUpdate) {
-      await this.hooks.afterUpdate(id, pageRef)
-    }
-
-    return pageRef
+    return new NotionPageReference({
+      notion: this.client,
+      schema: this.schema,
+      converter: this.propertyConverter,
+      notionPage: notionPage,
+      cache: this.cache,
+    })
   }
 
   async updateMany(options: UpdateManyOptions<T>): Promise<number> {
@@ -297,33 +295,36 @@ export class NotionTable<T extends Schema> {
   }
 
   async delete(id: string): Promise<void> {
-    if (this.hooks.beforeDelete) {
-      await this.hooks.beforeDelete(id)
-    }
-
     await this.client.pages.update({
       page_id: id,
       archived: true,
     })
 
-    this.cache?.delete(`page:${id}`)
-
-    if (this.hooks.afterDelete) {
-      await this.hooks.afterDelete(id)
-    }
+    this.cache.deletePage(id)
+    this.cache.deleteBlocks(id)
   }
 
-  async restore(id: string): Promise<void> {
-    await this.client.pages.update({
+  async restore(id: string): Promise<NotionPageReference<T>> {
+    const result = await this.client.pages.update({
       page_id: id,
       archived: false,
     })
 
-    this.cache?.delete(`page:${id}`)
+    const notionPage = toNotionPage(result)
+
+    this.cache.setPage(id, notionPage)
+
+    return new NotionPageReference({
+      notion: this.client,
+      schema: this.schema,
+      converter: this.propertyConverter,
+      notionPage: notionPage,
+      cache: this.cache,
+    })
   }
 
   clearCache(): void {
-    this.cache?.clear()
+    this.cache.clear()
   }
 
   private buildNotionSort(
@@ -336,17 +337,18 @@ export class NotionTable<T extends Schema> {
     return this.queryBuilder?.buildSort(sortArray) || []
   }
 
-  private async fetchAllRecords(
+  private async fetchPages(
     maxCount: number,
     pageSize: number,
     notionFilter: Record<string, unknown> | undefined,
     notionSort: Array<Record<string, unknown>>,
   ): Promise<NotionQueryResult<T>> {
-    const allPageReferences: NotionPageReference<T>[] = []
+    const references: NotionPageReference<T>[] = []
+
     let nextCursor: string | null = null
     let hasMore = true
 
-    while (hasMore && allPageReferences.length < maxCount) {
+    while (hasMore && references.length < maxCount) {
       const response = await this.client.dataSources.query({
         data_source_id: this.tableId,
         filter: notionFilter as never,
@@ -354,43 +356,32 @@ export class NotionTable<T extends Schema> {
         start_cursor: nextCursor || undefined,
         page_size: pageSize,
       })
-
-      const pageReferences = response.results.map((page) => {
-        return this.convertPageToPageReference(page as PageObjectResponse)
+      const refs = response.results.map((page) => {
+        return new NotionPageReference({
+          notion: this.client,
+          schema: this.schema,
+          converter: this.propertyConverter,
+          notionPage: page as PageObjectResponse,
+          cache: this.cache,
+        })
       })
-
-      allPageReferences.push(...pageReferences)
+      references.push(...refs)
       nextCursor = response.next_cursor
-      hasMore = response.has_more && allPageReferences.length < maxCount
+      hasMore = response.has_more && references.length < maxCount
     }
 
-    if (allPageReferences.length > maxCount) {
+    if (references.length > maxCount) {
       return new NotionQueryResult({
-        pageReferences: allPageReferences.slice(0, maxCount),
+        pageReferences: references.slice(0, maxCount),
         cursor: nextCursor,
         hasMore,
       })
     }
 
     return new NotionQueryResult({
-      pageReferences: allPageReferences,
+      pageReferences: references,
       cursor: nextCursor,
       hasMore,
-    })
-  }
-
-  private convertPageToPageReference(
-    page: PageObjectResponse,
-  ): NotionPageReference<T> {
-    if (!this.converter) {
-      throw new Error("Converter is not initialized")
-    }
-
-    return new NotionPageReference({
-      notion: this.client,
-      schema: this.schema,
-      converter: this.converter,
-      rawData: page,
     })
   }
 
@@ -408,7 +399,7 @@ export class NotionTable<T extends Schema> {
     const blocks = toNotionBlocks(content)
     const enhancedBlocks = blocks.map((block) => {
       if ("type" in block && typeof block.type === "string") {
-        const enhancedType = this.enhancer.enhanceBlockType(block.type)
+        const enhancedType = this.markdown.enhanceBlockType(block.type)
         return { ...block, type: enhancedType } as typeof block
       }
       return block

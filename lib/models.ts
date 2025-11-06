@@ -1,14 +1,5 @@
 import { z } from "zod"
 
-export const zNotionPage = z.object({
-  id: z.string(),
-  created_time: z.string(),
-  last_edited_time: z.string(),
-  archived: z.boolean(),
-  in_trash: z.boolean(),
-  is_locked: z.boolean(),
-})
-
 /**
  * タイトルプロパティ設定のスキーマ
  */

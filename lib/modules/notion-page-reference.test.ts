@@ -29,7 +29,7 @@ test("プロパティを取得できる", () => {
     notion: mockClient,
     schema: mockSchema,
     converter: mockConverter,
-    rawData: mockPageData,
+    notionPage: mockPageData,
   })
 
   const properties = pageRef.properties()
@@ -58,7 +58,7 @@ test("元のNotionページデータを取得できる", () => {
     notion: mockClient,
     schema: mockSchema,
     converter: mockConverter,
-    rawData: mockPageData,
+    notionPage: mockPageData,
   })
 
   const raw = pageRef.raw()
@@ -81,7 +81,7 @@ test("イミュータブルなオブジェクトである", () => {
     notion: mockClient,
     schema: mockSchema,
     converter: mockConverter,
-    rawData: mockPageData,
+    notionPage: mockPageData,
   })
 
   expect(Object.isFrozen(pageRef)).toBe(true)
@@ -106,7 +106,7 @@ test("本文をマークダウン形式で取得できる", async () => {
     notion: mockClient,
     schema: mockSchema,
     converter: mockConverter,
-    rawData: mockPageData,
+    notionPage: mockPageData,
   })
 
   // body()メソッドが存在することを確認
@@ -137,7 +137,7 @@ test("複数タイプのプロパティを保持できる", () => {
     notion: mockClient,
     schema: mockSchema,
     converter: mockConverter,
-    rawData: mockPageData,
+    notionPage: mockPageData,
   })
 
   const properties = pageRef.properties()

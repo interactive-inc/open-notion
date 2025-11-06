@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test"
 import type { RichTextItemResponse } from "@notionhq/client/build/src/api-endpoints"
-import { fromNotionRichTextItem } from "./from-notion-rich-text-item"
+import { fromNotionRichTextItem } from "./utils"
 
 test("空の配列を処理", () => {
   const richTexts: RichTextItemResponse[] = []

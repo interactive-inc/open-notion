@@ -213,18 +213,6 @@ test("バリデーションとフックのテスト", async () => {
   expect(
     table.create({ properties: { email: "test@example.com", age: 150 } }),
   ).rejects.toThrow('Field "age" must be at most 120')
-
-  // フック
-  let hookCalled = false
-  table.hooks = {
-    beforeCreate: async (data) => {
-      hookCalled = true
-      return data
-    },
-  }
-
-  await table.create({ properties: { email: "test@example.com", age: 25 } })
-  expect(hookCalled).toBe(true)
 })
 
 test("NotionMarkdownとの統合", async () => {
@@ -288,7 +276,7 @@ test("NotionMarkdownとの統合", async () => {
     client: mockNotion,
     tableId: "test-db",
     schema,
-    enhancer,
+    markdown: enhancer,
   })
 
   // # Title -> heading_1 -> heading_2 に変換される

@@ -18,7 +18,7 @@ export class NotionQueryResult<S extends Schema> {
   /**
    * 取得したページ参照の配列
    */
-  pageReferences(): NotionPageReference<S>[] {
+  references(): NotionPageReference<S>[] {
     return this.props.pageReferences
   }
 

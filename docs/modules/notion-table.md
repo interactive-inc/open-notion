@@ -15,8 +15,7 @@ new NotionTable<TSchema>({
   client: Client,
   tableId: string,
   schema: TSchema,
-  enhancer?: NotionMarkdown,
-  hooks?: TableHooks<TSchema>
+  enhancer?: NotionMarkdown
 })
 ```
 
@@ -26,7 +25,6 @@ new NotionTable<TSchema>({
 - `tableId` - Database ID from Notion
 - `schema` - Type-safe schema definition
 - `enhancer` - Optional markdown transformer
-- `hooks` - Optional lifecycle hooks
 
 ## Basic Usage
 
@@ -138,46 +136,6 @@ const docsTable = new NotionTable({
   tableId: 'docs-db',
   schema: { title: { type: 'title', required: true } },
   enhancer
-})
-```
-
-### With Lifecycle Hooks
-
-```typescript
-const ordersTable = new NotionTable({
-  client,
-  tableId: 'orders-db',
-  schema: {
-    orderNumber: { type: 'title', required: true },
-    total: { type: 'number' }
-  },
-  hooks: {
-    beforeCreate: async (data) => {
-      // Generate order number
-      return {
-        ...data,
-        orderNumber: `ORD-${Date.now()}`
-      }
-    },
-    afterCreate: async (record) => {
-      console.log('Order created:', record.orderNumber)
-      return record
-    },
-    beforeUpdate: async (id, data) => {
-      // Validate updates
-      if (data.total && data.total < 0) {
-        throw new Error('Total cannot be negative')
-      }
-      return data
-    },
-    afterFind: async (records) => {
-      // Add computed fields
-      return records.map(r => ({
-        ...r,
-        formattedTotal: `$${r.total.toFixed(2)}`
-      }))
-    }
-  }
 })
 ```
 

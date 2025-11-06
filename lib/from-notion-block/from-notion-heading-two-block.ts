@@ -1,5 +1,5 @@
 import type { Heading2BlockObjectResponse } from "@notionhq/client/build/src/api-endpoints"
-import { fromNotionRichTextItem } from "@/utils/from-notion-rich-text-item"
+import { fromNotionRichTextItem } from "@/utils"
 
 export function fromNotionHeadingTwoBlock(
   block: Heading2BlockObjectResponse,
