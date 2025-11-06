@@ -86,8 +86,9 @@ test("基本的な統合テスト", async () => {
       status: "todo",
     },
   })
-  expect(created.title).toBe("新規タスク")
-  expect(created.status).toBe("todo")
+  const createdProps = created.properties()
+  expect(createdProps.title).toBe("新規タスク")
+  expect(createdProps.status).toBe("todo")
 })
 
 test("高度なクエリのテスト", async () => {

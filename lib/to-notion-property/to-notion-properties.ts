@@ -4,10 +4,10 @@ import { toNotionProperty } from "./to-notion-property"
 /**
  * スキーマに基づいてオブジェクトをNotionプロパティに変換
  */
-export function toNotionProperties<T extends Schema>(
-  schema: T,
-  data: Partial<SchemaType<T>>,
-): Record<string, NotionPropertyRequest> {
+export function toNotionProperties<
+  T extends Schema,
+  D extends Partial<SchemaType<T>>,
+>(schema: T, data: D): Record<string, NotionPropertyRequest> {
   const properties: Record<string, NotionPropertyRequest> = {}
 
   for (const [key, config] of Object.entries(schema)) {

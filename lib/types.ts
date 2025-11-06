@@ -327,6 +327,12 @@ export type TableRecord<T> = T & {
 
 /* Page reference type */
 export type PageReferenceType<T> = {
+  id: string
+  url: string
+  createdAt: string
+  updatedAt: string
+  isArchived: boolean
+  isDeleted: boolean
   properties(): T
   raw(): PageObjectResponse
   body(): Promise<string>
@@ -384,7 +390,7 @@ export type FindOptions<T extends Schema> = {
 }
 
 export type CreateInput<T extends Schema> = {
-  properties: Partial<SchemaType<T>>
+  properties: Pick<SchemaType<T>, RequiredKeys<T>> & Partial<SchemaType<T>>
   body?: string
 }
 
@@ -424,11 +430,11 @@ export type BatchResult<T> = {
 /* Hook definitions */
 export type TableHooks<T extends Schema> = {
   beforeCreate?: (data: CreateInput<T>) => Promise<CreateInput<T>>
-  afterCreate?: (record: TableRecord<SchemaType<T>>) => Promise<void>
+  afterCreate?: (record: PageReferenceType<SchemaType<T>>) => Promise<void>
   beforeUpdate?: (id: string, data: UpdateInput<T>) => Promise<UpdateInput<T>>
   afterUpdate?: (
     id: string,
-    record: TableRecord<SchemaType<T>>,
+    record: PageReferenceType<SchemaType<T>>,
   ) => Promise<void>
   beforeDelete?: (id: string) => Promise<void>
   afterDelete?: (id: string) => Promise<void>
@@ -471,9 +477,9 @@ export type NotionConverterInterface = {
     schema: T,
     properties: Record<string, unknown>,
   ): SchemaType<T>
-  toNotion<T extends Schema>(
+  toNotion<T extends Schema, D extends Partial<SchemaType<T>>>(
     schema: T,
-    data: Partial<SchemaType<T>>,
+    data: D,
   ): Record<string, unknown>
 }
 

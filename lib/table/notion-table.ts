@@ -1,6 +1,6 @@
 import type { Client } from "@notionhq/client"
 import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints"
-import { PageReference } from "@/modules/notion-page-reference"
+import { NotionPageReference } from "@/modules/notion-page-reference"
 import { NotionQueryResult } from "@/modules/notion-query-result"
 import { NotionMarkdown } from "@/table/notion-markdown"
 import { NotionMemoryCache } from "@/table/notion-memory-cache"
@@ -12,12 +12,9 @@ import type {
   BatchResult,
   CreateInput,
   FindOptions,
-  NotionPage,
   Schema,
-  SchemaType,
   SortOption,
   TableHooks,
-  TableRecord,
   UpdateInput,
   UpdateManyOptions,
   UpsertOptions,
@@ -59,7 +56,7 @@ export class NotionTable<T extends Schema> {
 
   async findMany(
     options: FindOptions<T> = {},
-  ): Promise<PageReference<TableRecord<SchemaType<T>>>[]> {
+  ): Promise<NotionPageReference<T>[]> {
     const where = options.where || {}
     const count = options.count || 100
 
@@ -85,7 +82,7 @@ export class NotionTable<T extends Schema> {
 
   async findOne(
     options: FindOptions<T> = {},
-  ): Promise<PageReference<TableRecord<SchemaType<T>>> | null> {
+  ): Promise<NotionPageReference<T> | null> {
     const result = await this.findMany({
       ...options,
       count: 1,
@@ -96,11 +93,11 @@ export class NotionTable<T extends Schema> {
   async findById(
     id: string,
     options?: { cache?: boolean },
-  ): Promise<TableRecord<SchemaType<T>> | null> {
+  ): Promise<NotionPageReference<T> | null> {
     const cacheKey = `page:${id}`
 
     if (options?.cache) {
-      const cached = this.cache?.get<TableRecord<SchemaType<T>>>(cacheKey)
+      const cached = this.cache?.get<NotionPageReference<T>>(cacheKey)
       if (cached) {
         return cached
       }
@@ -108,20 +105,22 @@ export class NotionTable<T extends Schema> {
 
     try {
       const response = await this.client.pages.retrieve({ page_id: id })
-      const record = this.convertPageToRecord(response as unknown as NotionPage)
+      const pageRef = this.convertPageToPageReference(
+        response as unknown as PageObjectResponse,
+      )
 
       if (options?.cache) {
-        this.cache?.set(cacheKey, record)
+        this.cache?.set(cacheKey, pageRef)
       }
 
-      return record
+      return pageRef
     } catch {
       return null
     }
   }
 
-  async create(input: CreateInput<T>): Promise<TableRecord<SchemaType<T>>> {
-    this.validator?.validate(this.schema, input.properties)
+  async create(input: CreateInput<T>): Promise<NotionPageReference<T>> {
+    this.validator.validate(this.schema, input.properties)
 
     const processedInput = this.hooks.beforeCreate
       ? await this.hooks.beforeCreate(input)
@@ -149,12 +148,13 @@ export class NotionTable<T extends Schema> {
     }
 
     const response = await this.client.pages.create({
-      parent: { database_id: this.tableId },
+      parent: { data_source_id: this.tableId },
       properties: properties as never,
       children: children as never,
     })
 
     const record = await this.findById(response.id)
+
     if (!record) {
       throw new Error("Failed to retrieve created record")
     }
@@ -172,12 +172,12 @@ export class NotionTable<T extends Schema> {
 
   async createMany(
     records: Array<CreateInput<T>>,
-  ): Promise<BatchResult<TableRecord<SchemaType<T>>>> {
+  ): Promise<BatchResult<NotionPageReference<T>>> {
     const results = await Promise.allSettled(
       records.map((record) => this.create(record)),
     )
 
-    const succeeded: TableRecord<SchemaType<T>>[] = []
+    const succeeded: NotionPageReference<T>[] = []
     const failed: Array<{
       data: CreateInput<T>
       error: Error
@@ -190,15 +190,18 @@ export class NotionTable<T extends Schema> {
       }
 
       const record = records[index]
-      if (record) {
-        failed.push({
-          data: record,
-          error:
-            result.reason instanceof Error
-              ? result.reason
-              : new Error(String(result.reason)),
-        })
-      }
+
+      if (record === undefined) continue
+
+      const error =
+        result.reason instanceof Error
+          ? result.reason
+          : new Error(String(result.reason))
+
+      failed.push({
+        data: record,
+        error: error,
+      })
     }
 
     return { succeeded, failed }
@@ -208,7 +211,10 @@ export class NotionTable<T extends Schema> {
     return this.createMany
   }
 
-  async update(id: string, input: UpdateInput<T>): Promise<void> {
+  async update(
+    id: string,
+    input: UpdateInput<T>,
+  ): Promise<NotionPageReference<T>> {
     this.validator?.validate(this.schema, input.properties, {
       skipRequired: true,
     })
@@ -226,7 +232,7 @@ export class NotionTable<T extends Schema> {
       processedInput.properties,
     )
 
-    await this.client.pages.update({
+    const result = await this.client.pages.update({
       page_id: id,
       properties: properties,
     })
@@ -237,47 +243,45 @@ export class NotionTable<T extends Schema> {
 
     this.cache?.delete(`page:${id}`)
 
+    const pageRef = this.convertPageToPageReference(
+      result as unknown as PageObjectResponse,
+    )
+
     if (this.hooks.afterUpdate) {
-      const record = await this.findById(id)
-      if (record) {
-        await this.hooks.afterUpdate(id, record)
-      }
+      await this.hooks.afterUpdate(id, pageRef)
     }
+
+    return pageRef
   }
 
   async updateMany(options: UpdateManyOptions<T>): Promise<number> {
-    const where = options.where || {}
-    const update = options.update
-    const count = options.count || 1024
-
-    const result = await this.findMany({ where, count })
+    const result = await this.findMany({
+      where: options.where || {},
+      count: options.count || 1024,
+    })
 
     let updated = 0
     for (const record of result) {
-      await this.update(record.properties().id, update)
+      await this.update(record.id, options.update)
       updated++
     }
 
     return updated
   }
 
-  async upsert(options: UpsertOptions<T>): Promise<TableRecord<SchemaType<T>>> {
-    const where = options.where
-    const insert = options.insert
-    const update = options.update
+  async upsert(options: UpsertOptions<T>): Promise<NotionPageReference<T>> {
+    const current = await this.findOne({ where: options.where })
 
-    const existingRecord = await this.findOne({ where })
-
-    if (existingRecord) {
-      await this.update(existingRecord.properties().id, update)
-      const updated = await this.findById(existingRecord.properties().id)
+    if (current !== null) {
+      await this.update(current.id, options.update)
+      const updated = await this.findById(current.id)
       if (updated === null) {
         throw new Error("Failed to retrieve updated record")
       }
       return updated
     }
 
-    return await this.create(insert)
+    return await this.create(options.insert)
   }
 
   async deleteMany(where: WhereCondition<T> = {}): Promise<number> {
@@ -285,7 +289,7 @@ export class NotionTable<T extends Schema> {
 
     let deleted = 0
     for (const record of result) {
-      await this.delete(record.properties().id)
+      await this.delete(record.id)
       deleted++
     }
 
@@ -337,8 +341,8 @@ export class NotionTable<T extends Schema> {
     pageSize: number,
     notionFilter: Record<string, unknown> | undefined,
     notionSort: Array<Record<string, unknown>>,
-  ): Promise<NotionQueryResult<TableRecord<SchemaType<T>>>> {
-    const allPageReferences: PageReference<TableRecord<SchemaType<T>>>[] = []
+  ): Promise<NotionQueryResult<T>> {
+    const allPageReferences: NotionPageReference<T>[] = []
     let nextCursor: string | null = null
     let hasMore = true
 
@@ -375,43 +379,17 @@ export class NotionTable<T extends Schema> {
     })
   }
 
-  private convertPageToRecord(page: NotionPage): TableRecord<SchemaType<T>> {
-    if (!this.converter) {
-      throw new Error("Converter is not initialized")
-    }
-    const data = this.converter.fromNotion(
-      this.schema,
-      page.properties as PageObjectResponse["properties"],
-    )
-    return {
-      id: page.id,
-      createdAt: page.created_time,
-      updatedAt: page.last_edited_time,
-      isDeleted: page.archived,
-      ...data,
-    } as TableRecord<SchemaType<T>>
-  }
-
   private convertPageToPageReference(
     page: PageObjectResponse,
-  ): PageReference<TableRecord<SchemaType<T>>> {
+  ): NotionPageReference<T> {
     if (!this.converter) {
       throw new Error("Converter is not initialized")
     }
-    const data = this.converter.fromNotion(this.schema, page.properties)
 
-    const properties = {
-      id: page.id,
-      createdAt: page.created_time,
-      updatedAt: page.last_edited_time,
-      isDeleted: page.archived,
-      ...data,
-    } as TableRecord<SchemaType<T>>
-
-    return new PageReference({
+    return new NotionPageReference({
       notion: this.client,
-      pageId: page.id,
-      properties,
+      schema: this.schema,
+      converter: this.converter,
       rawData: page,
     })
   }

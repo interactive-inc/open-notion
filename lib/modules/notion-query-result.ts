@@ -1,7 +1,8 @@
-import type { PageReference } from "./notion-page-reference"
+import type { Schema } from "../types"
+import type { NotionPageReference } from "./notion-page-reference"
 
-type Props<T> = {
-  readonly pageReferences: PageReference<T>[]
+type Props<S extends Schema> = {
+  readonly pageReferences: NotionPageReference<S>[]
   readonly cursor: string | null
   readonly hasMore: boolean
 }
@@ -9,15 +10,15 @@ type Props<T> = {
 /**
  * データベースクエリの結果を表すクラス
  */
-export class NotionQueryResult<T> {
-  constructor(private readonly props: Props<T>) {
+export class NotionQueryResult<S extends Schema> {
+  constructor(private readonly props: Props<S>) {
     Object.freeze(this)
   }
 
   /**
    * 取得したページ参照の配列
    */
-  pageReferences(): PageReference<T>[] {
+  pageReferences(): NotionPageReference<S>[] {
     return this.props.pageReferences
   }
 

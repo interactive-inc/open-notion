@@ -11,7 +11,10 @@ export class NotionPropertyConverter {
     return fromNotionProperties(schema, properties)
   }
 
-  toNotion<T extends Schema>(schema: T, data: Partial<SchemaType<T>>) {
+  toNotion<T extends Schema, D extends Partial<SchemaType<T>>>(
+    schema: T,
+    data: D,
+  ) {
     return toNotionProperties(schema, data)
   }
 }

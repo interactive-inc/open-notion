@@ -1,22 +1,35 @@
 import { expect, test } from "bun:test"
 import type { Client } from "@notionhq/client"
 import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints"
-import { PageReference } from "./notion-page-reference"
+import type { NotionPropertyConverter } from "../table/notion-property-converter"
+import type { Schema } from "../types"
+import { NotionPageReference } from "./notion-page-reference"
 import { NotionQueryResult } from "./notion-query-result"
 
 test("ページ参照の配列を取得できる", () => {
+  const mockSchema = {
+    title: { type: "title" as const },
+  } satisfies Schema
+
   const mockClient = {} as Client
-  const pageRef1 = new PageReference({
+  const mockConverter = {
+    fromNotion: (_schema: Schema, properties: Record<string, unknown>) => {
+      return { title: properties.id === "page-1" ? "Page 1" : "Page 2" }
+    },
+    toNotion: () => ({}),
+  } as unknown as NotionPropertyConverter
+
+  const pageRef1 = new NotionPageReference({
     notion: mockClient,
-    pageId: "page-1",
-    properties: { title: "Page 1" },
-    rawData: { id: "page-1" } as PageObjectResponse,
+    schema: mockSchema,
+    converter: mockConverter,
+    rawData: { id: "page-1", properties: {} } as unknown as PageObjectResponse,
   })
-  const pageRef2 = new PageReference({
+  const pageRef2 = new NotionPageReference({
     notion: mockClient,
-    pageId: "page-2",
-    properties: { title: "Page 2" },
-    rawData: { id: "page-2" } as PageObjectResponse,
+    schema: mockSchema,
+    converter: mockConverter,
+    rawData: { id: "page-2", properties: {} } as unknown as PageObjectResponse,
   })
 
   const queryResult = new NotionQueryResult({
@@ -69,15 +82,29 @@ test("さらにページがあるかを確認できる", () => {
 })
 
 test("ページ数を取得できる", () => {
+  const mockSchema = {
+    title: { type: "title" as const },
+  } satisfies Schema
+
   const mockClient = {} as Client
+  const mockConverter = {
+    fromNotion: (_: Schema, properties: Record<string, unknown>) => {
+      return { title: `Page ${properties.id}` }
+    },
+    toNotion: () => ({}),
+  } as unknown as NotionPropertyConverter
+
   const pageRefs = Array.from(
     { length: 5 },
     (_, i) =>
-      new PageReference({
+      new NotionPageReference({
         notion: mockClient,
-        pageId: `page-${i}`,
-        properties: { title: `Page ${i}` },
-        rawData: { id: `page-${i}` } as PageObjectResponse,
+        schema: mockSchema,
+        converter: mockConverter,
+        rawData: {
+          id: `page-${i}`,
+          properties: {},
+        } as unknown as PageObjectResponse,
       }),
   )
 
@@ -114,27 +141,32 @@ test("イミュータブルなオブジェクトである", () => {
 })
 
 test("型安全なプロパティを持つページ参照を扱える", () => {
-  type ArticleProperties = {
-    title: string
-    author: string
-    publishedDate: Date
-    tags: string[]
-  }
+  const mockSchema = {
+    title: { type: "title" as const },
+    author: { type: "rich_text" as const },
+    publishedDate: { type: "date" as const },
+    tags: { type: "multi_select" as const, options: null },
+  } satisfies Schema
 
   const mockClient = {} as Client
-  const articleRef = new PageReference<ArticleProperties>({
-    notion: mockClient,
-    pageId: "article-1",
-    properties: {
+  const mockConverter = {
+    fromNotion: () => ({
       title: "TypeScriptの基礎",
       author: "山田太郎",
-      publishedDate: new Date("2024-01-01"),
+      publishedDate: { start: "2024-01-01", end: null },
       tags: ["TypeScript", "プログラミング"],
-    },
-    rawData: { id: "article-1" } as PageObjectResponse,
+    }),
+    toNotion: () => ({}),
+  } as unknown as NotionPropertyConverter
+
+  const articleRef = new NotionPageReference({
+    notion: mockClient,
+    schema: mockSchema,
+    converter: mockConverter,
+    rawData: { id: "article-1", properties: {} } as PageObjectResponse,
   })
 
-  const queryResult = new NotionQueryResult<ArticleProperties>({
+  const queryResult = new NotionQueryResult({
     pageReferences: [articleRef],
     cursor: null,
     hasMore: false,
