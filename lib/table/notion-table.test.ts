@@ -187,10 +187,6 @@ test("バリデーションとフックのテスト", async () => {
     email: {
       type: "email",
       required: true,
-      validate: (value: unknown) => {
-        if (typeof value !== "string") return false
-        return value.includes("@") || "有効なメールアドレスを入力してください"
-      },
     },
     age: {
       type: "number",
@@ -208,7 +204,7 @@ test("バリデーションとフックのテスト", async () => {
   // バリデーションエラー
   expect(
     table.create({ properties: { email: "invalid", age: 25 } }),
-  ).rejects.toThrow("有効なメールアドレスを入力してください")
+  ).rejects.toThrow('Field "email" must be a valid email address')
 
   expect(
     table.create({ properties: { email: "test@example.com", age: 150 } }),

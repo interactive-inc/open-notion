@@ -187,41 +187,6 @@ test("URLのバリデーション", () => {
   }).not.toThrow()
 })
 
-test("カスタムバリデーション", () => {
-  const validator = new NotionSchemaValidator()
-  const schema: Schema = {
-    password: {
-      type: "rich_text",
-      validate: (value: unknown) => {
-        if (typeof value !== "string") return false
-        if (value.length < 8) return "パスワードは8文字以上である必要があります"
-        if (!/[A-Z]/.test(value))
-          return "パスワードは大文字を含む必要があります"
-        if (!/[0-9]/.test(value)) return "パスワードは数字を含む必要があります"
-        return true
-      },
-    },
-  }
-
-  // カスタムバリデーションのエラーメッセージ
-  expect(() => {
-    validator.validate(schema, { password: "short" })
-  }).toThrow('Field "password": パスワードは8文字以上である必要があります')
-
-  expect(() => {
-    validator.validate(schema, { password: "lowercase123" })
-  }).toThrow('Field "password": パスワードは大文字を含む必要があります')
-
-  expect(() => {
-    validator.validate(schema, { password: "NoNumbers" })
-  }).toThrow('Field "password": パスワードは数字を含む必要があります')
-
-  // 正常な場合
-  expect(() => {
-    validator.validate(schema, { password: "StrongPass123" })
-  }).not.toThrow()
-})
-
 test("リレーション型のバリデーション", () => {
   const validator = new NotionSchemaValidator()
   const schema: Schema = {

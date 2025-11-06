@@ -36,17 +36,6 @@ export class NotionSchemaValidator {
     value: unknown,
     config: PropertyConfig,
   ): void {
-    // カスタムバリデーション
-    if (config.validate) {
-      const result = config.validate(value)
-      if (typeof result === "string") {
-        throw new Error(`Field "${key}": ${result}`)
-      }
-      if (!result) {
-        throw new Error(`Field "${key}" validation failed`)
-      }
-    }
-
     // 型別のバリデーション
     if (config.type === "title" || config.type === "rich_text") {
       if (typeof value !== "string") {

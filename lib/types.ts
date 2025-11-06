@@ -141,7 +141,6 @@ export type RichTextItemRequest = {
 /* Common property config */
 type BasePropertyConfig = {
   required?: boolean
-  validate?: (value: unknown) => boolean | string
 }
 
 /* Number format type */
