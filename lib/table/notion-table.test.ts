@@ -8,7 +8,7 @@ import { NotionTable } from "./notion-table"
 test("基本的な統合テスト", async () => {
   // 実際のNotionクライアントのようなレスポンスを返すモック
   const mockNotion = {
-    databases: {
+    dataSources: {
       query: async () => ({
         results: [
           {
@@ -81,8 +81,10 @@ test("基本的な統合テスト", async () => {
 
   // createのテスト
   const created = await table.create({
-    title: "新規タスク",
-    status: "todo",
+    properties: {
+      title: "新規タスク",
+      status: "todo",
+    },
   })
   expect(created.title).toBe("新規タスク")
   expect(created.status).toBe("todo")
@@ -90,7 +92,7 @@ test("基本的な統合テスト", async () => {
 
 test("高度なクエリのテスト", async () => {
   const mockNotion = {
-    databases: {
+    dataSources: {
       query: async (params: {
         database_id: string
         filter?: Record<string, unknown>
@@ -144,7 +146,7 @@ test("高度なクエリのテスト", async () => {
 
 test("バリデーションとフックのテスト", async () => {
   const mockNotion = {
-    databases: {
+    dataSources: {
       query: async () => ({ results: [], next_cursor: null, has_more: false }),
     },
     pages: {
@@ -203,12 +205,12 @@ test("バリデーションとフックのテスト", async () => {
   })
 
   // バリデーションエラー
-  await expect(table.create({ email: "invalid", age: 25 })).rejects.toThrow(
-    "有効なメールアドレスを入力してください",
-  )
+  expect(
+    table.create({ properties: { email: "invalid", age: 25 } }),
+  ).rejects.toThrow("有効なメールアドレスを入力してください")
 
-  await expect(
-    table.create({ email: "test@example.com", age: 150 }),
+  expect(
+    table.create({ properties: { email: "test@example.com", age: 150 } }),
   ).rejects.toThrow('Field "age" must be at most 120')
 
   // フック
@@ -220,7 +222,7 @@ test("バリデーションとフックのテスト", async () => {
     },
   }
 
-  await table.create({ email: "test@example.com", age: 25 })
+  await table.create({ properties: { email: "test@example.com", age: 25 } })
   expect(hookCalled).toBe(true)
 })
 
@@ -228,7 +230,7 @@ test("NotionMarkdownとの統合", async () => {
   let appendedBlocks: unknown[] = []
 
   const mockNotion = {
-    databases: {
+    dataSources: {
       query: async () => ({ results: [], next_cursor: null, has_more: false }),
     },
     pages: {
@@ -290,7 +292,9 @@ test("NotionMarkdownとの統合", async () => {
 
   // # Title -> heading_1 -> heading_2 に変換される
   await table.create({
-    title: "テストページ",
+    properties: {
+      title: "テストページ",
+    },
     body: "# Title\n\nParagraph\n\n## Subtitle",
   })
 
@@ -305,7 +309,7 @@ test("エンハンサーなしのデフォルト動作", async () => {
   let appendedBlocks: unknown[] = []
 
   const mockNotion = {
-    databases: {
+    dataSources: {
       query: async () => ({ results: [], next_cursor: null, has_more: false }),
     },
     pages: {
@@ -360,7 +364,9 @@ test("エンハンサーなしのデフォルト動作", async () => {
   })
 
   await table.create({
-    title: "テストページ",
+    properties: {
+      title: "テストページ",
+    },
     body: "# Title",
   })
 

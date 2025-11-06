@@ -1,29 +1,28 @@
 {
   "name": "@interactive-inc/notion-client",
-  "version": "1.0.2",
+  "version": "1.2.0",
   "type": "module",
   "scripts": {
     "format": "biome check . --fix --unsafe",
     "check": "tsgo --noEmit",
     "build": "tsup",
-    "deploy": "bun run build && npm publish",
     "claude": "claude --dangerously-skip-permissions",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs"
   },
   "dependencies": {
-    "@notionhq/client": "^4.0.1",
-    "marked": "^16.1.1",
-    "vitepress": "^1.6.3",
-    "zod": "^4.0.14"
+    "@notionhq/client": "^5.3.0",
+    "marked": "^16.4.1",
+    "vitepress": "^1.6.4",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.1.2",
+    "@biomejs/biome": "^2.3.3",
     "@types/bun": "latest",
-    "@typescript/native-preview": "^7.0.0-dev.20250728.1",
+    "@typescript/native-preview": "^7.0.0-dev.20251104.1",
     "tsup": "^8.5.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.3"
   },
   "publishConfig": {
     "access": "public"

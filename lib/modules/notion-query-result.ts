@@ -1,4 +1,4 @@
-import type { PageReference } from "./page-reference"
+import type { PageReference } from "./notion-page-reference"
 
 type Props<T> = {
   readonly pageReferences: PageReference<T>[]
@@ -9,7 +9,7 @@ type Props<T> = {
 /**
  * データベースクエリの結果を表すクラス
  */
-export class QueryResult<T> {
+export class NotionQueryResult<T> {
   constructor(private readonly props: Props<T>) {
     Object.freeze(this)
   }

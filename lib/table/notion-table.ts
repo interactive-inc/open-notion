@@ -1,7 +1,7 @@
 import type { Client } from "@notionhq/client"
 import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints"
-import { PageReference } from "@/modules/page-reference"
-import { QueryResult } from "@/modules/query-result"
+import { PageReference } from "@/modules/notion-page-reference"
+import { NotionQueryResult } from "@/modules/notion-query-result"
 import { NotionMarkdown } from "@/table/notion-markdown"
 import { NotionMemoryCache } from "@/table/notion-memory-cache"
 import { NotionPropertyConverter } from "@/table/notion-property-converter"
@@ -10,6 +10,7 @@ import { NotionSchemaValidator } from "@/table/notion-schema-validator"
 import { toNotionBlocks } from "@/to-notion-block/to-notion-blocks"
 import type {
   BatchResult,
+  CreateInput,
   FindOptions,
   NotionPage,
   Schema,
@@ -17,10 +18,22 @@ import type {
   SortOption,
   TableHooks,
   TableRecord,
+  UpdateInput,
   UpdateManyOptions,
   UpsertOptions,
   WhereCondition,
 } from "@/types"
+
+type Props<T extends Schema> = {
+  client: Client
+  tableId: string
+  schema: T
+  cache?: NotionMemoryCache
+  validator?: NotionSchemaValidator
+  queryBuilder?: NotionQueryBuilder
+  converter?: NotionPropertyConverter
+  enhancer?: NotionMarkdown
+}
 
 export class NotionTable<T extends Schema> {
   private readonly client: Client
@@ -33,16 +46,7 @@ export class NotionTable<T extends Schema> {
   private readonly enhancer: NotionMarkdown
   public hooks: TableHooks<T> = {}
 
-  constructor(options: {
-    client: Client
-    tableId: string
-    schema: T
-    cache?: NotionMemoryCache
-    validator?: NotionSchemaValidator
-    queryBuilder?: NotionQueryBuilder
-    converter?: NotionPropertyConverter
-    enhancer?: NotionMarkdown
-  }) {
+  constructor(options: Props<T>) {
     this.client = options.client
     this.tableId = options.tableId
     this.schema = options.schema
@@ -56,7 +60,8 @@ export class NotionTable<T extends Schema> {
   async findMany(
     options: FindOptions<T> = {},
   ): Promise<PageReference<TableRecord<SchemaType<T>>>[]> {
-    const { where = {}, count = 100, sorts } = options
+    const where = options.where || {}
+    const count = options.count || 100
 
     const maxCount = Math.min(Math.max(1, count), 1024)
     const pageSize = Math.min(maxCount, 100)
@@ -66,7 +71,7 @@ export class NotionTable<T extends Schema> {
         ? this.queryBuilder?.buildFilter(this.schema, where)
         : undefined
 
-    const notionSort = this.buildNotionSort(sorts)
+    const notionSort = this.buildNotionSort(options.sorts)
 
     const allRecords = await this.fetchAllRecords(
       maxCount,
@@ -115,24 +120,25 @@ export class NotionTable<T extends Schema> {
     }
   }
 
-  async create(
-    data: Partial<SchemaType<T>> & { body?: string },
-  ): Promise<TableRecord<SchemaType<T>>> {
-    this.validator?.validate(this.schema, data)
+  async create(input: CreateInput<T>): Promise<TableRecord<SchemaType<T>>> {
+    this.validator?.validate(this.schema, input.properties)
 
-    const processedData = this.hooks.beforeCreate
-      ? await this.hooks.beforeCreate(data)
-      : data
+    const processedInput = this.hooks.beforeCreate
+      ? await this.hooks.beforeCreate(input)
+      : input
 
     if (!this.converter) {
       throw new Error("Converter is not initialized")
     }
 
-    const properties = this.converter?.toNotion(this.schema, processedData)
+    const properties = this.converter.toNotion(
+      this.schema,
+      processedInput.properties,
+    )
 
     let children: unknown[] | undefined
-    if (processedData.body) {
-      const blocks = toNotionBlocks(processedData.body as string)
+    if (processedInput.body) {
+      const blocks = toNotionBlocks(processedInput.body)
       children = blocks.map((block) => {
         if ("type" in block && typeof block.type === "string") {
           const enhancedType = this.enhancer.enhanceBlockType(block.type)
@@ -160,8 +166,12 @@ export class NotionTable<T extends Schema> {
     return record
   }
 
+  get insert() {
+    return this.create
+  }
+
   async createMany(
-    records: Array<Partial<SchemaType<T>> & { body?: string }>,
+    records: Array<CreateInput<T>>,
   ): Promise<BatchResult<TableRecord<SchemaType<T>>>> {
     const results = await Promise.allSettled(
       records.map((record) => this.create(record)),
@@ -169,7 +179,7 @@ export class NotionTable<T extends Schema> {
 
     const succeeded: TableRecord<SchemaType<T>>[] = []
     const failed: Array<{
-      data: Partial<SchemaType<T>> & { body?: string }
+      data: CreateInput<T>
       error: Error
     }> = []
 
@@ -194,29 +204,35 @@ export class NotionTable<T extends Schema> {
     return { succeeded, failed }
   }
 
-  async update(
-    id: string,
-    data: Partial<SchemaType<T>> & { body?: string | null },
-  ): Promise<void> {
-    this.validator?.validate(this.schema, data, { skipRequired: true })
+  get insertMany() {
+    return this.createMany
+  }
 
-    const processedData = this.hooks.beforeUpdate
-      ? await this.hooks.beforeUpdate(id, data)
-      : data
+  async update(id: string, input: UpdateInput<T>): Promise<void> {
+    this.validator?.validate(this.schema, input.properties, {
+      skipRequired: true,
+    })
+
+    const processedInput = this.hooks.beforeUpdate
+      ? await this.hooks.beforeUpdate(id, input)
+      : input
 
     if (!this.converter) {
       throw new Error("Converter is not initialized")
     }
 
-    const properties = this.converter.toNotion(this.schema, processedData)
+    const properties = this.converter.toNotion(
+      this.schema,
+      processedInput.properties,
+    )
 
     await this.client.pages.update({
       page_id: id,
-      properties: properties as never,
+      properties: properties,
     })
 
-    if (processedData.body) {
-      await this.updatePageContent(id, processedData.body as string)
+    if (processedInput.body) {
+      await this.updatePageContent(id, processedInput.body)
     }
 
     this.cache?.delete(`page:${id}`)
@@ -230,7 +246,9 @@ export class NotionTable<T extends Schema> {
   }
 
   async updateMany(options: UpdateManyOptions<T>): Promise<number> {
-    const { where = {}, update, count = 1024 } = options
+    const where = options.where || {}
+    const update = options.update
+    const count = options.count || 1024
 
     const result = await this.findMany({ where, count })
 
@@ -244,18 +262,22 @@ export class NotionTable<T extends Schema> {
   }
 
   async upsert(options: UpsertOptions<T>): Promise<TableRecord<SchemaType<T>>> {
-    const { where, insert = {}, update } = options
+    const where = options.where
+    const insert = options.insert
+    const update = options.update
 
     const existingRecord = await this.findOne({ where })
 
     if (existingRecord) {
       await this.update(existingRecord.properties().id, update)
       const updated = await this.findById(existingRecord.properties().id)
-      return updated as TableRecord<SchemaType<T>>
+      if (updated === null) {
+        throw new Error("Failed to retrieve updated record")
+      }
+      return updated
     }
 
-    const createData = { ...where, ...insert } as Partial<SchemaType<T>>
-    return await this.create(createData)
+    return await this.create(insert)
   }
 
   async deleteMany(where: WhereCondition<T> = {}): Promise<number> {
@@ -315,14 +337,14 @@ export class NotionTable<T extends Schema> {
     pageSize: number,
     notionFilter: Record<string, unknown> | undefined,
     notionSort: Array<Record<string, unknown>>,
-  ): Promise<QueryResult<TableRecord<SchemaType<T>>>> {
+  ): Promise<NotionQueryResult<TableRecord<SchemaType<T>>>> {
     const allPageReferences: PageReference<TableRecord<SchemaType<T>>>[] = []
     let nextCursor: string | null = null
     let hasMore = true
 
     while (hasMore && allPageReferences.length < maxCount) {
-      const response = await this.client.databases.query({
-        database_id: this.tableId,
+      const response = await this.client.dataSources.query({
+        data_source_id: this.tableId,
         filter: notionFilter as never,
         sorts: notionSort.length > 0 ? (notionSort as never) : undefined,
         start_cursor: nextCursor || undefined,
@@ -339,14 +361,14 @@ export class NotionTable<T extends Schema> {
     }
 
     if (allPageReferences.length > maxCount) {
-      return new QueryResult({
+      return new NotionQueryResult({
         pageReferences: allPageReferences.slice(0, maxCount),
         cursor: nextCursor,
         hasMore,
       })
     }
 
-    return new QueryResult({
+    return new NotionQueryResult({
       pageReferences: allPageReferences,
       cursor: nextCursor,
       hasMore,

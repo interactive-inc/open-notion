@@ -1,8 +1,8 @@
 import { expect, test } from "bun:test"
 import type { Client } from "@notionhq/client"
 import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints"
-import { PageReference } from "./page-reference"
-import { QueryResult } from "./query-result"
+import { PageReference } from "./notion-page-reference"
+import { NotionQueryResult } from "./notion-query-result"
 
 test("ページ参照の配列を取得できる", () => {
   const mockClient = {} as Client
@@ -19,7 +19,7 @@ test("ページ参照の配列を取得できる", () => {
     rawData: { id: "page-2" } as PageObjectResponse,
   })
 
-  const queryResult = new QueryResult({
+  const queryResult = new NotionQueryResult({
     pageReferences: [pageRef1, pageRef2],
     cursor: "next-cursor",
     hasMore: true,
@@ -32,7 +32,7 @@ test("ページ参照の配列を取得できる", () => {
 })
 
 test("カーソルを取得できる", () => {
-  const queryResult = new QueryResult({
+  const queryResult = new NotionQueryResult({
     pageReferences: [],
     cursor: "next-page-cursor",
     hasMore: true,
@@ -42,7 +42,7 @@ test("カーソルを取得できる", () => {
 })
 
 test("カーソルがnullの場合", () => {
-  const queryResult = new QueryResult({
+  const queryResult = new NotionQueryResult({
     pageReferences: [],
     cursor: null,
     hasMore: false,
@@ -52,13 +52,13 @@ test("カーソルがnullの場合", () => {
 })
 
 test("さらにページがあるかを確認できる", () => {
-  const queryResultWithMore = new QueryResult({
+  const queryResultWithMore = new NotionQueryResult({
     pageReferences: [],
     cursor: "cursor",
     hasMore: true,
   })
 
-  const queryResultNoMore = new QueryResult({
+  const queryResultNoMore = new NotionQueryResult({
     pageReferences: [],
     cursor: null,
     hasMore: false,
@@ -81,7 +81,7 @@ test("ページ数を取得できる", () => {
       }),
   )
 
-  const queryResult = new QueryResult({
+  const queryResult = new NotionQueryResult({
     pageReferences: pageRefs,
     cursor: null,
     hasMore: false,
@@ -91,7 +91,7 @@ test("ページ数を取得できる", () => {
 })
 
 test("空の結果の場合", () => {
-  const queryResult = new QueryResult({
+  const queryResult = new NotionQueryResult({
     pageReferences: [],
     cursor: null,
     hasMore: false,
@@ -104,7 +104,7 @@ test("空の結果の場合", () => {
 })
 
 test("イミュータブルなオブジェクトである", () => {
-  const queryResult = new QueryResult({
+  const queryResult = new NotionQueryResult({
     pageReferences: [],
     cursor: null,
     hasMore: false,
@@ -134,7 +134,7 @@ test("型安全なプロパティを持つページ参照を扱える", () => {
     rawData: { id: "article-1" } as PageObjectResponse,
   })
 
-  const queryResult = new QueryResult<ArticleProperties>({
+  const queryResult = new NotionQueryResult<ArticleProperties>({
     pageReferences: [articleRef],
     cursor: null,
     hasMore: false,

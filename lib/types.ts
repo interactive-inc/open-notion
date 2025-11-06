@@ -383,16 +383,26 @@ export type FindOptions<T extends Schema> = {
   sorts?: SortOption<T> | SortOption<T>[]
 }
 
+export type CreateInput<T extends Schema> = {
+  properties: Partial<SchemaType<T>>
+  body?: string
+}
+
+export type UpdateInput<T extends Schema> = {
+  properties: Partial<SchemaType<T>>
+  body?: string | null
+}
+
 export type UpdateManyOptions<T extends Schema> = {
   where?: WhereCondition<T>
-  update: Partial<SchemaType<T>>
+  update: UpdateInput<T>
   count?: number
 }
 
 export type UpsertOptions<T extends Schema> = {
   where: WhereCondition<T>
-  insert: Partial<SchemaType<T>> & RequiredFields<T>
-  update: Partial<SchemaType<T>>
+  insert: CreateInput<T>
+  update: UpdateInput<T>
 }
 
 /* Query result type */
@@ -413,14 +423,9 @@ export type BatchResult<T> = {
 
 /* Hook definitions */
 export type TableHooks<T extends Schema> = {
-  beforeCreate?: (
-    data: Partial<SchemaType<T>>,
-  ) => Promise<Partial<SchemaType<T>>>
+  beforeCreate?: (data: CreateInput<T>) => Promise<CreateInput<T>>
   afterCreate?: (record: TableRecord<SchemaType<T>>) => Promise<void>
-  beforeUpdate?: (
-    id: string,
-    data: Partial<SchemaType<T>>,
-  ) => Promise<Partial<SchemaType<T>>>
+  beforeUpdate?: (id: string, data: UpdateInput<T>) => Promise<UpdateInput<T>>
   afterUpdate?: (
     id: string,
     record: TableRecord<SchemaType<T>>,

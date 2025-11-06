@@ -4,7 +4,8 @@ deploy:
 	bun biome check . --fix --unsafe
 	bun run check
 	bun test
-	bun run deploy
+	bun run build
+	npm publish
 
 check:
 	bun biome check . --fix --unsafe

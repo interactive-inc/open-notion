@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test"
 import type { Client } from "@notionhq/client"
 import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints"
-import { PageReference } from "./page-reference"
+import { PageReference } from "./notion-page-reference"
 
 test("プロパティを取得できる", () => {
   const mockProperties = { title: "Test Page", score: 100 }
