@@ -1,13 +1,15 @@
 import { expect, test } from "bun:test"
 import type { Schema, WhereCondition } from "@/types"
-import { toNotionQuery } from "./to-notion-query"
+import { NotionQueryBuilder } from "./notion-query-builder"
+
+const queryBuilder = new NotionQueryBuilder()
 
 test("シンプルな文字列条件", () => {
   const schema: Schema = {
     slug: { type: "rich_text" },
   }
 
-  const result = toNotionQuery(schema, { slug: "test" })
+  const result = queryBuilder.toNotionQuery(schema, { slug: "test" })
 
   expect(result).toEqual({
     property: "slug",
@@ -20,7 +22,7 @@ test("数値の等価条件", () => {
     count: { type: "number" },
   }
 
-  const result = toNotionQuery(schema, { count: 42 })
+  const result = queryBuilder.toNotionQuery(schema, { count: 42 })
 
   expect(result).toEqual({
     property: "count",
@@ -33,7 +35,7 @@ test("数値の比較演算子", () => {
     count: { type: "number" },
   }
 
-  const result = toNotionQuery(schema, {
+  const result = queryBuilder.toNotionQuery(schema, {
     and: [
       { count: { greater_than_or_equal_to: 10 } },
       { count: { less_than: 100 } },
@@ -59,7 +61,7 @@ test("select の複数条件", () => {
     status: { type: "select", options: ["todo", "done"] },
   }
 
-  const result = toNotionQuery(schema, {
+  const result = queryBuilder.toNotionQuery(schema, {
     or: [{ status: "todo" }, { status: "done" }],
   })
 
@@ -83,7 +85,7 @@ test("or 条件", () => {
     priority: { type: "number" },
   } as const
 
-  const result = toNotionQuery(schema, {
+  const result = queryBuilder.toNotionQuery(schema, {
     or: [{ status: "todo" }, { priority: { greater_than_or_equal_to: 5 } }],
   })
 
@@ -107,7 +109,7 @@ test("and 条件", () => {
     priority: { type: "number" },
   } as const
 
-  const result = toNotionQuery(schema, {
+  const result = queryBuilder.toNotionQuery(schema, {
     and: [{ status: "todo" }, { priority: 5 }],
   })
 
@@ -131,7 +133,7 @@ test("複数フィールドは自動的に and になる", () => {
     priority: { type: "number" },
   }
 
-  const result = toNotionQuery(schema, {
+  const result = queryBuilder.toNotionQuery(schema, {
     status: "todo",
     priority: 5,
   })
@@ -155,7 +157,7 @@ test("checkbox 型", () => {
     done: { type: "checkbox" },
   }
 
-  const result = toNotionQuery(schema, { done: true })
+  const result = queryBuilder.toNotionQuery(schema, { done: true })
 
   expect(result).toEqual({
     property: "done",
@@ -168,7 +170,7 @@ test("multi_select の contains", () => {
     tags: { type: "multi_select", options: ["js", "ts"] },
   }
 
-  const result = toNotionQuery(schema, { tags: "js" })
+  const result = queryBuilder.toNotionQuery(schema, { tags: "js" })
 
   expect(result).toEqual({
     property: "tags",
@@ -181,7 +183,7 @@ test("contains 演算子", () => {
     title: { type: "title" },
   }
 
-  const result = toNotionQuery(schema, {
+  const result = queryBuilder.toNotionQuery(schema, {
     title: { contains: "test" },
   })
 
@@ -196,7 +198,7 @@ test("空の条件は undefined を返す", () => {
     slug: { type: "rich_text" },
   }
 
-  const result = toNotionQuery(schema, {})
+  const result = queryBuilder.toNotionQuery(schema, {})
 
   expect(result).toBeUndefined()
 })
@@ -206,7 +208,7 @@ test("存在しないフィールドは無視される", () => {
     slug: { type: "rich_text" },
   }
 
-  const result = toNotionQuery(schema, {
+  const result = queryBuilder.toNotionQuery(schema, {
     nonexistent: "value",
   } as WhereCondition<typeof schema>)
 
@@ -218,7 +220,7 @@ test("Notion API filter format: equals", () => {
     slug: { type: "rich_text" },
   }
 
-  const result = toNotionQuery(schema, {
+  const result = queryBuilder.toNotionQuery(schema, {
     slug: { equals: "test-1" },
   })
 
@@ -233,7 +235,7 @@ test("Notion API filter format: contains", () => {
     title: { type: "title" },
   }
 
-  const result = toNotionQuery(schema, {
+  const result = queryBuilder.toNotionQuery(schema, {
     title: { contains: "hello" },
   })
 
@@ -248,7 +250,7 @@ test("Notion API filter format: number greater_than", () => {
     count: { type: "number" },
   }
 
-  const result = toNotionQuery(schema, {
+  const result = queryBuilder.toNotionQuery(schema, {
     count: { greater_than: 10 },
   })
 

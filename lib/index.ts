@@ -4,9 +4,10 @@ export type { NotionQueryWhere } from "./notion-types"
 export { NotionMarkdown } from "./table/notion-markdown"
 export { NotionMemoryCache } from "./table/notion-memory-cache"
 export { NotionPropertyConverter } from "./table/notion-property-converter"
-export { NotionQueryBuilder } from "./table/notion-query-builder"
+export {
+  NotionQueryBuilder,
+  toNotionQuery as toNotionQueryWhere,
+} from "./table/notion-query-builder"
 export { NotionTable } from "./table/notion-table"
-export { toNotionQuery as toNotionQueryWhere } from "./table/to-notion-query"
 export { toNotionBlocks } from "./to-notion-block/to-notion-blocks"
 export type * from "./types"
-export type { fromNotionRichTextItem } from "./utils"
