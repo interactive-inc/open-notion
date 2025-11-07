@@ -68,7 +68,7 @@ test("fromNotion: スキーマに基づいてプロパティを変換", () => {
 test("fromNotion: オプショナルなプロパティが存在しない場合", () => {
   const schema: Schema = {
     title: { type: "title" },
-    description: { type: "rich_text", required: false },
+    description: { type: "rich_text" },
   }
 
   const properties: PageObjectResponse["properties"] = {
@@ -83,25 +83,6 @@ test("fromNotion: オプショナルなプロパティが存在しない場合",
 
   expect(result.title).toBe("タイトルのみ")
   expect(result.description).toBeNull()
-})
-
-test("fromNotion: 必須プロパティが存在しない場合はエラー", () => {
-  const schema: Schema = {
-    title: { type: "title", required: true },
-    score: { type: "number", required: true },
-  }
-
-  const properties: PageObjectResponse["properties"] = {
-    title: {
-      id: "title-id",
-      type: "title",
-      title: [createRichTextItem("タイトル")],
-    },
-  }
-
-  expect(() => converter.fromNotion(schema, properties)).toThrow(
-    "必須プロパティ score が見つかりません",
-  )
 })
 
 test("toNotion: スキーマに基づいてデータを変換", () => {

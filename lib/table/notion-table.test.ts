@@ -61,7 +61,7 @@ test("基本的な統合テスト", async () => {
   } as unknown as Client
 
   const schema: Schema = {
-    title: { type: "title", required: true },
+    title: { type: "title" },
     status: { type: "select", options: ["todo", "in_progress", "done"] },
     priority: { type: "number" },
   }
@@ -140,7 +140,7 @@ test("高度なクエリのテスト", async () => {
   // 高度なクエリ
   await table.findMany({
     where: {
-      $or: [{ status: "todo" }, { priority: { $gte: 5 } }],
+      or: [{ status: "todo" }, { priority: { greater_than_or_equal_to: 5 } }],
     },
   })
 })
@@ -193,7 +193,7 @@ test("NotionMarkdownとの統合", async () => {
   } as unknown as Client
 
   const schema: Schema = {
-    title: { type: "title", required: true },
+    title: { type: "title" },
   }
 
   // H1をH2に変換するエンハンサーを設定
@@ -272,7 +272,7 @@ test("エンハンサーなしのデフォルト動作", async () => {
   } as unknown as Client
 
   const schema: Schema = {
-    title: { type: "title", required: true },
+    title: { type: "title" },
   }
 
   const table = new NotionTable({

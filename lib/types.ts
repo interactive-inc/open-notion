@@ -337,25 +337,52 @@ export type TableOptions<T extends Schema> = {
 }
 
 /* Advanced query operators */
-export type QueryOperator<T> = {
-  $eq?: T
-  $ne?: T
-  $gt?: T
-  $gte?: T
-  $lt?: T
-  $lte?: T
-  $in?: T[]
-  $contains?: T extends string ? string : never
+import type {
+  CheckboxPropertyFilter,
+  DatePropertyFilter,
+  MultiSelectPropertyFilter,
+  NumberPropertyFilter,
+  PeoplePropertyFilter,
+  RelationPropertyFilter,
+  SelectPropertyFilter,
+  StatusPropertyFilter,
+  TextPropertyFilter,
+} from "./notion-types"
+
+type PropertyFilterForType<Config> = Config extends { type: "title" }
+  ? TextPropertyFilter
+  : Config extends { type: "rich_text" }
+    ? TextPropertyFilter
+    : Config extends { type: "number" }
+      ? NumberPropertyFilter
+      : Config extends { type: "checkbox" }
+        ? CheckboxPropertyFilter
+        : Config extends { type: "select" }
+          ? SelectPropertyFilter
+          : Config extends { type: "multi_select" }
+            ? MultiSelectPropertyFilter
+            : Config extends { type: "status" }
+              ? StatusPropertyFilter
+              : Config extends { type: "date" }
+                ? DatePropertyFilter
+                : Config extends { type: "people" }
+                  ? PeoplePropertyFilter
+                  : Config extends { type: "relation" }
+                    ? RelationPropertyFilter
+                    : never
+
+type WhereFieldCondition<T extends Schema> = {
+  [K in keyof SchemaType<T>]?: SchemaType<T>[K] | PropertyFilterForType<T[K]>
 }
 
-export type WhereCondition<T extends Schema> = {
-  [K in keyof SchemaType<T>]?:
-    | SchemaType<T>[K]
-    | QueryOperator<SchemaType<T>[K]>
-} & {
-  $or?: WhereCondition<T>[]
-  $and?: WhereCondition<T>[]
-}
+export type WhereCondition<T extends Schema> =
+  | {
+      or: WhereCondition<T>[]
+    }
+  | {
+      and: WhereCondition<T>[]
+    }
+  | WhereFieldCondition<T>
 
 export type FindOptions<T extends Schema> = {
   where?: WhereCondition<T>

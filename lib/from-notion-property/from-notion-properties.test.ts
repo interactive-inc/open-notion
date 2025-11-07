@@ -5,9 +5,9 @@ import { fromNotionProperties } from "./from-notion-properties"
 
 test("スキーマに基づいてプロパティを変換", () => {
   const schema: Schema = {
-    title: { type: "title", required: true },
+    title: { type: "title" },
     description: { type: "rich_text" },
-    price: { type: "number", required: true },
+    price: { type: "number" },
     isActive: { type: "checkbox" },
   }
 
@@ -75,7 +75,7 @@ test("スキーマに基づいてプロパティを変換", () => {
 
 test("オプショナルなプロパティが存在しない場合", () => {
   const schema: Schema = {
-    title: { type: "title", required: true },
+    title: { type: "title" },
     description: { type: "rich_text" },
   }
 
@@ -109,18 +109,6 @@ test("オプショナルなプロパティが存在しない場合", () => {
   })
 })
 
-test("必須プロパティが存在しない場合はエラー", () => {
-  const schema: Schema = {
-    title: { type: "title", required: true },
-  }
-
-  const properties: PageObjectResponse["properties"] = {}
-
-  expect(() => fromNotionProperties(schema, properties)).toThrow(
-    "必須プロパティ title が見つかりません",
-  )
-})
-
 test("プロパティタイプが一致しない場合はエラー", () => {
   const schema: Schema = {
     title: { type: "title" },
@@ -141,7 +129,7 @@ test("プロパティタイプが一致しない場合はエラー", () => {
 
 test("複数のプロパティタイプを含むスキーマを変換", () => {
   const schema: Schema = {
-    name: { type: "title", required: true },
+    name: { type: "title" },
     tags: { type: "multi_select", options: null },
     status: { type: "select", options: ["進行中", "完了", "未着手"] },
     deadline: { type: "date" },

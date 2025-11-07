@@ -11,13 +11,13 @@ test("buildFilter: 単純な条件", () => {
     priority: { type: "number" },
   }
 
-  // タイトルの部分一致
+  // タイトルの完全一致
   const titleFilter = queryBuilder.buildFilter(schema, {
     title: "検索語",
   })
   expect(titleFilter).toEqual({
     property: "title",
-    title: { contains: "検索語" },
+    title: { equals: "検索語" },
   })
 
   // 選択肢の完全一致
@@ -52,20 +52,20 @@ test("buildFilter: 複数条件（AND）", () => {
 
   expect(filter).toEqual({
     and: [
-      { property: "title", title: { contains: "タスク" } },
+      { property: "title", title: { equals: "タスク" } },
       { property: "status", select: { equals: "todo" } },
     ],
   })
 })
 
-test("buildFilter: $or条件", () => {
+test("buildFilter: or条件", () => {
   const schema = {
     status: { type: "select", options: ["todo", "in_progress", "done"] },
     priority: { type: "number" },
   } as const
 
   const filter = queryBuilder.buildFilter(schema, {
-    $or: [{ status: "todo" }, { priority: 5 }],
+    or: [{ status: "todo" }, { priority: 5 }],
   })
 
   expect(filter).toEqual({
@@ -76,14 +76,14 @@ test("buildFilter: $or条件", () => {
   })
 })
 
-test("buildFilter: $and条件", () => {
+test("buildFilter: and条件", () => {
   const schema = {
     status: { type: "select", options: ["todo", "done"] },
     priority: { type: "number" },
   } as const
 
   const filter = queryBuilder.buildFilter(schema, {
-    $and: [{ status: "todo" }, { priority: 5 }],
+    and: [{ status: "todo" }, { priority: 5 }],
   })
 
   expect(filter).toEqual({
@@ -94,7 +94,7 @@ test("buildFilter: $and条件", () => {
   })
 })
 
-test("buildFilter: 演算子条件", () => {
+test("buildFilter: Notion API filter format", () => {
   const schema: Schema = {
     priority: { type: "number" },
     deadline: { type: "date" },
@@ -102,7 +102,7 @@ test("buildFilter: 演算子条件", () => {
 
   // 数値の比較演算子
   const gtFilter = queryBuilder.buildFilter(schema, {
-    priority: { $gt: 3 },
+    priority: { greater_than: 3 },
   })
   expect(gtFilter).toEqual({
     property: "priority",
@@ -110,7 +110,7 @@ test("buildFilter: 演算子条件", () => {
   })
 
   const gteFilter = queryBuilder.buildFilter(schema, {
-    priority: { $gte: 3 },
+    priority: { greater_than_or_equal_to: 3 },
   })
   expect(gteFilter).toEqual({
     property: "priority",
@@ -118,7 +118,7 @@ test("buildFilter: 演算子条件", () => {
   })
 
   const ltFilter = queryBuilder.buildFilter(schema, {
-    priority: { $lt: 5 },
+    priority: { less_than: 5 },
   })
   expect(ltFilter).toEqual({
     property: "priority",
@@ -126,7 +126,7 @@ test("buildFilter: 演算子条件", () => {
   })
 
   const lteFilter = queryBuilder.buildFilter(schema, {
-    priority: { $lte: 5 },
+    priority: { less_than_or_equal_to: 5 },
   })
   expect(lteFilter).toEqual({
     property: "priority",
@@ -135,7 +135,7 @@ test("buildFilter: 演算子条件", () => {
 
   // 日付の比較演算子
   const dateAfterFilter = queryBuilder.buildFilter(schema, {
-    deadline: { $gt: { start: "2024-01-01", end: null } },
+    deadline: { after: "2024-01-01" },
   })
   expect(dateAfterFilter).toEqual({
     property: "deadline",
@@ -143,7 +143,7 @@ test("buildFilter: 演算子条件", () => {
   })
 })
 
-test("buildFilter: $contains演算子", () => {
+test("buildFilter: contains演算子", () => {
   const schema: Schema = {
     title: { type: "title" },
     description: { type: "rich_text" },
@@ -152,7 +152,7 @@ test("buildFilter: $contains演算子", () => {
 
   // タイトルの部分一致
   const titleContains = queryBuilder.buildFilter(schema, {
-    title: { $contains: "検索" },
+    title: { contains: "検索" },
   })
   expect(titleContains).toEqual({
     property: "title",
@@ -161,7 +161,7 @@ test("buildFilter: $contains演算子", () => {
 
   // リッチテキストの部分一致
   const richTextContains = queryBuilder.buildFilter(schema, {
-    description: { $contains: "説明" },
+    description: { contains: "説明" },
   })
   expect(richTextContains).toEqual({
     property: "description",
@@ -170,7 +170,7 @@ test("buildFilter: $contains演算子", () => {
 
   // 複数選択の包含
   const multiSelectContains = queryBuilder.buildFilter(schema, {
-    tags: ["js"],
+    tags: "js",
   })
   expect(multiSelectContains).toEqual({
     property: "tags",
@@ -178,13 +178,13 @@ test("buildFilter: $contains演算子", () => {
   })
 })
 
-test("buildFilter: $in演算子", () => {
+test("buildFilter: 複数選択肢のor条件", () => {
   const schema: Schema = {
     status: { type: "select", options: ["todo", "in_progress", "done"] },
   }
 
   const filter = queryBuilder.buildFilter(schema, {
-    status: { $in: ["todo", "in_progress"] },
+    or: [{ status: "todo" }, { status: "in_progress" }],
   })
 
   expect(filter).toEqual({
@@ -193,24 +193,15 @@ test("buildFilter: $in演算子", () => {
       { property: "status", select: { equals: "in_progress" } },
     ],
   })
-
-  // 単一値の場合
-  const singleFilter = queryBuilder.buildFilter(schema, {
-    status: { $in: ["todo"] },
-  })
-  expect(singleFilter).toEqual({
-    property: "status",
-    select: { equals: "todo" },
-  })
 })
 
-test("buildFilter: $ne演算子", () => {
+test("buildFilter: does_not_equal演算子", () => {
   const schema: Schema = {
     status: { type: "select", options: ["todo", "done"] },
   }
 
   const filter = queryBuilder.buildFilter(schema, {
-    status: { $ne: "done" },
+    status: { does_not_equal: "done" },
   })
 
   expect(filter).toEqual({
@@ -227,10 +218,13 @@ test("buildFilter: 複雑な条件の組み合わせ", () => {
   } as const
 
   const filter = queryBuilder.buildFilter(schema, {
-    $or: [
+    or: [
       { status: "todo" },
       {
-        $and: [{ priority: { $gte: 5 } }, { title: { $contains: "重要" } }],
+        and: [
+          { priority: { greater_than_or_equal_to: 5 } },
+          { title: { contains: "重要" } },
+        ],
       },
     ],
   })
@@ -279,7 +273,7 @@ test("buildFilter: フォーミュラ型のフィルター", () => {
   })
   expect(booleanFormula).toEqual({
     property: "isActive",
-    formula: { boolean: { equals: true } },
+    formula: { checkbox: { equals: true } },
   })
 })
 
@@ -289,7 +283,7 @@ test("buildFilter: 空の条件", () => {
   }
 
   const filter = queryBuilder.buildFilter(schema, {})
-  expect(filter).toEqual({})
+  expect(filter).toBeUndefined()
 })
 
 test("buildSort: ソート条件の変換", () => {
@@ -328,7 +322,7 @@ test("buildFilter: 日付型の様々な形式", () => {
   })
   expect(dateRangeFilter).toEqual({
     property: "deadline",
-    date: { on: "2024-01-01" },
+    date: { equals: "2024-01-01" },
   })
 
   // Date型
@@ -337,7 +331,7 @@ test("buildFilter: 日付型の様々な形式", () => {
   })
   expect(dateFilter).toEqual({
     property: "deadline",
-    date: { on: "2024-01-01" },
+    date: { equals: "2024-01-01" },
   })
 
   // 文字列型
@@ -346,7 +340,7 @@ test("buildFilter: 日付型の様々な形式", () => {
   })
   expect(stringDateFilter).toEqual({
     property: "deadline",
-    date: { on: "2024-01-01" },
+    date: { equals: "2024-01-01" },
   })
 })
 
@@ -361,6 +355,6 @@ test("buildFilter: 無効なプロパティはスキップ", () => {
 
   expect(filter).toEqual({
     property: "title",
-    title: { contains: "有効" },
+    title: { equals: "有効" },
   })
 })

@@ -15,9 +15,6 @@ export function fromNotionProperties<T extends Schema>(
     const property = properties[key]
 
     if (!property) {
-      if (config.required) {
-        throw new Error(`必須プロパティ ${key} が見つかりません`)
-      }
       result[key] = null
       continue
     }
