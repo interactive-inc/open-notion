@@ -1,18 +1,21 @@
 import type { Client } from "@notionhq/client"
-import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints"
+import type {
+  BlockObjectRequest,
+  PageObjectResponse,
+} from "@notionhq/client/build/src/api-endpoints"
 import { NotionPageReference } from "@/modules/notion-page-reference"
 import { NotionQueryResult } from "@/modules/notion-query-result"
 import { NotionMarkdown } from "@/table/notion-markdown"
 import { NotionMemoryCache } from "@/table/notion-memory-cache"
 import { NotionPropertyConverter } from "@/table/notion-property-converter"
 import { NotionQueryBuilder } from "@/table/notion-query-builder"
-import { NotionSchemaValidator } from "@/table/notion-schema-validator"
 import { toNotionBlocks } from "@/to-notion-block/to-notion-blocks"
 import type {
   BatchResult,
   CreateInput,
   FindOptions,
   Schema,
+  SchemaType,
   SortOption,
   UpdateInput,
   UpdateManyOptions,
@@ -26,7 +29,6 @@ type Props<T extends Schema> = {
   tableId: string
   schema: T
   cache?: NotionMemoryCache
-  validator?: NotionSchemaValidator
   queryBuilder?: NotionQueryBuilder
   propertyConverter?: NotionPropertyConverter
   markdown?: NotionMarkdown
@@ -37,7 +39,6 @@ export class NotionTable<T extends Schema> {
   private readonly tableId: string
   private readonly schema: T
   private readonly cache: NotionMemoryCache
-  private readonly validator: NotionSchemaValidator
   private readonly queryBuilder: NotionQueryBuilder
   private readonly propertyConverter: NotionPropertyConverter
   private readonly markdown: NotionMarkdown
@@ -47,7 +48,6 @@ export class NotionTable<T extends Schema> {
     this.tableId = props.tableId
     this.schema = props.schema
     this.cache = props.cache || new NotionMemoryCache()
-    this.validator = props.validator || new NotionSchemaValidator()
     this.queryBuilder = props.queryBuilder || new NotionQueryBuilder()
     this.propertyConverter =
       props.propertyConverter || new NotionPropertyConverter()
@@ -128,22 +128,21 @@ export class NotionTable<T extends Schema> {
   }
 
   async create(input: CreateInput<T>): Promise<NotionPageReference<T>> {
-    this.validator.validate(this.schema, input.properties)
-
     if (!this.propertyConverter) {
       throw new Error("Converter is not initialized")
     }
 
     const properties = this.propertyConverter.toNotion(
       this.schema,
-      input.properties,
+      input.properties as Partial<SchemaType<T>>,
     )
 
-    let children: unknown[] | undefined
+    let children: BlockObjectRequest[] = []
+
     if (input.body) {
       const blocks = toNotionBlocks(input.body)
       children = blocks.map((block) => {
-        if ("type" in block && typeof block.type === "string") {
+        if (typeof block.type === "string") {
           const enhancedType = this.markdown.enhanceBlockType(block.type)
           return { ...block, type: enhancedType } as typeof block
         }
@@ -153,8 +152,8 @@ export class NotionTable<T extends Schema> {
 
     const response = await this.client.pages.create({
       parent: { data_source_id: this.tableId },
-      properties: properties as never,
-      children: children as never,
+      properties: properties,
+      children: children,
     })
 
     const record = await this.findById(response.id)
@@ -174,10 +173,13 @@ export class NotionTable<T extends Schema> {
     records: Array<CreateInput<T>>,
   ): Promise<BatchResult<NotionPageReference<T>>> {
     const results = await Promise.allSettled(
-      records.map((record) => this.create(record)),
+      records.map((record) => {
+        return this.create(record)
+      }),
     )
 
     const succeeded: NotionPageReference<T>[] = []
+
     const failed: Array<{
       data: CreateInput<T>
       error: Error
@@ -215,10 +217,6 @@ export class NotionTable<T extends Schema> {
     id: string,
     input: UpdateInput<T>,
   ): Promise<NotionPageReference<T>> {
-    this.validator?.validate(this.schema, input.properties, {
-      skipRequired: true,
-    })
-
     if (!this.propertyConverter) {
       throw new Error("Converter is not initialized")
     }
@@ -259,6 +257,7 @@ export class NotionTable<T extends Schema> {
     })
 
     let updated = 0
+
     for (const record of result) {
       await this.update(record.id, options.update)
       updated++

@@ -5,7 +5,6 @@ import { z } from "zod"
  */
 export const zTitlePropertyConfig = z.object({
   type: z.literal("title"),
-  required: z.boolean().optional(),
 })
 
 /**
@@ -13,7 +12,6 @@ export const zTitlePropertyConfig = z.object({
  */
 export const zRichTextPropertyConfig = z.object({
   type: z.literal("rich_text"),
-  required: z.boolean().optional(),
 })
 
 /**
@@ -38,7 +36,6 @@ const zNumberFormat = z.enum([
  */
 export const zNumberPropertyConfig = z.object({
   type: z.literal("number"),
-  required: z.boolean().optional(),
   format: zNumberFormat.optional(),
   min: z.number().optional(),
   max: z.number().optional(),
@@ -49,7 +46,6 @@ export const zNumberPropertyConfig = z.object({
  */
 export const zCheckboxPropertyConfig = z.object({
   type: z.literal("checkbox"),
-  required: z.boolean().optional(),
 })
 
 /**
@@ -57,7 +53,6 @@ export const zCheckboxPropertyConfig = z.object({
  */
 export const zSelectPropertyConfig = z.object({
   type: z.literal("select"),
-  required: z.boolean().optional(),
   options: z.union([z.array(z.string()).readonly(), z.array(z.string())]),
 })
 
@@ -66,7 +61,6 @@ export const zSelectPropertyConfig = z.object({
  */
 export const zMultiSelectPropertyConfig = z.object({
   type: z.literal("multi_select"),
-  required: z.boolean().optional(),
   options: z.array(z.string()).nullable(),
 })
 
@@ -75,7 +69,6 @@ export const zMultiSelectPropertyConfig = z.object({
  */
 export const zStatusPropertyConfig = z.object({
   type: z.literal("status"),
-  required: z.boolean().optional(),
   options: z.union([z.array(z.string()).readonly(), z.array(z.string())]),
 })
 
@@ -84,7 +77,6 @@ export const zStatusPropertyConfig = z.object({
  */
 export const zDatePropertyConfig = z.object({
   type: z.literal("date"),
-  required: z.boolean().optional(),
 })
 
 /**
@@ -92,7 +84,6 @@ export const zDatePropertyConfig = z.object({
  */
 export const zUrlPropertyConfig = z.object({
   type: z.literal("url"),
-  required: z.boolean().optional(),
 })
 
 /**
@@ -100,7 +91,6 @@ export const zUrlPropertyConfig = z.object({
  */
 export const zEmailPropertyConfig = z.object({
   type: z.literal("email"),
-  required: z.boolean().optional(),
 })
 
 /**
@@ -108,7 +98,6 @@ export const zEmailPropertyConfig = z.object({
  */
 export const zPhoneNumberPropertyConfig = z.object({
   type: z.literal("phone_number"),
-  required: z.boolean().optional(),
 })
 
 /**
@@ -116,9 +105,6 @@ export const zPhoneNumberPropertyConfig = z.object({
  */
 export const zRelationPropertyConfig = z.object({
   type: z.literal("relation"),
-  required: z.boolean().optional(),
-  database_id: z.string(),
-  single_property: z.boolean().optional(),
 })
 
 /**
@@ -126,7 +112,6 @@ export const zRelationPropertyConfig = z.object({
  */
 export const zPeoplePropertyConfig = z.object({
   type: z.literal("people"),
-  required: z.boolean().optional(),
 })
 
 /**
@@ -134,7 +119,6 @@ export const zPeoplePropertyConfig = z.object({
  */
 export const zFilesPropertyConfig = z.object({
   type: z.literal("files"),
-  required: z.boolean().optional(),
 })
 
 /**
@@ -142,7 +126,6 @@ export const zFilesPropertyConfig = z.object({
  */
 export const zCreatedTimePropertyConfig = z.object({
   type: z.literal("created_time"),
-  required: z.boolean().optional(),
 })
 
 /**
@@ -150,7 +133,6 @@ export const zCreatedTimePropertyConfig = z.object({
  */
 export const zCreatedByPropertyConfig = z.object({
   type: z.literal("created_by"),
-  required: z.boolean().optional(),
 })
 
 /**
@@ -158,7 +140,6 @@ export const zCreatedByPropertyConfig = z.object({
  */
 export const zLastEditedTimePropertyConfig = z.object({
   type: z.literal("last_edited_time"),
-  required: z.boolean().optional(),
 })
 
 /**
@@ -166,7 +147,6 @@ export const zLastEditedTimePropertyConfig = z.object({
  */
 export const zLastEditedByPropertyConfig = z.object({
   type: z.literal("last_edited_by"),
-  required: z.boolean().optional(),
 })
 
 /**
@@ -174,7 +154,6 @@ export const zLastEditedByPropertyConfig = z.object({
  */
 export const zFormulaPropertyConfig = z.object({
   type: z.literal("formula"),
-  required: z.boolean().optional(),
   formulaType: z.enum(["string", "number", "boolean", "date"]),
 })
 
@@ -206,4 +185,4 @@ export const zPropertyConfig = z.discriminatedUnion("type", [
 /**
  * スキーマのスキーマ
  */
-export const zSchema = z.record(z.string(), zPropertyConfig)
+export const zNotionPropertyConfig = z.record(z.string(), zPropertyConfig)

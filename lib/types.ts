@@ -5,7 +5,7 @@ import type {
   UpdatePageParameters,
 } from "@notionhq/client/build/src/api-endpoints"
 import type { z } from "zod"
-import type { zPropertyConfig, zSchema } from "./models"
+import type { zNotionPropertyConfig, zPropertyConfig } from "./models"
 
 /* Notion page object type */
 export type NotionPage = PageObjectResponse
@@ -138,11 +138,6 @@ export type RichTextItemRequest = {
   }
 }
 
-/* Common property config */
-type BasePropertyConfig = {
-  required?: boolean
-}
-
 /* Number format type */
 type NumberFormat =
   | "number"
@@ -157,87 +152,85 @@ type NumberFormat =
   | "won"
   | "yuan"
 
-export type TitlePropertyConfig = BasePropertyConfig & {
+export type TitlePropertyConfig = {
   type: "title"
 }
 
-export type RichTextPropertyConfig = BasePropertyConfig & {
+export type RichTextPropertyConfig = {
   type: "rich_text"
 }
 
-export type NumberPropertyConfig = BasePropertyConfig & {
+export type NumberPropertyConfig = {
   type: "number"
   format?: NumberFormat
   min?: number
   max?: number
 }
 
-export type SelectPropertyConfig = BasePropertyConfig & {
+export type SelectPropertyConfig = {
   type: "select"
   options: readonly string[] | string[]
 }
 
-export type MultiSelectPropertyConfig = BasePropertyConfig & {
+export type MultiSelectPropertyConfig = {
   type: "multi_select"
   options: string[] | null
 }
 
-export type StatusPropertyConfig = BasePropertyConfig & {
+export type StatusPropertyConfig = {
   type: "status"
   options: readonly string[] | string[]
 }
 
-export type DatePropertyConfig = BasePropertyConfig & {
+export type DatePropertyConfig = {
   type: "date"
 }
 
-export type PeoplePropertyConfig = BasePropertyConfig & {
+export type PeoplePropertyConfig = {
   type: "people"
 }
 
-export type FilesPropertyConfig = BasePropertyConfig & {
+export type FilesPropertyConfig = {
   type: "files"
 }
 
-export type CheckboxPropertyConfig = BasePropertyConfig & {
+export type CheckboxPropertyConfig = {
   type: "checkbox"
 }
 
-export type UrlPropertyConfig = BasePropertyConfig & {
+export type UrlPropertyConfig = {
   type: "url"
 }
 
-export type EmailPropertyConfig = BasePropertyConfig & {
+export type EmailPropertyConfig = {
   type: "email"
 }
 
-export type PhoneNumberPropertyConfig = BasePropertyConfig & {
+export type PhoneNumberPropertyConfig = {
   type: "phone_number"
 }
 
-export type RelationPropertyConfig = BasePropertyConfig & {
+export type RelationPropertyConfig = {
   type: "relation"
-  database_id: string
-  single_property?: boolean
 }
 
-export type CreatedTimePropertyConfig = BasePropertyConfig & {
+export type CreatedTimePropertyConfig = {
   type: "created_time"
 }
 
-export type CreatedByPropertyConfig = BasePropertyConfig & {
+export type CreatedByPropertyConfig = {
   type: "created_by"
 }
 
-export type LastEditedTimePropertyConfig = BasePropertyConfig & {
+export type LastEditedTimePropertyConfig = {
   type: "last_edited_time"
 }
 
-export type LastEditedByPropertyConfig = BasePropertyConfig & {
+export type LastEditedByPropertyConfig = {
   type: "last_edited_by"
 }
 
-export type FormulaPropertyConfig = BasePropertyConfig & {
+export type FormulaPropertyConfig = {
   type: "formula"
   formulaType: "string" | "number" | "boolean" | "date"
 }
@@ -246,7 +239,7 @@ export type FormulaPropertyConfig = BasePropertyConfig & {
 export type PropertyConfig = z.infer<typeof zPropertyConfig>
 
 /* Database schema definition - inferred from zod */
-export type Schema = z.infer<typeof zSchema>
+export type Schema = z.infer<typeof zNotionPropertyConfig>
 
 /* Type mapping for schema */
 export type PropertyTypeMapping<T extends PropertyConfig> = T extends
@@ -336,17 +329,6 @@ export type SortOption<T extends Schema> = {
   direction: "asc" | "desc"
 }
 
-/* Get required field keys */
-export type RequiredKeys<T extends Schema> = {
-  [K in keyof T]: T[K] extends { required: true } ? K : never
-}[keyof T] &
-  keyof SchemaType<T>
-
-/* Required fields type */
-export type RequiredFields<T extends Schema> = {
-  [K in RequiredKeys<T>]: SchemaType<T>[K]
-}
-
 /* Table creation options */
 export type TableOptions<T extends Schema> = {
   notion: Client
@@ -382,7 +364,7 @@ export type FindOptions<T extends Schema> = {
 }
 
 export type CreateInput<T extends Schema> = {
-  properties: Pick<SchemaType<T>, RequiredKeys<T>> & Partial<SchemaType<T>>
+  properties: Partial<SchemaType<T>>
   body?: string
 }
 
