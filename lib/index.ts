@@ -1,13 +1,9 @@
 export { fromNotionBlock } from "./from-notion-block/from-notion-block"
 export { fromNotionBlocks } from "./from-notion-block/from-notion-blocks"
-export type { NotionQueryWhere } from "./notion-types"
 export { NotionMarkdown } from "./table/notion-markdown"
 export { NotionMemoryCache } from "./table/notion-memory-cache"
 export { NotionPropertyConverter } from "./table/notion-property-converter"
-export {
-  NotionQueryBuilder,
-  toNotionQuery as toNotionQueryWhere,
-} from "./table/notion-query-builder"
+export { NotionQueryBuilder } from "./table/notion-query-builder"
 export { NotionTable } from "./table/notion-table"
 export { toNotionBlocks } from "./to-notion-block/to-notion-blocks"
 export type * from "./types"

@@ -358,3 +358,134 @@ test("buildFilter: 無効なプロパティはスキップ", () => {
     title: { equals: "有効" },
   })
 })
+
+test("buildFilter: checkbox型", () => {
+  const schema: Schema = {
+    done: { type: "checkbox" },
+  }
+
+  const filter = queryBuilder.buildFilter(schema, { done: true })
+
+  expect(filter).toEqual({
+    property: "done",
+    checkbox: { equals: true },
+  })
+})
+
+test("toNotionQuery: シンプルな文字列条件", () => {
+  const schema: Schema = {
+    slug: { type: "rich_text" },
+  }
+
+  const result = queryBuilder.toNotionQuery(schema, { slug: "test" })
+
+  expect(result).toEqual({
+    property: "slug",
+    rich_text: { equals: "test" },
+  })
+})
+
+test("toNotionQuery: 数値の等価条件", () => {
+  const schema: Schema = {
+    count: { type: "number" },
+  }
+
+  const result = queryBuilder.toNotionQuery(schema, { count: 42 })
+
+  expect(result).toEqual({
+    property: "count",
+    number: { equals: 42 },
+  })
+})
+
+test("toNotionQuery: 複数フィールドは自動的に and になる", () => {
+  const schema: Schema = {
+    status: { type: "select", options: ["todo"] },
+    priority: { type: "number" },
+  }
+
+  const result = queryBuilder.toNotionQuery(schema, {
+    status: "todo",
+    priority: 5,
+  })
+
+  expect(result).toEqual({
+    and: [
+      {
+        property: "status",
+        select: { equals: "todo" },
+      },
+      {
+        property: "priority",
+        number: { equals: 5 },
+      },
+    ],
+  })
+})
+
+test("toNotionQuery: 空の条件は undefined を返す", () => {
+  const schema: Schema = {
+    slug: { type: "rich_text" },
+  }
+
+  const result = queryBuilder.toNotionQuery(schema, {})
+
+  expect(result).toBeUndefined()
+})
+
+test("toNotionQuery: 存在しないフィールドは無視される", () => {
+  const schema: Schema = {
+    slug: { type: "rich_text" },
+  }
+
+  const result = queryBuilder.toNotionQuery(schema, {
+    nonexistent: "value",
+  } as any)
+
+  expect(result).toBeUndefined()
+})
+
+test("toNotionQuery: Notion API filter format - equals", () => {
+  const schema: Schema = {
+    slug: { type: "rich_text" },
+  }
+
+  const result = queryBuilder.toNotionQuery(schema, {
+    slug: { equals: "test-1" },
+  })
+
+  expect(result).toEqual({
+    property: "slug",
+    rich_text: { equals: "test-1" },
+  })
+})
+
+test("toNotionQuery: Notion API filter format - contains", () => {
+  const schema: Schema = {
+    title: { type: "title" },
+  }
+
+  const result = queryBuilder.toNotionQuery(schema, {
+    title: { contains: "hello" },
+  })
+
+  expect(result).toEqual({
+    property: "title",
+    title: { contains: "hello" },
+  })
+})
+
+test("toNotionQuery: Notion API filter format - number greater_than", () => {
+  const schema: Schema = {
+    count: { type: "number" },
+  }
+
+  const result = queryBuilder.toNotionQuery(schema, {
+    count: { greater_than: 10 },
+  })
+
+  expect(result).toEqual({
+    property: "count",
+    number: { greater_than: 10 },
+  })
+})
