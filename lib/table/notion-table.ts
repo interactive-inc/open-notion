@@ -14,7 +14,7 @@ import type {
   BatchResult,
   CreateInput,
   FindOptions,
-  Schema,
+  NotionPropertySchema,
   SchemaType,
   SortOption,
   UpdateInput,
@@ -24,20 +24,20 @@ import type {
 } from "@/types"
 import { toNotionPage } from "@/utils"
 
-type Props<T extends Schema> = {
+type Props<T extends NotionPropertySchema> = {
   client: Client
-  tableId: string
-  schema: T
+  dataSourceId: string
+  properties: T
   cache?: NotionMemoryCache
   queryBuilder?: NotionQueryBuilder
   propertyConverter?: NotionPropertyConverter
   markdown?: NotionMarkdown
 }
 
-export class NotionTable<T extends Schema> {
+export class NotionTable<T extends NotionPropertySchema> {
   private readonly client: Client
-  private readonly tableId: string
-  private readonly schema: T
+  private readonly dataSourceId: string
+  private readonly properties: T
   private readonly cache: NotionMemoryCache
   private readonly queryBuilder: NotionQueryBuilder
   private readonly propertyConverter: NotionPropertyConverter
@@ -45,8 +45,8 @@ export class NotionTable<T extends Schema> {
 
   constructor(props: Props<T>) {
     this.client = props.client
-    this.tableId = props.tableId
-    this.schema = props.schema
+    this.dataSourceId = props.dataSourceId
+    this.properties = props.properties
     this.cache = props.cache || new NotionMemoryCache()
     this.queryBuilder = props.queryBuilder || new NotionQueryBuilder()
     this.propertyConverter =
@@ -65,7 +65,7 @@ export class NotionTable<T extends Schema> {
 
     const notionFilter =
       Object.keys(where).length > 0
-        ? this.queryBuilder?.buildFilter(this.schema, where)
+        ? this.queryBuilder?.buildFilter(this.properties, where)
         : undefined
 
     const notionSort = this.buildNotionSort(options.sorts)
@@ -99,7 +99,7 @@ export class NotionTable<T extends Schema> {
       if (cached) {
         return new NotionPageReference({
           notion: this.client,
-          schema: this.schema,
+          schema: this.properties,
           converter: this.propertyConverter,
           notionPage: cached,
           cache: this.cache,
@@ -117,7 +117,7 @@ export class NotionTable<T extends Schema> {
 
       return new NotionPageReference({
         notion: this.client,
-        schema: this.schema,
+        schema: this.properties,
         converter: this.propertyConverter,
         notionPage: notionPage,
         cache: this.cache,
@@ -133,7 +133,7 @@ export class NotionTable<T extends Schema> {
     }
 
     const properties = this.propertyConverter.toNotion(
-      this.schema,
+      this.properties,
       input.properties as Partial<SchemaType<T>>,
     )
 
@@ -151,7 +151,7 @@ export class NotionTable<T extends Schema> {
     }
 
     const response = await this.client.pages.create({
-      parent: { data_source_id: this.tableId },
+      parent: { data_source_id: this.dataSourceId },
       properties: properties,
       children: children,
     })
@@ -222,7 +222,7 @@ export class NotionTable<T extends Schema> {
     }
 
     const properties = this.propertyConverter.toNotion(
-      this.schema,
+      this.properties,
       input.properties,
     )
 
@@ -243,7 +243,7 @@ export class NotionTable<T extends Schema> {
 
     return new NotionPageReference({
       notion: this.client,
-      schema: this.schema,
+      schema: this.properties,
       converter: this.propertyConverter,
       notionPage: notionPage,
       cache: this.cache,
@@ -315,7 +315,7 @@ export class NotionTable<T extends Schema> {
 
     return new NotionPageReference({
       notion: this.client,
-      schema: this.schema,
+      schema: this.properties,
       converter: this.propertyConverter,
       notionPage: notionPage,
       cache: this.cache,
@@ -349,7 +349,7 @@ export class NotionTable<T extends Schema> {
 
     while (hasMore && references.length < maxCount) {
       const response = await this.client.dataSources.query({
-        data_source_id: this.tableId,
+        data_source_id: this.dataSourceId,
         filter: notionFilter as never,
         sorts: notionSort.length > 0 ? (notionSort as never) : undefined,
         start_cursor: nextCursor || undefined,
@@ -358,7 +358,7 @@ export class NotionTable<T extends Schema> {
       const refs = response.results.map((page) => {
         return new NotionPageReference({
           notion: this.client,
-          schema: this.schema,
+          schema: this.properties,
           converter: this.propertyConverter,
           notionPage: page as PageObjectResponse,
           cache: this.cache,

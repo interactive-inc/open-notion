@@ -8,7 +8,7 @@ Define a schema once and get IDE auto-completion everywhere:
 
 ```typescript
 const taskSchema = {
-  title: { type: 'title', required: true },
+  title: { type: 'title' },
   status: { type: 'select', options: ['todo', 'in_progress', 'done'] as const },
   priority: { type: 'number', min: 1, max: 10 },
   tags: { type: 'multi_select', options: ['bug', 'feature', 'docs'] as const }
@@ -22,7 +22,7 @@ const tasksTable = new NotionTable({
 
 // IDE auto-completes all properties and values
 await tasksTable.create({
-  title: 'Fix login bug',        // ✅ Required field
+  title: 'Fix login bug',        // ✅ String field
   status: 'in_progress',         // ✅ Auto-completes: 'todo' | 'in_progress' | 'done'
   priority: 5,                   // ✅ Number type
   tags: ['bug']                  // ✅ Auto-completes: 'bug' | 'feature' | 'docs'
@@ -37,10 +37,10 @@ The schema automatically generates TypeScript types:
 type Task = InferSchemaType<typeof taskSchema>
 // {
 //   id: string
-//   title: string
-//   status?: 'todo' | 'in_progress' | 'done'
-//   priority?: number
-//   tags?: ('bug' | 'feature' | 'docs')[]
+//   title: string | null
+//   status: 'todo' | 'in_progress' | 'done' | null
+//   priority: number | null
+//   tags: ('bug' | 'feature' | 'docs')[] | null
 // }
 ```
 
@@ -63,8 +63,8 @@ const results = await tasksTable.findMany({
 
 // Results are fully typed
 results.records.forEach(task => {
-  console.log(task.title)        // string
-  console.log(task.status)       // 'todo' | 'in_progress' | 'done' | undefined
+  console.log(task.title)        // string | null
+  console.log(task.status)       // 'todo' | 'in_progress' | 'done' | null
 })
 ```
 
@@ -74,11 +74,10 @@ TypeScript catches errors before runtime:
 
 ```typescript
 await tasksTable.create({
-  // ❌ Error: Missing required property 'title'
   status: 'pending'              // ❌ Error: 'pending' is not a valid option
 })
 
-// Update operations have all fields optional
+// Update operations work with partial data
 await tasksTable.update('task-id', {
   status: 'done'                 // ✅ Auto-completes valid options
 })

@@ -7,7 +7,7 @@ Date and optional time values.
 ```typescript
 {
   createdAt: { type: 'date' },
-  deadline: { type: 'date', required: true }
+  deadline: { type: 'date' }
 }
 ```
 
@@ -60,8 +60,8 @@ const eventsTable = new NotionTable({
   client,
   tableId: 'events-db',
   schema: {
-    title: { type: 'title', required: true },
-    startDate: { type: 'date', required: true },
+    title: { type: 'title' },
+    startDate: { type: 'date' },
     endDate: { type: 'date' },
     registrationDeadline: { type: 'date' }
   }

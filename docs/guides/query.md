@@ -14,9 +14,9 @@ const client = new Client({ auth: process.env.NOTION_TOKEN })
 
 const contactsTable = new NotionTable({
   client,
-  tableId: 'your-database-id',
-  schema: {
-    name: { type: 'title', required: true },
+  dataSourceId: 'your-database-id',
+  properties: {
+    name: { type: 'title' },
     email: { type: 'email' },
     company: { type: 'select', options: ['Apple', 'Google', 'Microsoft'] },
     active: { type: 'checkbox' }
@@ -32,23 +32,23 @@ Retrieve multiple records with optional filtering:
 
 ```typescript
 // Get all records
-const { records } = await contactsTable.findMany()
+const contacts = await contactsTable.findMany()
 
 // With filtering
-const { records } = await contactsTable.findMany({
-  where: { active: true }
+const activeContacts = await contactsTable.findMany({
+  where: { active: { equals: true } }
 })
 
-// With pagination
-const { records, hasMore, nextCursor } = await contactsTable.findMany({
-  limit: 10
+// With count limit
+const first10 = await contactsTable.findMany({
+  count: 10
 })
 
-// Next page
-const nextPage = await contactsTable.findMany({
-  limit: 10,
-  cursor: nextCursor
-})
+// Access properties
+for (const contact of contacts) {
+  const props = contact.properties()
+  console.log(props.name, props.email)
+}
 ```
 
 ### Find One
@@ -78,20 +78,23 @@ const contact = await contactsTable.findById('page-id-here')
 ### Comparison Operators
 
 ```typescript
-// Greater than
+// Greater than or equal to
 const highPriority = await tasksTable.findMany({
-  where: { priority: { $gte: 8 } }
+  where: { priority: { greater_than_or_equal_to: 8 } }
 })
 
-// Not equal
+// Does not equal
 const activeTasks = await tasksTable.findMany({
-  where: { status: { $ne: 'completed' } }
+  where: { status: { does_not_equal: 'completed' } }
 })
 
-// Range query
+// Range query using AND
 const mediumPriority = await tasksTable.findMany({
   where: {
-    priority: { $gte: 4, $lte: 7 }
+    and: [
+      { priority: { greater_than_or_equal_to: 4 } },
+      { priority: { less_than_or_equal_to: 7 } }
+    ]
   }
 })
 ```
@@ -101,12 +104,17 @@ const mediumPriority = await tasksTable.findMany({
 ```typescript
 // Contains
 const results = await contactsTable.findMany({
-  where: { name: { $contains: 'John' } }
+  where: { name: { contains: 'John' } }
 })
 
 // Starts with
 const results = await contactsTable.findMany({
-  where: { email: { $starts_with: 'admin@' } }
+  where: { email: { starts_with: 'admin@' } }
+})
+
+// Ends with
+const results = await contactsTable.findMany({
+  where: { email: { ends_with: '@company.com' } }
 })
 ```
 
@@ -116,9 +124,9 @@ const results = await contactsTable.findMany({
 // OR query
 const results = await tasksTable.findMany({
   where: {
-    $or: [
-      { status: 'urgent' },
-      { priority: { $gte: 9 } }
+    or: [
+      { status: { equals: 'urgent' } },
+      { priority: { greater_than_or_equal_to: 9 } }
     ]
   }
 })
@@ -126,12 +134,12 @@ const results = await tasksTable.findMany({
 // Complex AND/OR
 const results = await tasksTable.findMany({
   where: {
-    $and: [
-      { active: true },
+    and: [
+      { active: { equals: true } },
       {
-        $or: [
-          { priority: { $gte: 8 } },
-          { tags: { $contains: 'important' } }
+        or: [
+          { priority: { greater_than_or_equal_to: 8 } },
+          { tags: { contains: 'important' } }
         ]
       }
     ]
@@ -144,43 +152,45 @@ const results = await tasksTable.findMany({
 ```typescript
 // Single sort
 const results = await tasksTable.findMany({
-  sorts: [{ property: 'priority', direction: 'descending' }]
+  sorts: [{ field: 'priority', direction: 'desc' }]
 })
 
 // Multiple sorts
 const results = await contactsTable.findMany({
   sorts: [
-    { property: 'company', direction: 'ascending' },
-    { property: 'name', direction: 'ascending' }
+    { field: 'company', direction: 'asc' },
+    { field: 'name', direction: 'asc' }
   ]
 })
 ```
 
-## Working with Hooks
+## Working with Results
 
-Transform data after retrieval:
+Transform and use query results:
 
 ```typescript
-const productsTable = new NotionTable({
-  client,
-  tableId: 'products-db-id',
-  schema: {
-    name: { type: 'title', required: true },
-    price: { type: 'number' }
-  },
-  hooks: {
-    afterFind: async (records) => {
-      // Add computed field
-      return records.map(record => ({
-        ...record,
-        formattedPrice: `$${record.price.toFixed(2)}`
-      }))
-    }
-  }
+const contacts = await contactsTable.findMany({
+  where: { active: { equals: true } }
 })
 
-const products = await productsTable.findMany()
-// Each product now has formattedPrice
+// Access properties
+for (const contact of contacts) {
+  const props = contact.properties()
+  console.log(`${props.name} - ${props.email}`)
+
+  // Get metadata
+  console.log(contact.id)
+  console.log(contact.url)
+  console.log(contact.createdAt)
+  console.log(contact.updatedAt)
+
+  // Get page body as markdown
+  const body = await contact.body()
+  console.log(body)
+}
+
+// Map to simple objects
+const simpleList = contacts.map(c => c.properties())
 ```
 
 ## Performance Tips
@@ -188,15 +198,15 @@ const products = await productsTable.findMany()
 ### Use Specific Queries
 
 ```typescript
-// Good: Specific query
+// Good: Specific query with filter
 const active = await table.findMany({
-  where: { status: 'active' },
-  limit: 20
+  where: { status: { equals: 'active' } },
+  count: 20
 })
 
-// Avoid: Fetching all then filtering
+// Avoid: Fetching all then filtering in JavaScript
 const all = await table.findMany()
-const active = all.records.filter(r => r.status === 'active')
+const active = all.filter(r => r.properties().status === 'active')
 ```
 
 ### Implement Caching

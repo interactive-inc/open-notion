@@ -10,9 +10,11 @@ Create a new record with required fields:
 
 ```typescript
 const task = await tasksTable.create({
-  title: 'Complete documentation',
-  status: 'in_progress',
-  priority: 5
+  properties: {
+    title: 'Complete documentation',
+    status: 'in_progress',
+    priority: 5
+  }
 })
 
 console.log(task.id) // Notion page ID
@@ -24,7 +26,9 @@ Add rich text content using markdown:
 
 ```typescript
 const blogPost = await blogTable.create({
-  title: 'Getting Started with notion-client',
+  properties: {
+    title: 'Getting Started with notion-client'
+  },
   body: `# Introduction
 
 This library makes working with Notion databases **simple** and *intuitive*.
@@ -39,44 +43,6 @@ const table = new NotionTable({ ... })
 \`\`\`
 `
 })
-```
-
-### With Validation
-
-Schema validation ensures data integrity:
-
-```typescript
-const userTable = new NotionTable({
-  client,
-  tableId: 'users-db',
-  schema: {
-    email: {
-      type: 'email',
-      required: true,
-      validate: (value) => {
-        if (!value.endsWith('@company.com')) {
-          return 'Must use company email'
-        }
-        return true
-      }
-    },
-    age: {
-      type: 'number',
-      min: 18,
-      max: 100
-    }
-  }
-})
-
-try {
-  await userTable.create({
-    email: 'john@gmail.com', // Will fail validation
-    age: 150 // Will fail min/max validation
-  })
-} catch (error) {
-  console.error(error.message)
-  // "Validation failed: Must use company email"
-}
 ```
 
 ## Updating Records
@@ -149,9 +115,9 @@ Transform data before saving:
 ```typescript
 const articlesTable = new NotionTable({
   client,
-  tableId: 'articles-db',
-  schema: {
-    title: { type: 'title', required: true },
+  dataSourceId: 'articles-db',
+  properties: {
+    title: { type: 'title' },
     slug: { type: 'rich_text' },
     publishedAt: { type: 'date' }
   },
@@ -185,9 +151,9 @@ Perform actions after updates:
 ```typescript
 const ordersTable = new NotionTable({
   client,
-  tableId: 'orders-db',
-  schema: {
-    orderNumber: { type: 'title', required: true },
+  dataSourceId: 'orders-db',
+  properties: {
+    orderNumber: { type: 'title' },
     status: { type: 'select', options: ['pending', 'shipped', 'delivered'] },
     customerEmail: { type: 'email' }
   },
@@ -210,9 +176,9 @@ Transform heading levels for consistency:
 ```typescript
 const docsTable = new NotionTable({
   client,
-  tableId: 'docs-db',
-  schema: {
-    title: { type: 'title', required: true }
+  dataSourceId: 'docs-db',
+  properties: {
+    title: { type: 'title' }
   },
   enhancer: new NotionMarkdown({
     heading_1: 'heading_2', // Convert all H1 to H2

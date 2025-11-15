@@ -11,20 +11,26 @@ import { NotionTable } from '@interactive-inc/notion-client'
 ## Constructor
 
 ```typescript
-new NotionTable<TSchema>({
+new NotionTable<T extends Schema>({
   client: Client,
-  tableId: string,
-  schema: TSchema,
-  enhancer?: NotionMarkdown
+  dataSourceId: string,
+  properties: T,
+  cache?: NotionMemoryCache,
+  queryBuilder?: NotionQueryBuilder,
+  propertyConverter?: NotionPropertyConverter,
+  markdown?: NotionMarkdown
 })
 ```
 
 ### Parameters
 
 - `client` - Notion API client instance
-- `tableId` - Database ID from Notion
-- `schema` - Type-safe schema definition
-- `enhancer` - Optional markdown transformer
+- `dataSourceId` - Database ID from Notion
+- `properties` - Type-safe properties definition
+- `cache` - Optional cache instance for performance optimization
+- `queryBuilder` - Optional custom query builder
+- `propertyConverter` - Optional custom property converter
+- `markdown` - Optional markdown transformer for block type enhancement
 
 ## Basic Usage
 
@@ -36,11 +42,11 @@ const client = new Client({ auth: process.env.NOTION_TOKEN })
 
 const tasksTable = new NotionTable({
   client,
-  tableId: 'your-database-id',
-  schema: {
-    title: { type: 'title', required: true },
+  dataSourceId: 'your-database-id',
+  properties: {
+    title: { type: 'title' },
     status: { type: 'select', options: ['todo', 'done'] as const },
-    priority: { type: 'number', min: 1, max: 10 }
+    priority: { type: 'number' }
   } as const
 })
 ```
@@ -51,14 +57,18 @@ const tasksTable = new NotionTable({
 
 ```typescript
 const task = await tasksTable.create({
-  title: 'New Task',
-  status: 'todo',
-  priority: 5
+  properties: {
+    title: 'New Task',
+    status: 'todo',
+    priority: 5
+  }
 })
 
 // With markdown body
 const page = await tasksTable.create({
-  title: 'Documentation',
+  properties: {
+    title: 'Documentation'
+  },
   body: `# Overview\n\nThis is **markdown** content.`
 })
 ```
@@ -66,11 +76,11 @@ const page = await tasksTable.create({
 ### Read
 
 ```typescript
-// Find many
-const { records, hasMore, nextCursor } = await tasksTable.findMany({
+// Find many - returns array of NotionPageReference
+const tasks = await tasksTable.findMany({
   where: { status: 'todo' },
-  sorts: [{ property: 'priority', direction: 'descending' }],
-  limit: 20
+  sorts: [{ field: 'priority', direction: 'desc' }],
+  count: 20
 })
 
 // Find one
@@ -78,8 +88,8 @@ const task = await tasksTable.findOne({
   where: { title: 'Important Task' }
 })
 
-// Find by ID
-const specific = await tasksTable.findById('page-id')
+// Find by ID with cache option
+const specific = await tasksTable.findById('page-id', { cache: true })
 ```
 
 ### Update
@@ -87,20 +97,35 @@ const specific = await tasksTable.findById('page-id')
 ```typescript
 // Update single
 const updated = await tasksTable.update('page-id', {
-  status: 'done'
+  properties: {
+    status: 'done'
+  }
 })
 
 // Update many
 const count = await tasksTable.updateMany({
   where: { status: 'todo' },
-  data: { status: 'in_progress' }
+  update: {
+    properties: {
+      status: 'in_progress'
+    }
+  }
 })
 
 // Upsert
 const result = await tasksTable.upsert({
   where: { email: 'user@example.com' },
-  create: { name: 'New User', email: 'user@example.com' },
-  update: { lastSeen: new Date().toISOString() }
+  insert: {
+    properties: {
+      name: 'New User',
+      email: 'user@example.com'
+    }
+  },
+  update: {
+    properties: {
+      lastSeen: { start: new Date().toISOString(), end: null }
+    }
+  }
 })
 ```
 
@@ -133,80 +158,100 @@ const enhancer = new NotionMarkdown({
 
 const docsTable = new NotionTable({
   client,
-  tableId: 'docs-db',
-  schema: { title: { type: 'title', required: true } },
-  enhancer
+  dataSourceId: 'docs-db',
+  properties: { title: { type: 'title' } },
+  markdown: enhancer
 })
 ```
 
 ### Query Operators
 
 ```typescript
-// Comparison
-{ price: { $gte: 100 } }
-{ quantity: { $lt: 10 } }
+// Comparison (number)
+{ price: { greater_than_or_equal_to: 100 } }
+{ quantity: { less_than: 10 } }
+{ count: { equals: 5 } }
 
-// String matching
-{ name: { $contains: 'product' } }
-{ email: { $ends_with: '@company.com' } }
+// String matching (text/title/rich_text)
+{ name: { contains: 'product' } }
+{ email: { ends_with: '@company.com' } }
+{ title: { starts_with: 'Project' } }
 
-// Array operations
-{ tags: { $contains: 'urgent' } }
-{ categories: { $contains_any: ['electronics', 'books'] } }
+// Array operations (multi_select)
+{ tags: { contains: 'urgent' } }
 
-// Logical
-{ $or: [{ status: 'active' }, { priority: { $gte: 8 } }] }
-{ $and: [{ published: true }, { featured: true }] }
-{ $not: { status: 'archived' } }
+// Logical operators
+{ or: [{ status: 'active' }, { priority: { greater_than_or_equal_to: 8 } }] }
+{ and: [{ published: true }, { featured: true }] }
 
 // Empty checks
-{ description: { $is_empty: true } }
-{ tags: { $is_not_empty: true } }
+{ description: { is_empty: true } }
+{ tags: { is_not_empty: true } }
+
+// Date operations
+{ createdAt: { before: '2024-01-01' } }
+{ dueDate: { after: '2024-12-31' } }
+{ publishDate: { on_or_before: '2024-06-01' } }
 ```
 
 ## Type Safety
 
 ```typescript
-// Schema defines types
-const schema = {
-  name: { type: 'title', required: true },
+// Properties define types
+const properties = {
+  name: { type: 'title' },
   age: { type: 'number' },
   tags: { type: 'multi_select', options: ['a', 'b', 'c'] as const }
 } as const
 
-// Type is inferred
-type User = InferSchemaType<typeof schema>
+// Type is inferred from properties
+type User = SchemaType<typeof properties>
 // {
-//   id: string
 //   name: string
-//   age?: number
-//   tags?: ('a' | 'b' | 'c')[]
+//   age: number | null
+//   tags: string[]
 // }
 
 // Full IDE support
-const table = new NotionTable({ client, tableId, schema })
+const table = new NotionTable({ client, dataSourceId: 'db-id', properties })
 const user = await table.create({
-  name: 'John',     // ✅ Required
-  age: 30,          // ✅ Optional number
-  tags: ['a', 'b']  // ✅ Array of valid options
+  properties: {
+    name: 'John',     // ✅ String
+    age: 30,          // ✅ Number
+    tags: ['a', 'b']  // ✅ Array of valid options
+  }
 })
 ```
 
-## Error Handling
+## Return Types
+
+### NotionPageReference
+
+All query methods return `NotionPageReference<T>` instances:
 
 ```typescript
-try {
-  await table.create({ 
-    // Missing required field
-    status: 'todo' 
-  })
-} catch (error) {
-  // ValidationError: title is required
-}
+const page = await table.findById('page-id')
 
-try {
-  await table.findById('invalid-id')
-} catch (error) {
-  // NotFoundError: Page not found
-}
+// Properties
+page.id           // string - Page ID
+page.url          // string - Page URL
+page.createdAt    // string - ISO date string
+page.updatedAt    // string - ISO date string
+page.isArchived   // boolean
+page.isDeleted    // boolean (same as isArchived)
+
+// Methods
+page.properties() // SchemaType<T> - Typed properties
+page.raw()        // PageObjectResponse - Raw Notion response
+await page.body() // string - Page body as markdown
+```
+
+## Cache Management
+
+```typescript
+// Clear all cached pages and blocks
+table.clearCache()
+
+// Use cache when finding by ID
+const cached = await table.findById('page-id', { cache: true })
 ```

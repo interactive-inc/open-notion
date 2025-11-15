@@ -3,7 +3,7 @@ import type {
   PageObjectResponse,
   RichTextItemResponse,
 } from "@notionhq/client/build/src/api-endpoints"
-import type { Schema } from "@/types"
+import type { NotionPropertySchema } from "@/types"
 import { NotionPropertyConverter } from "./notion-property-converter"
 
 const converter = new NotionPropertyConverter()
@@ -27,7 +27,7 @@ function createRichTextItem(content: string): RichTextItemResponse {
 }
 
 test("fromNotion: スキーマに基づいてプロパティを変換", () => {
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     title: { type: "title" },
     content: { type: "rich_text" },
     score: { type: "number" },
@@ -66,7 +66,7 @@ test("fromNotion: スキーマに基づいてプロパティを変換", () => {
 })
 
 test("fromNotion: オプショナルなプロパティが存在しない場合", () => {
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     title: { type: "title" },
     description: { type: "rich_text" },
   }
@@ -86,7 +86,7 @@ test("fromNotion: オプショナルなプロパティが存在しない場合",
 })
 
 test("toNotion: スキーマに基づいてデータを変換", () => {
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     title: { type: "title" },
     content: { type: "rich_text" },
     score: { type: "number" },
@@ -113,7 +113,7 @@ test("toNotion: スキーマに基づいてデータを変換", () => {
 })
 
 test("toNotion: 部分的なデータを変換", () => {
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     title: { type: "title" },
     content: { type: "rich_text" },
     score: { type: "number" },
@@ -133,7 +133,7 @@ test("toNotion: 部分的なデータを変換", () => {
 })
 
 test("toNotion: 日付プロパティを正しく変換", () => {
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     deadline: { type: "date" },
   }
 
@@ -153,7 +153,7 @@ test("toNotion: 日付プロパティを正しく変換", () => {
 })
 
 test("toNotion: 複数選択プロパティを正しく変換", () => {
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     tags: { type: "multi_select", options: ["TypeScript", "Notion", "テスト"] },
   }
 
@@ -173,7 +173,7 @@ test("toNotion: 複数選択プロパティを正しく変換", () => {
 })
 
 test("型安全性の確認", () => {
-  const articleSchema: Schema = {
+  const articleSchema: NotionPropertySchema = {
     title: { type: "title" },
     author: { type: "rich_text" },
     publishedDate: { type: "date" },

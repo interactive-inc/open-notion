@@ -1,7 +1,7 @@
-import type { Schema } from "../types"
+import type { NotionPropertySchema } from "../types"
 import type { NotionPageReference } from "./notion-page-reference"
 
-type Props<S extends Schema> = {
+type Props<S extends NotionPropertySchema> = {
   readonly pageReferences: NotionPageReference<S>[]
   readonly cursor: string | null
   readonly hasMore: boolean
@@ -10,7 +10,7 @@ type Props<S extends Schema> = {
 /**
  * データベースクエリの結果を表すクラス
  */
-export class NotionQueryResult<S extends Schema> {
+export class NotionQueryResult<S extends NotionPropertySchema> {
   constructor(private readonly props: Props<S>) {
     Object.freeze(this)
   }

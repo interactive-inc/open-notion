@@ -7,7 +7,7 @@ Phone number field with formatting.
 ```typescript
 {
   phone: { type: 'phone_number' },
-  mobile: { type: 'phone_number', required: true }
+  mobile: { type: 'phone_number' }
 }
 ```
 
@@ -63,7 +63,7 @@ const contactsTable = new NotionTable({
   client,
   tableId: 'contacts-db',
   schema: {
-    name: { type: 'title', required: true },
+    name: { type: 'title' },
     phone: { type: 'phone_number' },
     mobile: { type: 'phone_number' },
     fax: { type: 'phone_number' }

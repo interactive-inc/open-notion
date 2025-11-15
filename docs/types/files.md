@@ -64,7 +64,7 @@ const documentsTable = new NotionTable({
   client,
   tableId: 'documents-db',
   schema: {
-    title: { type: 'title', required: true },
+    title: { type: 'title' },
     attachments: { type: 'files' },
     screenshots: { type: 'files' },
     resources: { type: 'files' }

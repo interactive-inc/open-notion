@@ -55,7 +55,7 @@ const tasksTable = new NotionTable({
   client,
   tableId: 'your-database-id',
   schema: {
-    title: { type: 'title', required: true },
+    title: { type: 'title' },
     status: { type: 'select', options: ['todo', 'in_progress', 'done'] },
     priority: { type: 'number' },
     tags: { type: 'multi_select', options: ['bug', 'feature', 'enhancement'] }
@@ -102,7 +102,7 @@ const blogTable = new NotionTable({
   client,
   tableId: 'your-blog-database-id',
   schema: {
-    title: { type: 'title', required: true },
+    title: { type: 'title' },
     content: { type: 'rich_text' }
   },
   enhancer  // Optional: transforms markdown before saving
@@ -173,7 +173,6 @@ const userTable = new NotionTable({
   schema: {
     email: {
       type: 'email',
-      required: true,
       validate: (value) => {
         if (!value.includes('@')) {
           return 'Invalid email format'

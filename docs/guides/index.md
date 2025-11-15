@@ -61,9 +61,9 @@ const notion = new Client({
 // Create type-safe table instance
 const tasksTable = new NotionTable({
   client: notion,
-  tableId: process.env.NOTION_DATABASE_ID,
-  schema: {
-    title: { type: 'title', required: true },
+  dataSourceId: process.env.NOTION_DATABASE_ID,
+  properties: {
+    title: { type: 'title' },
     status: { type: 'select', options: ['todo', 'done'] as const },
     priority: { type: 'number' }
   } as const
@@ -162,7 +162,7 @@ const notion = new Client({ auth: process.env.NOTION_TOKEN })
 
 // Define schema
 const schema = {
-  title: { type: 'title', required: true },
+  title: { type: 'title' },
   description: { type: 'rich_text' },
   status: { 
     type: 'select', 
@@ -180,7 +180,7 @@ const schema = {
 // Create table instance
 const projectTable = new NotionTable({
   client: notion,
-  tableId: 'your-database-id',
+  dataSourceId: 'your-database-id',
   schema
 })
 

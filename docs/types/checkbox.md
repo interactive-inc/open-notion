@@ -7,7 +7,7 @@ Boolean true/false values.
 ```typescript
 {
   isActive: { type: 'checkbox' },
-  isPublished: { type: 'checkbox', required: true }
+  isPublished: { type: 'checkbox' }
 }
 ```
 
@@ -56,7 +56,7 @@ const articlesTable = new NotionTable({
   client,
   tableId: 'articles-db',
   schema: {
-    title: { type: 'title', required: true },
+    title: { type: 'title' },
     published: { type: 'checkbox' },
     featured: { type: 'checkbox' },
     allowComments: { type: 'checkbox' }

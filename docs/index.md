@@ -64,10 +64,10 @@ const client = new Client({ auth: process.env.NOTION_TOKEN })
 // Create a type-safe table instance
 const tasksTable = new NotionTable({
   client,
-  tableId: 'your-database-id',  // Replace with your Notion database ID
-  schema: {
+  dataSourceId: 'your-database-id',  // Replace with your Notion database ID
+  properties: {
     // Define your database schema
-    title: { type: 'title', required: true },
+    title: { type: 'title' },
     status: { type: 'select', options: ['todo', 'in_progress', 'done'] },
     priority: { type: 'number' }
   }
@@ -75,20 +75,24 @@ const tasksTable = new NotionTable({
 
 // Create a new task
 const task = await tasksTable.create({
-  title: 'Build awesome app',
-  status: 'todo',
-  priority: 1
+  properties: {
+    title: 'Build awesome app',
+    status: 'todo',
+    priority: 1
+  }
 })
 
 // Query tasks with filtering and sorting
-const { records } = await tasksTable.findMany({
+const tasks = await tasksTable.findMany({
   where: { status: 'todo' },
-  sorts: [{ property: 'priority', direction: 'ascending' }]
+  sorts: [{ field: 'priority', direction: 'asc' }]
 })
 
 // Update a task
 await tasksTable.update(task.id, {
-  status: 'done'
+  properties: {
+    status: 'done'
+  }
 })
 ```
 
@@ -126,16 +130,18 @@ await tasksTable.update(task.id, {
    // NotionTable wraps the client with type-safe operations
    const table = new NotionTable({
      client,
-     tableId: process.env.NOTION_DATABASE_ID,
-     schema: {
-       // Schema defines the shape of your data
-       title: { type: 'title', required: true }
+     dataSourceId: process.env.NOTION_DATABASE_ID,
+     properties: {
+       // Properties defines the shape of your data
+       title: { type: 'title' }
      }
    })
 
    // Now you can perform CRUD operations
    const record = await table.create({
-     title: 'My first record!'
+     properties: {
+       title: 'My first record!'
+     }
    })
    ```
 
@@ -177,9 +183,9 @@ Define your schema once and get full TypeScript support throughout your applicat
 ```typescript
 const blogTable = new NotionTable({
   client,
-  tableId: 'blog-database-id',
-  schema: {
-    title: { type: 'title', required: true },
+  dataSourceId: 'blog-database-id',
+  properties: {
+    title: { type: 'title' },
     content: { type: 'rich_text' },
     tags: { type: 'multi_select', options: ['tech', 'design', 'news'] as const },
     published: { type: 'checkbox' },
@@ -189,37 +195,40 @@ const blogTable = new NotionTable({
 
 // TypeScript knows all available properties and their types
 const post = await blogTable.create({
-  title: 'Building Type-safe Applications',  // Required
-  content: '# Introduction\n\nWrite in markdown!',
-  tags: ['tech'],  // Must be one of the defined options
-  published: true,
-  publishDate: new Date()
+  properties: {
+    title: 'Building Type-safe Applications',
+    content: 'Introduction paragraph',
+    tags: ['tech'],  // Must be one of the defined options
+    published: true,
+    publishDate: { start: new Date().toISOString(), end: null }
+  },
+  body: '# Introduction\n\nWrite in markdown!'
 })
 ```
 
 ### Advanced Querying
 
-MongoDB-like query syntax makes complex searches intuitive:
+Notion-native query syntax makes complex searches intuitive:
 
 ```typescript
 // Complex conditional queries
 const results = await tasksTable.findMany({
   where: {
-    $or: [
-      { priority: { $gte: 5 } },
-      { 
-        $and: [
+    or: [
+      { priority: { greater_than_or_equal_to: 5 } },
+      {
+        and: [
           { status: 'in_progress' },
-          { tags: { $contains: 'urgent' } }
+          { tags: { contains: 'urgent' } }
         ]
       }
     ]
   },
   sorts: [
-    { property: 'priority', direction: 'descending' },
-    { property: 'created_time', direction: 'ascending' }
+    { field: 'priority', direction: 'desc' },
+    { field: 'created_time', direction: 'asc' }
   ],
-  limit: 20
+  count: 20
 })
 ```
 
@@ -229,7 +238,9 @@ Seamlessly work with markdown content:
 
 ```typescript
 const article = await blogTable.create({
-  title: 'Getting Started with Markdown',
+  properties: {
+    title: 'Getting Started with Markdown'
+  },
   body: `# Overview
 
 This article explains how to use **notion-client**.
@@ -252,40 +263,6 @@ Learn more in the [official docs](https://github.com/interactive-inc/notion-clie
 })
 ```
 
-### Validation and Hooks
-
-Ensure data integrity and implement business logic:
-
-```typescript
-const userTable = new NotionTable({
-  client,
-  tableId: 'users-database-id',
-  schema: {
-    email: {
-      type: 'email',
-      required: true,
-      validate: (value) => {
-        if (!value.includes('@company.com')) {
-          return 'Please use a company email address'
-        }
-        return true
-      }
-    }
-  },
-  hooks: {
-    beforeCreate: async (data) => ({
-      ...data,
-      createdAt: new Date()
-    }),
-    afterFind: async (records) => 
-      records.map(r => ({
-        ...r,
-        isActive: r.lastLogin > Date.now() - 30 * 24 * 60 * 60 * 1000
-      }))
-  }
-})
-```
-
 ## Use Cases
 
 ### Task Management System
@@ -293,12 +270,12 @@ const userTable = new NotionTable({
 ```typescript
 const taskSystem = new NotionTable({
   client,
-  tableId: 'tasks-db-id',
-  schema: {
-    title: { type: 'title', required: true },
+  dataSourceId: 'tasks-db-id',
+  properties: {
+    title: { type: 'title' },
     assignee: { type: 'people' },
     status: { type: 'select', options: ['backlog', 'todo', 'in_progress', 'review', 'done'] },
-    priority: { type: 'number', min: 1, max: 5 },
+    priority: { type: 'number' },
     dueDate: { type: 'date' },
     description: { type: 'rich_text' }
   }
@@ -307,8 +284,10 @@ const taskSystem = new NotionTable({
 // Find overdue tasks
 const overdueTasks = await taskSystem.findMany({
   where: {
-    status: { $ne: 'done' },
-    dueDate: { $lt: new Date() }
+    and: [
+      { status: { does_not_equal: 'done' } },
+      { dueDate: { before: new Date().toISOString() } }
+    ]
   }
 })
 ```
@@ -318,14 +297,14 @@ const overdueTasks = await taskSystem.findMany({
 ```typescript
 const cms = new NotionTable({
   client,
-  tableId: 'articles-db-id',
-  schema: {
-    title: { type: 'title', required: true },
-    slug: { type: 'rich_text', required: true },
+  dataSourceId: 'articles-db-id',
+  properties: {
+    title: { type: 'title' },
+    slug: { type: 'rich_text' },
     content: { type: 'rich_text' },
     author: { type: 'people' },
     category: { type: 'select', options: ['tech', 'design', 'business'] },
-    tags: { type: 'multi_select' },
+    tags: { type: 'multi_select', options: null },
     published: { type: 'checkbox' },
     publishDate: { type: 'date' }
   }
@@ -334,10 +313,12 @@ const cms = new NotionTable({
 // Get published articles
 const publishedArticles = await cms.findMany({
   where: {
-    published: true,
-    publishDate: { $lte: new Date() }
+    and: [
+      { published: { equals: true } },
+      { publishDate: { on_or_before: new Date().toISOString() } }
+    ]
   },
-  sorts: [{ property: 'publishDate', direction: 'descending' }]
+  sorts: [{ field: 'publishDate', direction: 'desc' }]
 })
 ```
 
@@ -346,10 +327,10 @@ const publishedArticles = await cms.findMany({
 ```typescript
 const crm = new NotionTable({
   client,
-  tableId: 'customers-db-id',
-  schema: {
-    name: { type: 'title', required: true },
-    email: { type: 'email', required: true },
+  dataSourceId: 'customers-db-id',
+  properties: {
+    name: { type: 'title' },
+    email: { type: 'email' },
     company: { type: 'rich_text' },
     status: { type: 'select', options: ['lead', 'prospect', 'customer', 'churned'] },
     revenue: { type: 'number' },
@@ -361,8 +342,10 @@ const crm = new NotionTable({
 // Find high-value customers
 const vipCustomers = await crm.findMany({
   where: {
-    status: 'customer',
-    revenue: { $gte: 100000 }
+    and: [
+      { status: { equals: 'customer' } },
+      { revenue: { greater_than_or_equal_to: 100000 } }
+    ]
   }
 })
 ```

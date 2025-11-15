@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test"
 import type { Client } from "@notionhq/client"
-import type { Schema } from "@/types"
+import type { NotionPropertySchema } from "@/types"
 import { NotionMarkdown } from "./notion-markdown"
 import { NotionTable } from "./notion-table"
 
@@ -60,7 +60,7 @@ test("基本的な統合テスト", async () => {
     },
   } as unknown as Client
 
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     title: { type: "title" },
     status: { type: "select", options: ["todo", "in_progress", "done"] },
     priority: { type: "number" },
@@ -68,8 +68,8 @@ test("基本的な統合テスト", async () => {
 
   const table = new NotionTable({
     client: mockNotion,
-    tableId: "test-db",
-    schema,
+    dataSourceId: "test-db",
+    properties: schema,
   })
 
   // findManyのテスト
@@ -133,8 +133,8 @@ test("高度なクエリのテスト", async () => {
 
   const table = new NotionTable({
     client: mockNotion,
-    tableId: "test-db",
-    schema,
+    dataSourceId: "test-db",
+    properties: schema,
   })
 
   // 高度なクエリ
@@ -192,7 +192,7 @@ test("NotionMarkdownとの統合", async () => {
     },
   } as unknown as Client
 
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     title: { type: "title" },
   }
 
@@ -204,8 +204,8 @@ test("NotionMarkdownとの統合", async () => {
 
   const table = new NotionTable({
     client: mockNotion,
-    tableId: "test-db",
-    schema,
+    dataSourceId: "test-db",
+    properties: schema,
     markdown: enhancer,
   })
 
@@ -271,14 +271,14 @@ test("エンハンサーなしのデフォルト動作", async () => {
     },
   } as unknown as Client
 
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     title: { type: "title" },
   }
 
   const table = new NotionTable({
     client: mockNotion,
-    tableId: "test-db",
-    schema,
+    dataSourceId: "test-db",
+    properties: schema,
     // enhancerを指定しない
   })
 

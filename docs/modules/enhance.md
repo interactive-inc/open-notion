@@ -1,194 +1,289 @@
-# NotionMarkdown
+# enhance
 
-Transform markdown heading levels when converting to Notion blocks.
+Recursively fetch child blocks for Notion blocks with nested content.
 
 ## Import
 
 ```typescript
-import { NotionMarkdown } from '@interactive-inc/notion-client'
+import { enhance } from '@interactive-inc/notion-client'
 ```
 
-## Constructor
+## Function Signature
 
 ```typescript
-new NotionMarkdown({
-  heading_1?: 'heading_1' | 'heading_2' | 'heading_3',
-  heading_2?: 'heading_1' | 'heading_2' | 'heading_3',
-  heading_3?: 'heading_1' | 'heading_2' | 'heading_3'
-})
+type Client = (
+  args: ListBlockChildrenParameters
+) => Promise<ListBlockChildrenResponse>
+
+function enhance(client: Client): (
+  args: ListBlockChildrenParameters
+) => Promise<NotionBlock[]>
 ```
 
 ## Purpose
 
-Notion has limited heading levels (H1, H2, H3). The NotionMarkdown enhancer allows you to shift heading levels to maintain hierarchy when importing markdown content.
+The Notion API returns blocks without their children populated. The `enhance` function creates a wrapper around the blocks API that recursively fetches all child blocks, building a complete tree structure.
 
 ## Basic Usage
 
 ```typescript
-// Shift all headings down one level
-const enhancer = new NotionMarkdown({
-  heading_1: 'heading_2',  // # → ##
-  heading_2: 'heading_3'   // ## → ###
-})
+import { Client } from '@notionhq/client'
+import { enhance } from '@interactive-inc/notion-client'
 
-// Use with NotionTable
-const docsTable = new NotionTable({
-  client,
-  tableId: 'docs-db',
-  schema: { title: { type: 'title', required: true } },
-  enhancer
-})
+const notion = new Client({ auth: process.env.NOTION_TOKEN })
+
+// Create enhanced client
+const enhancedClient = enhance(notion.blocks.children.list.bind(notion.blocks.children))
+
+// Fetch blocks with all children recursively populated
+const blocks = await enhancedClient({ block_id: 'page-id' })
+
+// blocks now includes full tree structure with children
+```
+
+## How It Works
+
+### Without enhance
+
+```typescript
+const notion = new Client({ auth: process.env.NOTION_TOKEN })
+
+// Get top-level blocks only
+const response = await notion.blocks.children.list({ block_id: 'page-id' })
+
+// response.results[0].has_children === true
+// But children are not populated - need manual recursive fetch
+```
+
+### With enhance
+
+```typescript
+const enhancedClient = enhance(notion.blocks.children.list.bind(notion.blocks.children))
+
+// Get blocks with all children recursively
+const blocks = await enhancedClient({ block_id: 'page-id' })
+
+// blocks[0].children is fully populated
+// blocks[0].children[0].children is also populated, and so on
+```
+
+## Return Type
+
+Returns `NotionBlock[]` where each block has a `children` property:
+
+```typescript
+type NotionBlock = BlockObjectResponse & {
+  children: NotionBlock[]  // Recursively populated
+}
 ```
 
 ## Examples
 
-### Standard Shift Pattern
+### Nested List Items
 
 ```typescript
-// Most common: shift everything down
-const standardEnhancer = new NotionMarkdown({
-  heading_1: 'heading_2',
-  heading_2: 'heading_3',
-  heading_3: 'heading_3'  // H3 stays H3 (can't go lower)
-})
+const enhancedClient = enhance(notion.blocks.children.list.bind(notion.blocks.children))
 
-// Markdown input
-const markdown = `# Main Title
-## Section
-### Subsection`
+const blocks = await enhancedClient({ block_id: 'page-id' })
 
-// After enhancement in Notion:
-// ## Main Title (was H1)
-// ### Section (was H2)
-// ### Subsection (stays H3)
+// Example structure:
+// [
+//   {
+//     type: 'bulleted_list_item',
+//     bulleted_list_item: { rich_text: [{ text: { content: 'Parent' } }] },
+//     children: [
+//       {
+//         type: 'bulleted_list_item',
+//         bulleted_list_item: { rich_text: [{ text: { content: 'Child' } }] },
+//         children: []
+//       }
+//     ]
+//   }
+// ]
 ```
 
-### Flatten to Single Level
+### Full Page Content
 
 ```typescript
-// Make all headings the same level
-const flatEnhancer = new NotionMarkdown({
-  heading_1: 'heading_2',
-  heading_2: 'heading_2',
-  heading_3: 'heading_2'
-})
+// Get complete page structure
+const blocks = await enhancedClient({ block_id: 'page-id' })
 
-// All headings become H2 in Notion
+// Convert to markdown with nested structure preserved
+import { fromNotionBlocks } from '@interactive-inc/notion-client'
+const markdown = fromNotionBlocks(blocks)
 ```
 
-### Selective Enhancement
+### Working with Nested Structures
 
 ```typescript
-// Only transform H1, leave others unchanged
-const selectiveEnhancer = new NotionMarkdown({
-  heading_1: 'heading_3'  // Only H1 → H3
-  // H2 and H3 remain unchanged
-})
+function printBlockTree(blocks: NotionBlock[], indent = 0) {
+  for (const block of blocks) {
+    console.log('  '.repeat(indent) + block.type)
+
+    if (block.children.length > 0) {
+      printBlockTree(block.children, indent + 1)
+    }
+  }
+}
+
+const blocks = await enhancedClient({ block_id: 'page-id' })
+printBlockTree(blocks)
+// paragraph
+// heading_1
+// bulleted_list_item
+//   bulleted_list_item
+//     bulleted_list_item
+// heading_2
 ```
 
 ## Use Cases
 
-### Documentation Import
+### Full Content Export
 
 ```typescript
-// Documentation often starts with H1
-const docsEnhancer = new NotionMarkdown({
-  heading_1: 'heading_2',  // Page title is H1, content starts at H2
-  heading_2: 'heading_3',
-  heading_3: 'heading_3'
-})
+// Export complete page structure with all nested blocks
+const enhancedClient = enhance(notion.blocks.children.list.bind(notion.blocks.children))
 
-await docsTable.create({
-  title: 'API Documentation',  // This is the "H1"
-  body: `# Overview           // Becomes H2
-  
-## Authentication             // Becomes H3
-### API Keys                  // Stays H3
-### OAuth Flow                // Stays H3
-
-## Endpoints                  // Becomes H3
-### GET /users                // Stays H3`
-})
+async function exportPage(pageId: string) {
+  const blocks = await enhancedClient({ block_id: pageId })
+  const markdown = fromNotionBlocks(blocks)
+  return markdown
+}
 ```
 
-### Blog Posts
+### Content Synchronization
 
 ```typescript
-// Blog posts with deep nesting
-const blogEnhancer = new NotionMarkdown({
-  heading_1: 'heading_1',  // Keep main sections as H1
-  heading_2: 'heading_2',  // Keep subsections as H2
-  heading_3: 'heading_3'   // Keep sub-subsections as H3
-})
+// Sync Notion content to external system
+async function syncContent(pageId: string) {
+  const blocks = await enhancedClient({ block_id: pageId })
+
+  // Process each block with full context of children
+  for (const block of blocks) {
+    await processBlock(block)
+  }
+}
 ```
 
-### Meeting Notes
+### Hierarchical Analysis
 
 ```typescript
-// Flatten structure for simple notes
-const notesEnhancer = new NotionMarkdown({
-  heading_1: 'heading_2',
-  heading_2: 'heading_2',
-  heading_3: 'heading_2'
-})
+// Analyze document structure
+function analyzeStructure(blocks: NotionBlock[]): {
+  depth: number
+  blockCount: number
+} {
+  let maxDepth = 0
+  let totalCount = 0
 
-await notesTable.create({
-  title: 'Team Meeting - Jan 15',
-  body: `# Agenda              // All become H2
-## Project Updates           // for consistent
-### Website Launch          // visual hierarchy`
-})
+  function traverse(blocks: NotionBlock[], depth: number) {
+    totalCount += blocks.length
+    maxDepth = Math.max(maxDepth, depth)
+
+    for (const block of blocks) {
+      if (block.children.length > 0) {
+        traverse(block.children, depth + 1)
+      }
+    }
+  }
+
+  traverse(blocks, 1)
+  return { depth: maxDepth, blockCount: totalCount }
+}
 ```
 
-## Integration with toNotionBlocks
+## Performance Considerations
+
+### API Rate Limits
 
 ```typescript
-import { toNotionBlocks, NotionMarkdown } from '@interactive-inc/notion-client'
+// enhance makes recursive API calls
+// Be mindful of rate limits for deeply nested content
 
-const enhancer = new NotionMarkdown({
-  heading_1: 'heading_2',
-  heading_2: 'heading_3'
+// For pages with many nested blocks:
+// - Consider caching results
+// - Implement rate limiting
+// - Use pagination if needed
+```
+
+### Caching
+
+```typescript
+// Cache enhanced results
+const cache = new Map<string, NotionBlock[]>()
+
+async function getCachedBlocks(blockId: string) {
+  if (cache.has(blockId)) {
+    return cache.get(blockId)!
+  }
+
+  const blocks = await enhancedClient({ block_id: blockId })
+  cache.set(blockId, blocks)
+  return blocks
+}
+```
+
+## Integration with NotionTable
+
+```typescript
+import { NotionTable, enhance } from '@interactive-inc/notion-client'
+
+const table = new NotionTable({
+  client: notion,
+  dataSourceId: 'db-id',
+  properties: { title: { type: 'title' } }
 })
 
-const markdown = `# Title
-## Subtitle
-Content here`
+// Get page reference
+const page = await table.findById('page-id')
 
-// Convert with enhancement
-const blocks = await toNotionBlocks(markdown, enhancer)
+// Fetch enhanced blocks
+const enhancedClient = enhance(notion.blocks.children.list.bind(notion.blocks.children))
+const blocks = await enhancedClient({ block_id: page.id })
 
-// Results in Notion blocks with shifted heading levels
+// Convert to markdown
+const markdown = fromNotionBlocks(blocks)
 ```
 
 ## Best Practices
 
-### Consistent Hierarchy
+### Bind Context Properly
 
 ```typescript
-// Good: Maintain relative hierarchy
-new NotionMarkdown({
-  heading_1: 'heading_2',
-  heading_2: 'heading_3',
-  heading_3: 'heading_3'
-})
+// ✅ Good: Bind context
+const enhancedClient = enhance(
+  notion.blocks.children.list.bind(notion.blocks.children)
+)
 
-// Avoid: Inverted hierarchy
-new NotionMarkdown({
-  heading_1: 'heading_3',
-  heading_2: 'heading_1'  // Confusing!
-})
+// ❌ Bad: Context lost
+const enhancedClient = enhance(notion.blocks.children.list)
 ```
 
-### Document Structure
+### Error Handling
 
 ```typescript
-// For documents with title in Notion page
-const docEnhancer = new NotionMarkdown({
-  heading_1: 'heading_2'  // Shift down since page has title
-})
-
-// For standalone content
-const contentEnhancer = new NotionMarkdown({
-  // No transformation - preserve original levels
-})
+try {
+  const blocks = await enhancedClient({ block_id: 'page-id' })
+} catch (error) {
+  console.error('Failed to fetch blocks:', error)
+  // Handle API errors, rate limits, etc.
+}
 ```
+
+### Type Safety
+
+```typescript
+import type { NotionBlock } from '@interactive-inc/notion-client'
+
+function processBlocks(blocks: NotionBlock[]) {
+  // TypeScript knows about children property
+  blocks.forEach(block => {
+    console.log(block.children) // ✅ Type-safe
+  })
+}
+```
+
+## Related
+
+- [fromNotionBlocks](from-blocks.md) - Convert enhanced blocks to markdown
+- [NotionTable](notion-table.md) - Main API for database operations

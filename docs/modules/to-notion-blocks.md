@@ -11,11 +11,10 @@ import { toNotionBlocks } from '@interactive-inc/notion-client'
 ## Function Signature
 
 ```typescript
-async function toNotionBlocks(
-  markdown: string,
-  enhancer?: NotionMarkdown
-): Promise<NotionBlock[]>
+function toNotionBlocks(markdown: string): BlockObjectRequest[]
 ```
+
+Note: Block type transformation (e.g., heading level adjustment) is handled by the [NotionMarkdown](notion-markdown.md) option in NotionTable, not in this function directly.
 
 ## Supported Markdown
 
@@ -33,7 +32,7 @@ const markdown = `# Main Title
 ## Section
 ### Subsection`
 
-const blocks = await toNotionBlocks(markdown)
+const blocks = toNotionBlocks(markdown)
 // [
 //   { type: 'heading_1', heading_1: { rich_text: [...] } },
 //   { type: 'heading_2', heading_2: { rich_text: [...] } },
@@ -52,7 +51,7 @@ const markdown = `This is a paragraph.
 
 This is another paragraph.`
 
-const blocks = await toNotionBlocks(markdown)
+const blocks = toNotionBlocks(markdown)
 // [
 //   { type: 'paragraph', paragraph: { rich_text: [...] } },
 //   { type: 'paragraph', paragraph: { rich_text: [...] } }
@@ -74,7 +73,7 @@ const markdown = `- First bullet
 1. First number
 2. Second number`
 
-const blocks = await toNotionBlocks(markdown)
+const blocks = toNotionBlocks(markdown)
 // Bullets and numbered lists with proper nesting
 ```
 
@@ -91,7 +90,7 @@ const hello = "world"
 console.log(hello)
 \`\`\``
 
-const blocks = await toNotionBlocks(markdown)
+const blocks = toNotionBlocks(markdown)
 // [{
 //   type: 'code',
 //   code: {
@@ -113,7 +112,7 @@ const blocks = await toNotionBlocks(markdown)
 ```typescript
 const markdown = `This has **bold**, *italic*, ~~strike~~, and \`code\`.`
 
-const blocks = await toNotionBlocks(markdown)
+const blocks = toNotionBlocks(markdown)
 // Paragraph with rich text annotations
 ```
 
@@ -146,25 +145,32 @@ npm install
 2. Update settings
 3. Restart server`
 
-const blocks = await toNotionBlocks(markdown)
+const blocks = toNotionBlocks(markdown)
 // Complete Notion block structure
 ```
 
-### With Enhancement
+### With Block Type Transformation
 
 ```typescript
-import { NotionMarkdown, toNotionBlocks } from '@interactive-inc/notion-client'
+import { NotionMarkdown, NotionTable } from '@interactive-inc/notion-client'
 
-const enhancer = new NotionMarkdown({
+const markdown = new NotionMarkdown({
   heading_1: 'heading_2',  // # becomes ##
   heading_2: 'heading_3'   // ## becomes ###
 })
 
-const markdown = `# Title
-## Subtitle`
+const table = new NotionTable({
+  client,
+  dataSourceId: 'db-id',
+  properties: { title: { type: 'title' } },
+  markdown  // Transformation applied during create/update
+})
 
-const blocks = await toNotionBlocks(markdown, enhancer)
 // Title is heading_2, Subtitle is heading_3
+await table.create({
+  properties: { title: 'Document' },
+  body: `# Title\n## Subtitle`
+})
 ```
 
 ### Nested Lists
@@ -176,7 +182,7 @@ const markdown = `- Parent item
   - Another child
 - Back to parent`
 
-const blocks = await toNotionBlocks(markdown)
+const blocks = toNotionBlocks(markdown)
 // Creates proper parent-child relationships
 ```
 
@@ -206,15 +212,17 @@ The following markdown features are not supported:
 ```typescript
 const blogTable = new NotionTable({
   client,
-  tableId: 'blog-db',
-  schema: {
-    title: { type: 'title', required: true }
+  dataSourceId: 'blog-db',
+  properties: {
+    title: { type: 'title' }
   }
 })
 
 // Create page with markdown content
 const post = await blogTable.create({
-  title: 'My Blog Post',
+  properties: {
+    title: 'My Blog Post'
+  },
   body: `# Introduction
 
 This is my **awesome** blog post about \`TypeScript\`.
@@ -258,7 +266,7 @@ const markdown = `Paragraph one
 
 Paragraph two`  // Multiple empty lines
 
-const blocks = await toNotionBlocks(markdown)
+const blocks = toNotionBlocks(markdown)
 // Only creates two paragraph blocks
 ```
 
@@ -286,9 +294,7 @@ const markdown = `\`\`\`javascript
 ```typescript
 // Process large documents in chunks
 const chunks = markdown.split('\n\n')
-const blockArrays = await Promise.all(
-  chunks.map(chunk => toNotionBlocks(chunk))
-)
+const blockArrays = chunks.map(chunk => toNotionBlocks(chunk))
 const allBlocks = blockArrays.flat()
 ```
 
@@ -296,14 +302,14 @@ const allBlocks = blockArrays.flat()
 
 ```typescript
 // Cache converted blocks for repeated use
-const cache = new Map()
+const cache = new Map<string, BlockObjectRequest[]>()
 
-async function getCachedBlocks(markdown: string) {
+function getCachedBlocks(markdown: string): BlockObjectRequest[] {
   if (cache.has(markdown)) {
-    return cache.get(markdown)
+    return cache.get(markdown)!
   }
-  
-  const blocks = await toNotionBlocks(markdown)
+
+  const blocks = toNotionBlocks(markdown)
   cache.set(markdown, blocks)
   return blocks
 }

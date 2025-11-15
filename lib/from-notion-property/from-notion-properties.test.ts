@@ -1,10 +1,10 @@
 import { expect, test } from "bun:test"
 import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints"
-import type { Schema } from "@/types"
+import type { NotionPropertySchema } from "@/types"
 import { fromNotionProperties } from "./from-notion-properties"
 
 test("スキーマに基づいてプロパティを変換", () => {
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     title: { type: "title" },
     description: { type: "rich_text" },
     price: { type: "number" },
@@ -74,7 +74,7 @@ test("スキーマに基づいてプロパティを変換", () => {
 })
 
 test("オプショナルなプロパティが存在しない場合", () => {
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     title: { type: "title" },
     description: { type: "rich_text" },
   }
@@ -110,7 +110,7 @@ test("オプショナルなプロパティが存在しない場合", () => {
 })
 
 test("プロパティタイプが一致しない場合はエラー", () => {
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     title: { type: "title" },
   }
 
@@ -128,7 +128,7 @@ test("プロパティタイプが一致しない場合はエラー", () => {
 })
 
 test("複数のプロパティタイプを含むスキーマを変換", () => {
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     name: { type: "title" },
     tags: { type: "multi_select", options: null },
     status: { type: "select", options: ["進行中", "完了", "未着手"] },

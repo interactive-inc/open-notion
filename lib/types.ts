@@ -239,7 +239,7 @@ export type FormulaPropertyConfig = {
 export type PropertyConfig = z.infer<typeof zPropertyConfig>
 
 /* Database schema definition - inferred from zod */
-export type Schema = z.infer<typeof zNotionPropertyConfig>
+export type NotionPropertySchema = z.infer<typeof zNotionPropertyConfig>
 
 /* Type mapping for schema */
 export type PropertyTypeMapping<T extends PropertyConfig> = T extends
@@ -296,10 +296,8 @@ export type PropertyTypeMapping<T extends PropertyConfig> = T extends
                           : never
 
 /* Generate type from schema */
-export type SchemaType<T extends Schema> = {
-  [K in keyof T]: T[K] extends { required: true }
-    ? PropertyTypeMapping<T[K]>
-    : PropertyTypeMapping<T[K]> | null | undefined
+export type SchemaType<T extends NotionPropertySchema> = {
+  [K in keyof T]: PropertyTypeMapping<T[K]> | null
 }
 
 /* Record type definition */
@@ -324,13 +322,13 @@ export type PageReferenceType<T> = {
 }
 
 /* Sort option type */
-export type SortOption<T extends Schema> = {
+export type SortOption<T extends NotionPropertySchema> = {
   field: keyof SchemaType<T>
   direction: "asc" | "desc"
 }
 
 /* Table creation options */
-export type TableOptions<T extends Schema> = {
+export type TableOptions<T extends NotionPropertySchema> = {
   notion: Client
   tableId: string
   schema: T
@@ -371,11 +369,11 @@ type PropertyFilterForType<Config> = Config extends { type: "title" }
                     ? RelationPropertyFilter
                     : never
 
-type WhereFieldCondition<T extends Schema> = {
+type WhereFieldCondition<T extends NotionPropertySchema> = {
   [K in keyof SchemaType<T>]?: SchemaType<T>[K] | PropertyFilterForType<T[K]>
 }
 
-export type WhereCondition<T extends Schema> =
+export type WhereCondition<T extends NotionPropertySchema> =
   | {
       or: WhereCondition<T>[]
     }
@@ -384,29 +382,29 @@ export type WhereCondition<T extends Schema> =
     }
   | WhereFieldCondition<T>
 
-export type FindOptions<T extends Schema> = {
+export type FindOptions<T extends NotionPropertySchema> = {
   where?: WhereCondition<T>
   count?: number
   sorts?: SortOption<T> | SortOption<T>[]
 }
 
-export type CreateInput<T extends Schema> = {
+export type CreateInput<T extends NotionPropertySchema> = {
   properties: Partial<SchemaType<T>>
   body?: string
 }
 
-export type UpdateInput<T extends Schema> = {
+export type UpdateInput<T extends NotionPropertySchema> = {
   properties: Partial<SchemaType<T>>
   body?: string | null
 }
 
-export type UpdateManyOptions<T extends Schema> = {
+export type UpdateManyOptions<T extends NotionPropertySchema> = {
   where?: WhereCondition<T>
   update: UpdateInput<T>
   count?: number
 }
 
-export type UpsertOptions<T extends Schema> = {
+export type UpsertOptions<T extends NotionPropertySchema> = {
   where: WhereCondition<T>
   insert: CreateInput<T>
   update: UpdateInput<T>
@@ -445,27 +443,27 @@ export type NotionMemoeryCacheInterface = {
 
 /* Validator interface */
 export type ValidatorInterface = {
-  validate(schema: Schema, data: unknown): Record<string, unknown>
+  validate(schema: NotionPropertySchema, data: unknown): Record<string, unknown>
 }
 
 /* Query builder interface */
 export type NotionQueryBuilderInterface = {
-  buildFilter<T extends Schema>(
+  buildFilter<T extends NotionPropertySchema>(
     schema: T,
     where: WhereCondition<T>,
   ): Record<string, unknown> | undefined
-  buildSort<T extends Schema>(
+  buildSort<T extends NotionPropertySchema>(
     sorts: SortOption<T>[],
   ): Array<Record<string, unknown>>
 }
 
 /* Converter interface */
 export type NotionConverterInterface = {
-  fromNotion<T extends Schema>(
+  fromNotion<T extends NotionPropertySchema>(
     schema: T,
     properties: Record<string, unknown>,
   ): SchemaType<T>
-  toNotion<T extends Schema, D extends Partial<SchemaType<T>>>(
+  toNotion<T extends NotionPropertySchema, D extends Partial<SchemaType<T>>>(
     schema: T,
     data: D,
   ): Record<string, unknown>

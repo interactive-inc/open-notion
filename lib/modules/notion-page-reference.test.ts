@@ -2,14 +2,14 @@ import { expect, test } from "bun:test"
 import type { Client } from "@notionhq/client"
 import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints"
 import type { NotionPropertyConverter } from "../table/notion-property-converter"
-import type { Schema } from "../types"
+import type { NotionPropertySchema } from "../types"
 import { NotionPageReference } from "./notion-page-reference"
 
 test("プロパティを取得できる", () => {
   const mockSchema = {
     title: { type: "title" as const },
     score: { type: "number" as const },
-  } satisfies Schema
+  } satisfies NotionPropertySchema
 
   const mockPageData = {
     id: "page-123",
@@ -39,7 +39,7 @@ test("プロパティを取得できる", () => {
 test("元のNotionページデータを取得できる", () => {
   const mockSchema = {
     title: { type: "title" as const },
-  } satisfies Schema
+  } satisfies NotionPropertySchema
 
   const mockPageData = {
     id: "page-123",
@@ -68,7 +68,7 @@ test("元のNotionページデータを取得できる", () => {
 test("イミュータブルなオブジェクトである", () => {
   const mockSchema = {
     title: { type: "title" as const },
-  } satisfies Schema
+  } satisfies NotionPropertySchema
 
   const mockPageData = { id: "page-123", properties: {} } as PageObjectResponse
   const mockClient = {} as Client
@@ -90,7 +90,7 @@ test("イミュータブルなオブジェクトである", () => {
 test("本文をマークダウン形式で取得できる", async () => {
   const mockSchema = {
     title: { type: "title" as const },
-  } satisfies Schema
+  } satisfies NotionPropertySchema
 
   const mockPageData = { id: "page-123", properties: {} } as PageObjectResponse
 
@@ -119,7 +119,7 @@ test("複数タイプのプロパティを保持できる", () => {
     tags: { type: "multi_select" as const, options: null },
     isPublished: { type: "checkbox" as const },
     publishedAt: { type: "date" as const },
-  } satisfies Schema
+  } satisfies NotionPropertySchema
 
   const mockPageData = { id: "page-456", properties: {} } as PageObjectResponse
   const mockClient = {} as Client

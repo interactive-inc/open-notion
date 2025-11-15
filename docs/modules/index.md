@@ -8,14 +8,15 @@ notion-client consists of several modules that work together to provide a seamle
 
 ```
 NotionTable (Main Interface)
-    ├── Schema validation & Type inference
+    ├── Properties validation & Type inference
     ├── Property conversion (Notion ↔ Simple values)
-    └── Query building (MongoDB-style → Notion filters)
+    ├── Query building (Notion API filter format)
+    └── Cache management (NotionMemoryCache)
 
 Markdown Processing
     ├── toNotionBlocks (Markdown → Notion blocks)
     ├── fromNotionBlocks (Notion blocks → Markdown)
-    └── NotionMarkdown (Heading level enhancement)
+    └── NotionMarkdown (Block type transformation)
 
 Block Enhancement
     └── enhance (Recursive child block fetching)
@@ -26,18 +27,22 @@ Block Enhancement
 ### Database Operations Flow
 
 ```typescript
-// 1. Define schema → NotionTable validates and infers types
-const table = new NotionTable({ schema })
-
-// 2. Create with markdown → toNotionBlocks converts content
-await table.create({ 
-  title: 'Page',
-  body: '# Markdown content' 
+// 1. Define properties → NotionTable validates and infers types
+const table = new NotionTable({
+  client,
+  dataSourceId: 'db-id',
+  properties: { title: { type: 'title' }, status: { type: 'select', options: ['active', 'inactive'] } }
 })
 
-// 3. Query with filters → Query builder translates syntax
-await table.findMany({ 
-  where: { status: 'active' } 
+// 2. Create with markdown → toNotionBlocks converts content
+await table.create({
+  properties: { title: 'Page' },
+  body: '# Markdown content'
+})
+
+// 3. Query with filters → Query builder uses Notion API format
+await table.findMany({
+  where: { status: { equals: 'active' } }
 })
 
 // 4. Read with blocks → fromNotionBlocks converts to markdown
@@ -50,16 +55,26 @@ const content = fromNotionBlocks(blocks)
 // Input: Markdown text
 const markdown = '# Title\n**Bold** text'
 
-// Process: Convert to Notion blocks with enhancement
-const enhancer = new NotionMarkdown({ heading_1: 'heading_2' })
-const blocks = await toNotionBlocks(markdown, enhancer)
+// Process: Convert to Notion blocks
+const blocks = toNotionBlocks(markdown)
 
-// Store: Save to Notion database
-await table.create({ title: 'Doc', body: markdown })
+// Store: Save to Notion database with optional transformation
+const markdownTransformer = new NotionMarkdown({ heading_1: 'heading_2' })
+const table = new NotionTable({
+  client,
+  dataSourceId: 'db-id',
+  properties: { title: { type: 'title' } },
+  markdown: markdownTransformer
+})
+
+await table.create({
+  properties: { title: 'Doc' },
+  body: markdown
+})
 
 // Retrieve: Fetch with nested blocks
-const fetchBlocks = enhance(client)
-const allBlocks = await fetchBlocks({ block_id: 'page-id' })
+const enhancedClient = enhance(client.blocks.children.list.bind(client.blocks.children))
+const allBlocks = await enhancedClient({ block_id: 'page-id' })
 
 // Output: Convert back to markdown
 const result = fromNotionBlocks(allBlocks)
@@ -70,11 +85,11 @@ const result = fromNotionBlocks(allBlocks)
 ### NotionTable
 
 The main entry point for database operations:
-- Schema validation
+- Properties validation
 - Type-safe CRUD operations
-- Query building
-- Property conversion
-- Lifecycle hooks
+- Query building (Notion API filter format)
+- Property conversion (Notion ↔ JavaScript types)
+- Cache management
 
 ### NotionMarkdown
 

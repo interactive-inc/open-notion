@@ -9,7 +9,7 @@ Single choice from predefined options.
   status: { 
     type: 'select', 
     options: ['todo', 'in_progress', 'done'] as const,
-    required: true  // Optional
+      // Optional
   }
 }
 ```
@@ -65,7 +65,7 @@ const tasksTable = new NotionTable({
   client,
   tableId: 'tasks-db',
   schema: {
-    title: { type: 'title', required: true },
+    title: { type: 'title' },
     status: { 
       type: 'select', 
       options: ['backlog', 'todo', 'in_progress', 'review', 'done'] as const
@@ -73,7 +73,7 @@ const tasksTable = new NotionTable({
     priority: {
       type: 'select',
       options: ['low', 'medium', 'high', 'urgent'] as const,
-      required: true
+      
     }
   }
 })

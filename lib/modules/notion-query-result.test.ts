@@ -2,18 +2,21 @@ import { expect, test } from "bun:test"
 import type { Client } from "@notionhq/client"
 import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints"
 import type { NotionPropertyConverter } from "../table/notion-property-converter"
-import type { Schema } from "../types"
+import type { NotionPropertySchema } from "../types"
 import { NotionPageReference } from "./notion-page-reference"
 import { NotionQueryResult } from "./notion-query-result"
 
 test("ページ参照の配列を取得できる", () => {
   const mockSchema = {
     title: { type: "title" as const },
-  } satisfies Schema
+  } satisfies NotionPropertySchema
 
   const mockClient = {} as Client
   const mockConverter = {
-    fromNotion: (_schema: Schema, properties: Record<string, unknown>) => {
+    fromNotion: (
+      _schema: NotionPropertySchema,
+      properties: Record<string, unknown>,
+    ) => {
       return { title: properties.id === "page-1" ? "Page 1" : "Page 2" }
     },
     toNotion: () => ({}),
@@ -90,11 +93,14 @@ test("さらにページがあるかを確認できる", () => {
 test("ページ数を取得できる", () => {
   const mockSchema = {
     title: { type: "title" as const },
-  } satisfies Schema
+  } satisfies NotionPropertySchema
 
   const mockClient = {} as Client
   const mockConverter = {
-    fromNotion: (_: Schema, properties: Record<string, unknown>) => {
+    fromNotion: (
+      _: NotionPropertySchema,
+      properties: Record<string, unknown>,
+    ) => {
       return { title: `Page ${properties.id}` }
     },
     toNotion: () => ({}),
@@ -152,7 +158,7 @@ test("型安全なプロパティを持つページ参照を扱える", () => {
     author: { type: "rich_text" as const },
     publishedDate: { type: "date" as const },
     tags: { type: "multi_select" as const, options: null },
-  } satisfies Schema
+  } satisfies NotionPropertySchema
 
   const mockClient = {} as Client
   const mockConverter = {

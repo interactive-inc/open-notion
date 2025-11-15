@@ -57,7 +57,7 @@ const projectsTable = new NotionTable({
   client,
   tableId: 'projects-db',
   schema: {
-    name: { type: 'title', required: true },
+    name: { type: 'title' },
     tasks: { type: 'relation' },
     taskCount: { type: 'rollup' },  // Count of related tasks
     totalHours: { type: 'rollup' },  // Sum of task hours
@@ -88,7 +88,7 @@ const timeIntensive = await projectsTable.findMany({
 // Team example with member stats
 const teamsTable = new NotionTable({
   schema: {
-    name: { type: 'title', required: true },
+    name: { type: 'title' },
     members: { type: 'relation' },
     memberCount: { type: 'rollup' },  // Count
     avgExperience: { type: 'rollup' },  // Average years

@@ -6,7 +6,7 @@ The required primary field for every Notion database.
 
 ```typescript
 {
-  title: { type: 'title', required: true }
+  title: { type: 'title' }
 }
 ```
 
@@ -60,7 +60,7 @@ const projectsTable = new NotionTable({
   client,
   tableId: 'projects-db',
   schema: {
-    title: { type: 'title', required: true },
+    title: { type: 'title' },
     description: { type: 'rich_text' }
   }
 })

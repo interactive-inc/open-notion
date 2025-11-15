@@ -1,13 +1,13 @@
 import type { NotionQueryWhere } from "@/notion-types"
 import type {
+  NotionPropertySchema,
   PropertyConfig,
-  Schema,
   SortOption,
   WhereCondition,
 } from "@/types"
 
 export class NotionQueryBuilder {
-  buildFilter<T extends Schema>(
+  buildFilter<T extends NotionPropertySchema>(
     schema: T,
     where: WhereCondition<T>,
   ): Record<string, unknown> | undefined {
@@ -16,7 +16,7 @@ export class NotionQueryBuilder {
       | undefined
   }
 
-  buildSort<T extends Schema>(
+  buildSort<T extends NotionPropertySchema>(
     sorts: SortOption<T>[],
   ): Array<Record<string, unknown>> {
     return sorts.map((sort) => ({
@@ -28,7 +28,7 @@ export class NotionQueryBuilder {
   /**
    * Convert simple where condition to Notion API filter format
    */
-  toNotionQuery<T extends Schema>(
+  toNotionQuery<T extends NotionPropertySchema>(
     schema: T,
     where: WhereCondition<T>,
   ): NotionQueryWhere | undefined {
@@ -46,7 +46,7 @@ export class NotionQueryBuilder {
     return this.buildFieldConditions(schema, where)
   }
 
-  private buildOrCondition<T extends Schema>(
+  private buildOrCondition<T extends NotionPropertySchema>(
     schema: T,
     conditions: WhereCondition<T>[],
   ): NotionQueryWhere | undefined {
@@ -65,7 +65,7 @@ export class NotionQueryBuilder {
     return { or: orConditions }
   }
 
-  private buildAndCondition<T extends Schema>(
+  private buildAndCondition<T extends NotionPropertySchema>(
     schema: T,
     conditions: WhereCondition<T>[],
   ): NotionQueryWhere | undefined {
@@ -84,7 +84,7 @@ export class NotionQueryBuilder {
     return { and: andConditions }
   }
 
-  private buildFieldConditions<T extends Schema>(
+  private buildFieldConditions<T extends NotionPropertySchema>(
     schema: T,
     where: Record<string, unknown>,
   ): NotionQueryWhere | undefined {
@@ -290,7 +290,7 @@ export class NotionQueryBuilder {
  * Convert simple where condition to Notion API filter format
  * @deprecated Use NotionQueryBuilder.toNotionQuery() instead
  */
-export function toNotionQuery<T extends Schema>(
+export function toNotionQuery<T extends NotionPropertySchema>(
   schema: T,
   where: WhereCondition<T>,
 ): NotionQueryWhere | undefined {

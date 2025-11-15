@@ -1,11 +1,15 @@
-import type { NotionPropertyRequest, Schema, SchemaType } from "@/types"
+import type {
+  NotionPropertyRequest,
+  NotionPropertySchema,
+  SchemaType,
+} from "@/types"
 import { toNotionProperty } from "./to-notion-property"
 
 /**
  * スキーマに基づいてオブジェクトをNotionプロパティに変換
  */
 export function toNotionProperties<
-  T extends Schema,
+  T extends NotionPropertySchema,
   D extends Partial<SchemaType<T>>,
 >(schema: T, data: D): Record<string, NotionPropertyRequest> {
   const properties: Record<string, NotionPropertyRequest> = {}

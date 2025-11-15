@@ -7,7 +7,7 @@ Plain text content without formatting.
 ```typescript
 {
   description: { type: 'rich_text' },
-  notes: { type: 'rich_text', required: true }
+  notes: { type: 'rich_text' }
 }
 ```
 
@@ -60,7 +60,7 @@ const notesTable = new NotionTable({
   client,
   tableId: 'notes-db',
   schema: {
-    title: { type: 'title', required: true },
+    title: { type: 'title' },
     content: { type: 'rich_text' },
     summary: { type: 'rich_text' }
   }

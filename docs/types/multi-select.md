@@ -63,7 +63,7 @@ const issuesTable = new NotionTable({
   client,
   tableId: 'issues-db',
   schema: {
-    title: { type: 'title', required: true },
+    title: { type: 'title' },
     tags: { 
       type: 'multi_select', 
       options: ['bug', 'feature', 'enhancement', 'docs', 'urgent', 'blocked'] as const

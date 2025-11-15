@@ -7,7 +7,7 @@ Email address with built-in validation.
 ```typescript
 {
   email: { type: 'email' },
-  workEmail: { type: 'email', required: true }
+  workEmail: { type: 'email' }
 }
 ```
 
@@ -63,8 +63,8 @@ const contactsTable = new NotionTable({
   client,
   tableId: 'contacts-db',
   schema: {
-    name: { type: 'title', required: true },
-    email: { type: 'email', required: true },
+    name: { type: 'title' },
+    email: { type: 'email' },
     alternateEmail: { type: 'email' }
   }
 })
@@ -93,7 +93,7 @@ const userTable = new NotionTable({
   schema: {
     email: {
       type: 'email',
-      required: true,
+      
       validate: (value) => {
         if (!value.includes('@company.com')) {
           return 'Must use company email'

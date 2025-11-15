@@ -58,9 +58,9 @@ const ordersTable = new NotionTable({
   client,
   tableId: 'orders-db',
   schema: {
-    product: { type: 'title', required: true },
-    price: { type: 'number', required: true },
-    quantity: { type: 'number', required: true },
+    product: { type: 'title' },
+    price: { type: 'number' },
+    quantity: { type: 'number' },
     total: { type: 'formula' },  // price * quantity
     taxAmount: { type: 'formula' },  // total * 0.1
     grandTotal: { type: 'formula' }  // total + taxAmount
@@ -87,8 +87,8 @@ const largeOrders = await ordersTable.findMany({
 // String formula example
 const contactsTable = new NotionTable({
   schema: {
-    firstName: { type: 'rich_text', required: true },
-    lastName: { type: 'rich_text', required: true },
+    firstName: { type: 'rich_text' },
+    lastName: { type: 'rich_text' },
     fullName: { type: 'formula' }  // Concatenates names
   }
 })

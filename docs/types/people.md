@@ -55,7 +55,7 @@ const tasksTable = new NotionTable({
   client,
   tableId: 'tasks-db',
   schema: {
-    title: { type: 'title', required: true },
+    title: { type: 'title' },
     assignee: { type: 'people' },
     reviewers: { type: 'people' },
     watchers: { type: 'people' }

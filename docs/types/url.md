@@ -7,7 +7,7 @@ Web URLs with validation.
 ```typescript
 {
   website: { type: 'url' },
-  documentation: { type: 'url', required: true }
+  documentation: { type: 'url' }
 }
 ```
 
@@ -63,8 +63,8 @@ const projectsTable = new NotionTable({
   client,
   tableId: 'projects-db',
   schema: {
-    name: { type: 'title', required: true },
-    repository: { type: 'url', required: true },
+    name: { type: 'title' },
+    repository: { type: 'url' },
     homepage: { type: 'url' },
     documentation: { type: 'url' }
   }
@@ -97,7 +97,7 @@ const resourceTable = new NotionTable({
   schema: {
     url: {
       type: 'url',
-      required: true,
+      
       validate: (value) => {
         if (!value.startsWith('https://')) {
           return 'URL must use HTTPS'

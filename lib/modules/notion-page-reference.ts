@@ -4,9 +4,9 @@ import { enhance } from "../enhance"
 import { fromNotionBlocks } from "../from-notion-block/from-notion-blocks"
 import type { NotionMemoryCache } from "../table/notion-memory-cache"
 import type { NotionPropertyConverter } from "../table/notion-property-converter"
-import type { NotionPage, Schema, SchemaType } from "../types"
+import type { NotionPage, NotionPropertySchema, SchemaType } from "../types"
 
-type Props<T extends Schema> = {
+type Props<T extends NotionPropertySchema> = {
   readonly schema: T
   readonly notion: Client
   readonly notionPage: NotionPage
@@ -17,7 +17,7 @@ type Props<T extends Schema> = {
 /**
  * Notion ページへの参照を表すクラス
  */
-export class NotionPageReference<T extends Schema> {
+export class NotionPageReference<T extends NotionPropertySchema> {
   constructor(private readonly props: Props<T>) {
     Object.freeze(this)
   }
@@ -68,6 +68,7 @@ export class NotionPageReference<T extends Schema> {
    */
   async body(): Promise<string> {
     const cachedBlocks = this.props.cache?.getBlocks(this.id)
+
     if (cachedBlocks) {
       return fromNotionBlocks(cachedBlocks)
     }

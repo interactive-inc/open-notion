@@ -1,11 +1,11 @@
 import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints"
-import type { Schema, SchemaType } from "@/types"
+import type { NotionPropertySchema, SchemaType } from "@/types"
 import { fromNotionProperty } from "./from-notion-property"
 
 /**
  * Notionのプロパティをスキーマに基づいて変換
  */
-export function fromNotionProperties<T extends Schema>(
+export function fromNotionProperties<T extends NotionPropertySchema>(
   schema: T,
   properties: PageObjectResponse["properties"],
 ): SchemaType<T> {

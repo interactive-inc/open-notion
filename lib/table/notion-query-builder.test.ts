@@ -1,11 +1,11 @@
 import { expect, test } from "bun:test"
-import type { Schema } from "@/types"
+import type { NotionPropertySchema } from "@/types"
 import { NotionQueryBuilder } from "./notion-query-builder"
 
 const queryBuilder = new NotionQueryBuilder()
 
 test("buildFilter: 単純な条件", () => {
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     title: { type: "title" },
     status: { type: "select", options: ["todo", "done"] },
     priority: { type: "number" },
@@ -40,7 +40,7 @@ test("buildFilter: 単純な条件", () => {
 })
 
 test("buildFilter: 複数条件（AND）", () => {
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     title: { type: "title" },
     status: { type: "select", options: ["todo", "done"] },
   }
@@ -95,7 +95,7 @@ test("buildFilter: and条件", () => {
 })
 
 test("buildFilter: Notion API filter format", () => {
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     priority: { type: "number" },
     deadline: { type: "date" },
   }
@@ -144,7 +144,7 @@ test("buildFilter: Notion API filter format", () => {
 })
 
 test("buildFilter: contains演算子", () => {
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     title: { type: "title" },
     description: { type: "rich_text" },
     tags: { type: "multi_select", options: ["js", "ts", "react"] },
@@ -179,7 +179,7 @@ test("buildFilter: contains演算子", () => {
 })
 
 test("buildFilter: 複数選択肢のor条件", () => {
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     status: { type: "select", options: ["todo", "in_progress", "done"] },
   }
 
@@ -196,7 +196,7 @@ test("buildFilter: 複数選択肢のor条件", () => {
 })
 
 test("buildFilter: does_not_equal演算子", () => {
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     status: { type: "select", options: ["todo", "done"] },
   }
 
@@ -243,7 +243,7 @@ test("buildFilter: 複雑な条件の組み合わせ", () => {
 })
 
 test("buildFilter: フォーミュラ型のフィルター", () => {
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     calculated: { type: "formula", formulaType: "number" },
     status: { type: "formula", formulaType: "string" },
     isActive: { type: "formula", formulaType: "boolean" },
@@ -278,7 +278,7 @@ test("buildFilter: フォーミュラ型のフィルター", () => {
 })
 
 test("buildFilter: 空の条件", () => {
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     title: { type: "title" },
   }
 
@@ -287,7 +287,7 @@ test("buildFilter: 空の条件", () => {
 })
 
 test("buildSort: ソート条件の変換", () => {
-  const _schema: Schema = {
+  const _schema: NotionPropertySchema = {
     title: { type: "title" },
     priority: { type: "number" },
   }
@@ -312,7 +312,7 @@ test("buildSort: ソート条件の変換", () => {
 })
 
 test("buildFilter: 日付型の様々な形式", () => {
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     deadline: { type: "date" },
   }
 
@@ -345,7 +345,7 @@ test("buildFilter: 日付型の様々な形式", () => {
 })
 
 test("buildFilter: 無効なプロパティはスキップ", () => {
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     title: { type: "title" },
   }
 
@@ -360,7 +360,7 @@ test("buildFilter: 無効なプロパティはスキップ", () => {
 })
 
 test("buildFilter: checkbox型", () => {
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     done: { type: "checkbox" },
   }
 
@@ -373,7 +373,7 @@ test("buildFilter: checkbox型", () => {
 })
 
 test("toNotionQuery: シンプルな文字列条件", () => {
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     slug: { type: "rich_text" },
   }
 
@@ -386,7 +386,7 @@ test("toNotionQuery: シンプルな文字列条件", () => {
 })
 
 test("toNotionQuery: 数値の等価条件", () => {
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     count: { type: "number" },
   }
 
@@ -399,7 +399,7 @@ test("toNotionQuery: 数値の等価条件", () => {
 })
 
 test("toNotionQuery: 複数フィールドは自動的に and になる", () => {
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     status: { type: "select", options: ["todo"] },
     priority: { type: "number" },
   }
@@ -424,7 +424,7 @@ test("toNotionQuery: 複数フィールドは自動的に and になる", () => 
 })
 
 test("toNotionQuery: 空の条件は undefined を返す", () => {
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     slug: { type: "rich_text" },
   }
 
@@ -434,19 +434,19 @@ test("toNotionQuery: 空の条件は undefined を返す", () => {
 })
 
 test("toNotionQuery: 存在しないフィールドは無視される", () => {
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     slug: { type: "rich_text" },
   }
 
   const result = queryBuilder.toNotionQuery(schema, {
     nonexistent: "value",
-  } as any)
+  })
 
   expect(result).toBeUndefined()
 })
 
 test("toNotionQuery: Notion API filter format - equals", () => {
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     slug: { type: "rich_text" },
   }
 
@@ -461,7 +461,7 @@ test("toNotionQuery: Notion API filter format - equals", () => {
 })
 
 test("toNotionQuery: Notion API filter format - contains", () => {
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     title: { type: "title" },
   }
 
@@ -476,7 +476,7 @@ test("toNotionQuery: Notion API filter format - contains", () => {
 })
 
 test("toNotionQuery: Notion API filter format - number greater_than", () => {
-  const schema: Schema = {
+  const schema: NotionPropertySchema = {
     count: { type: "number" },
   }
 

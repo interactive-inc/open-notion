@@ -9,7 +9,7 @@ Numeric values with optional validation.
   price: { type: 'number' },
   quantity: { 
     type: 'number', 
-    required: true,
+    
     min: 0,
     max: 1000
   }
@@ -69,10 +69,10 @@ const productsTable = new NotionTable({
   client,
   tableId: 'products-db',
   schema: {
-    name: { type: 'title', required: true },
+    name: { type: 'title' },
     price: { 
       type: 'number', 
-      required: true,
+      
       min: 0
     },
     stock: { 

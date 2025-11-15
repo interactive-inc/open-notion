@@ -8,7 +8,7 @@ Define your database structure with TypeScript:
 
 ```typescript
 const schema = {
-  title: { type: 'title', required: true },
+  title: { type: 'title' },
   description: { type: 'rich_text' },
   priority: { type: 'number' },
   status: { type: 'select', options: ['todo', 'in_progress', 'done'] }
@@ -23,7 +23,7 @@ Every Notion database must have exactly one title property:
 
 ```typescript
 {
-  title: { type: 'title', required: true }
+  title: { type: 'title' }
 }
 ```
 
@@ -33,13 +33,13 @@ Every Notion database must have exactly one title property:
 {
   // Rich text with formatting support
   description: { type: 'rich_text' },
-  
+
   // URL validation
-  website: { type: 'url', required: true },
-  
+  website: { type: 'url' },
+
   // Email validation
   email: { type: 'email' },
-  
+
   // Phone number format
   phone: { type: 'phone_number' }
 }
@@ -53,11 +53,10 @@ Every Notion database must have exactly one title property:
   price: { type: 'number' },
   
   // With validation
-  age: { 
+  age: {
     type: 'number',
     min: 0,
-    max: 150,
-    required: true
+    max: 150
   },
   
   // Custom validation
@@ -80,8 +79,7 @@ Every Notion database must have exactly one title property:
   // Single select with options
   category: {
     type: 'select',
-    options: ['bug', 'feature', 'enhancement'] as const,
-    required: true
+    options: ['bug', 'feature', 'enhancement'] as const
   },
   
   // Multi-select
@@ -98,9 +96,9 @@ Every Notion database must have exactly one title property:
 {
   // Simple date
   createdAt: { type: 'date' },
-  
-  // Required date
-  deadline: { type: 'date', required: true }
+
+  // Date field
+  deadline: { type: 'date' }
 }
 ```
 
@@ -134,7 +132,7 @@ The schema automatically infers TypeScript types:
 
 ```typescript
 const taskSchema = {
-  title: { type: 'title', required: true },
+  title: { type: 'title' },
   priority: { type: 'number' },
   tags: { type: 'multi_select', options: ['bug', 'feature'] }
 } as const
@@ -142,9 +140,9 @@ const taskSchema = {
 type Task = InferSchemaType<typeof taskSchema>
 // {
 //   id: string
-//   title: string
-//   priority?: number
-//   tags?: ('bug' | 'feature')[]
+//   title: string | null
+//   priority: number | null
+//   tags: ('bug' | 'feature')[] | null
 // }
 ```
 
@@ -154,11 +152,10 @@ type Task = InferSchemaType<typeof taskSchema>
 
 ```typescript
 const productSchema = {
-  name: { type: 'title', required: true },
-  price: { 
-    type: 'number', 
-    required: true,
-    min: 0 
+  name: { type: 'title' },
+  price: {
+    type: 'number',
+    min: 0
   },
   stock: { 
     type: 'number',
@@ -174,7 +171,6 @@ const productSchema = {
 const userSchema = {
   username: {
     type: 'title',
-    required: true,
     validate: (value) => {
       if (value.length < 3) {
         return 'Username must be at least 3 characters'
@@ -187,7 +183,6 @@ const userSchema = {
   },
   email: {
     type: 'email',
-    required: true,
     validate: async (value) => {
       // Async validation
       const exists = await checkEmailExists(value)
@@ -206,10 +201,9 @@ const userSchema = {
 
 ```typescript
 const orderSchema = {
-  status: { 
-    type: 'select', 
-    options: ['pending', 'shipped', 'delivered'],
-    required: true
+  status: {
+    type: 'select',
+    options: ['pending', 'shipped', 'delivered']
   },
   shippedAt: { type: 'date' },
   deliveredAt: { type: 'date' }
@@ -233,7 +227,7 @@ const ordersTable = new NotionTable({
 
 ```typescript
 const documentSchema = {
-  title: { type: 'title', required: true },
+  title: { type: 'title' },
   slug: { type: 'rich_text' },
   createdAt: { type: 'date' }
 } as const
@@ -258,7 +252,7 @@ const documentsTable = new NotionTable({
 
 ```typescript
 const configSchema = {
-  name: { type: 'title', required: true },
+  name: { type: 'title' },
   settings: { 
     type: 'rich_text',
     validate: (value) => {
@@ -297,26 +291,25 @@ New optional fields can be added safely:
 ```typescript
 // Version 1
 const schemaV1 = {
-  title: { type: 'title', required: true }
+  title: { type: 'title' }
 }
 
 // Version 2 - Safe addition
 const schemaV2 = {
-  title: { type: 'title', required: true },
-  description: { type: 'rich_text' } // Optional field
+  title: { type: 'title' },
+  description: { type: 'rich_text' }
 }
 ```
 
 ### Handling Breaking Changes
 
 ```typescript
-// Migration strategy for required fields
+// Migration strategy for default values
 const migrationSchema = {
-  title: { type: 'title', required: true },
-  category: { 
+  title: { type: 'title' },
+  category: {
     type: 'select',
-    options: ['general', 'important'],
-    required: true
+    options: ['general', 'important']
   }
 }
 
@@ -361,13 +354,13 @@ const schema = {
 ```typescript
 // Separate concerns
 const baseSchema = {
-  id: { type: 'title', required: true },
+  id: { type: 'title' },
   createdAt: { type: 'date' }
 } as const
 
 const userSchema = {
   ...baseSchema,
-  email: { type: 'email', required: true },
+  email: { type: 'email' },
   role: { type: 'select', options: ['admin', 'user'] }
 } as const
 
